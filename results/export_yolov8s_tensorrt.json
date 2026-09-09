@@ -1,0 +1,61 @@
+{
+  "model": "yolov8s",
+  "onnx": "models/yolov8s/best.onnx",
+  "engine": "models/yolov8s/best.engine",
+  "precision": "fp16",
+  "workspace_mib": 2048,
+  "build_ok": true,
+  "build_seconds": 483.4,
+  "trtexec_log": "results/trtexec_yolov8s.log",
+  "device": {
+    "arch": "aarch64",
+    "l4t": "# R36 (release), REVISION: 5.2, GCID: 46426093, BOARD: generic, EABI: aarch64, DATE: Thu Jul 16 18:56:22 UTC 2026",
+    "cuda": "Cuda compilation tools, release 12.6, V12.6.68",
+    "nvpmodel_id": "0",
+    "power_modes": "0 NAME=15W|1 NAME=25W|2 NAME=MAXN_SUPER|",
+    "tensorrt": "10.3.0",
+    "torch": "2.10.0",
+    "onnx": "1.22.0"
+  },
+  "engine_size_mb": 25.56,
+  "trtexec_reported_build_sec": 479.839,
+  "load_check": {
+    "engine": "/home/jetson/quoc_anh/industrial-visual-inspection/models/yolov8s/best.engine",
+    "engine_size_mb": 25.56,
+    "tensorrt": "10.3.0",
+    "torch": "2.10.0",
+    "tensors": [
+      {
+        "name": "images",
+        "io": "INPUT",
+        "shape": [
+          1,
+          3,
+          640,
+          640
+        ],
+        "dtype": "float32"
+      },
+      {
+        "name": "output0",
+        "io": "OUTPUT",
+        "shape": [
+          1,
+          10,
+          8400
+        ],
+        "dtype": "float32"
+      }
+    ],
+    "iters": 50,
+    "warmup": 20,
+    "latency_ms": {
+      "p50": 9.658,
+      "p95": 9.682,
+      "min": 9.639,
+      "max": 10.125,
+      "mean": 9.668
+    },
+    "fps": 103.5
+  }
+}

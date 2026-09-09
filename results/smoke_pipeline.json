@@ -1,0 +1,593 @@
+{
+  "runs": {
+    "_smoke|pytorch": {
+      "skipped": false,
+      "model": "_smoke",
+      "backend": "pytorch",
+      "backend_info": {
+        "runner": "pytorch",
+        "weights": "/home/jetson/quoc_anh/industrial-visual-inspection/models/_smoke/best.pt",
+        "model_size_mb": 6.55,
+        "imgsz": 640,
+        "conf": 0.25,
+        "iou": 0.7,
+        "framework": "torch 2.10.0",
+        "device": "cuda",
+        "gpu": "Orin",
+        "precision": "fp32"
+      },
+      "load_seconds": 0.34,
+      "model_size_mb": 6.55,
+      "sessions": [
+        {
+          "session": 1,
+          "wall_seconds": 1.11,
+          "n_images": 30,
+          "n_detections": 0,
+          "fps_wall": 26.99,
+          "stages": {
+            "preprocess": {
+              "p50": 5.683,
+              "p95": 5.744,
+              "p99": 5.763,
+              "min": 5.652,
+              "max": 5.763,
+              "mean": 5.694,
+              "std": 0.032,
+              "n": 30
+            },
+            "inference": {
+              "p50": 28.904,
+              "p95": 29.376,
+              "p99": 29.525,
+              "min": 28.75,
+              "max": 29.525,
+              "mean": 28.946,
+              "std": 0.179,
+              "n": 30
+            },
+            "postprocess": {
+              "p50": 2.335,
+              "p95": 2.724,
+              "p99": 2.843,
+              "min": 1.786,
+              "max": 2.843,
+              "mean": 2.352,
+              "std": 0.288,
+              "n": 30
+            },
+            "total": {
+              "p50": 36.991,
+              "p95": 37.511,
+              "p99": 37.654,
+              "min": 36.326,
+              "max": 37.654,
+              "mean": 36.992,
+              "std": 0.367,
+              "n": 30
+            }
+          },
+          "temp_before_mean_c": 59.5,
+          "temp_after_mean_c": 59.5
+        }
+      ],
+      "median_stages": {
+        "preprocess": {
+          "p50": 5.683,
+          "p95": 5.744,
+          "p99": 5.763,
+          "min": 5.652,
+          "max": 5.763,
+          "mean": 5.694,
+          "std": 0.032
+        },
+        "inference": {
+          "p50": 28.904,
+          "p95": 29.376,
+          "p99": 29.525,
+          "min": 28.75,
+          "max": 29.525,
+          "mean": 28.946,
+          "std": 0.179
+        },
+        "postprocess": {
+          "p50": 2.335,
+          "p95": 2.724,
+          "p99": 2.843,
+          "min": 1.786,
+          "max": 2.843,
+          "mean": 2.352,
+          "std": 0.288
+        },
+        "total": {
+          "p50": 36.991,
+          "p95": 37.511,
+          "p99": 37.654,
+          "min": 36.326,
+          "max": 37.654,
+          "mean": 36.992,
+          "std": 0.367
+        }
+      },
+      "latency_p50_ms": 36.991,
+      "latency_p95_ms": 37.511,
+      "fps": 27.0,
+      "stage_sum_check": {
+        "sum_of_parts_p50": 36.922,
+        "total_p50": 36.991
+      },
+      "session_p50_spread_percent": 0.0,
+      "resources": {
+        "process_rss_peak_mb": 1132.2,
+        "process_rss_mean_mb": 1132.1,
+        "system_used_peak_mb": 3150.2,
+        "system_used_baseline_mb": 3150.2,
+        "system_used_delta_mb": 0.0,
+        "torch_gpu_allocated_mb": 12.8,
+        "torch_gpu_peak_mb": 37.6,
+        "n_samples": 6,
+        "ghi_chu": "Tren Jetson, CPU va GPU dung chung DRAM — 'gpu_peak' nam trong cung tong bo nho he thong, khong phai VRAM roi."
+      },
+      "idle_before_load": {
+        "system_used_mb": 2820.4,
+        "process_rss_mb": 614.3
+      }
+    },
+    "_smoke|onnx": {
+      "skipped": false,
+      "model": "_smoke",
+      "backend": "onnx",
+      "backend_info": {
+        "runner": "onnx",
+        "weights": "/home/jetson/quoc_anh/industrial-visual-inspection/models/_smoke/best.onnx",
+        "model_size_mb": 12.85,
+        "imgsz": 640,
+        "conf": 0.25,
+        "iou": 0.7,
+        "framework": "onnxruntime 1.24.0",
+        "providers_available": [
+          "TensorrtExecutionProvider",
+          "CUDAExecutionProvider",
+          "CPUExecutionProvider"
+        ],
+        "providers_active": [
+          "TensorrtExecutionProvider",
+          "CUDAExecutionProvider",
+          "CPUExecutionProvider"
+        ],
+        "running_on_gpu": true,
+        "precision": "fp32"
+      },
+      "load_seconds": 125.33,
+      "model_size_mb": 12.85,
+      "sessions": [
+        {
+          "session": 1,
+          "wall_seconds": 0.65,
+          "n_images": 30,
+          "n_detections": 0,
+          "fps_wall": 46.05,
+          "stages": {
+            "preprocess": {
+              "p50": 5.712,
+              "p95": 5.776,
+              "p99": 5.799,
+              "min": 5.674,
+              "max": 5.799,
+              "mean": 5.721,
+              "std": 0.032,
+              "n": 30
+            },
+            "inference": {
+              "p50": 13.354,
+              "p95": 13.403,
+              "p99": 13.452,
+              "min": 13.306,
+              "max": 13.452,
+              "mean": 13.358,
+              "std": 0.031,
+              "n": 30
+            },
+            "postprocess": {
+              "p50": 2.592,
+              "p95": 2.632,
+              "p99": 2.637,
+              "min": 2.506,
+              "max": 2.637,
+              "mean": 2.586,
+              "std": 0.035,
+              "n": 30
+            },
+            "total": {
+              "p50": 21.666,
+              "p95": 21.734,
+              "p99": 21.753,
+              "min": 21.59,
+              "max": 21.753,
+              "mean": 21.665,
+              "std": 0.047,
+              "n": 30
+            }
+          },
+          "temp_before_mean_c": 61.7,
+          "temp_after_mean_c": 61.8
+        }
+      ],
+      "median_stages": {
+        "preprocess": {
+          "p50": 5.712,
+          "p95": 5.776,
+          "p99": 5.799,
+          "min": 5.674,
+          "max": 5.799,
+          "mean": 5.721,
+          "std": 0.032
+        },
+        "inference": {
+          "p50": 13.354,
+          "p95": 13.403,
+          "p99": 13.452,
+          "min": 13.306,
+          "max": 13.452,
+          "mean": 13.358,
+          "std": 0.031
+        },
+        "postprocess": {
+          "p50": 2.592,
+          "p95": 2.632,
+          "p99": 2.637,
+          "min": 2.506,
+          "max": 2.637,
+          "mean": 2.586,
+          "std": 0.035
+        },
+        "total": {
+          "p50": 21.666,
+          "p95": 21.734,
+          "p99": 21.753,
+          "min": 21.59,
+          "max": 21.753,
+          "mean": 21.665,
+          "std": 0.047
+        }
+      },
+      "latency_p50_ms": 21.666,
+      "latency_p95_ms": 21.734,
+      "fps": 46.2,
+      "stage_sum_check": {
+        "sum_of_parts_p50": 21.658,
+        "total_p50": 21.666
+      },
+      "session_p50_spread_percent": 0.0,
+      "resources": {
+        "process_rss_peak_mb": 2708.8,
+        "process_rss_mean_mb": 2708.8,
+        "system_used_peak_mb": 4672.1,
+        "system_used_baseline_mb": 4672.1,
+        "system_used_delta_mb": 0.0,
+        "torch_gpu_allocated_mb": 0.0,
+        "torch_gpu_peak_mb": 0.0,
+        "n_samples": 4,
+        "ghi_chu": "Tren Jetson, CPU va GPU dung chung DRAM — 'gpu_peak' nam trong cung tong bo nho he thong, khong phai VRAM roi."
+      },
+      "idle_before_load": {
+        "system_used_mb": 3150.2,
+        "process_rss_mb": 1132.2
+      }
+    },
+    "_smoke|tensorrt": {
+      "skipped": false,
+      "model": "_smoke",
+      "backend": "tensorrt",
+      "backend_info": {
+        "runner": "tensorrt",
+        "weights": "/home/jetson/quoc_anh/industrial-visual-inspection/models/_smoke/best.engine",
+        "model_size_mb": 9.39,
+        "imgsz": 640,
+        "conf": 0.25,
+        "iou": 0.7,
+        "framework": "tensorrt 10.3.0",
+        "gpu": "Orin",
+        "io": [
+          {
+            "name": "images",
+            "io": "INPUT",
+            "shape": [
+              1,
+              3,
+              640,
+              640
+            ],
+            "dtype": "float32"
+          },
+          {
+            "name": "output0",
+            "io": "OUTPUT",
+            "shape": [
+              1,
+              84,
+              8400
+            ],
+            "dtype": "float32"
+          }
+        ],
+        "precision": "fp16 (theo configs/export.yaml)",
+        "io_dtypes": [
+          "float32"
+        ]
+      },
+      "load_seconds": 0.06,
+      "model_size_mb": 9.39,
+      "sessions": [
+        {
+          "session": 1,
+          "wall_seconds": 0.52,
+          "n_images": 30,
+          "n_detections": 0,
+          "fps_wall": 57.4,
+          "stages": {
+            "preprocess": {
+              "p50": 5.815,
+              "p95": 5.857,
+              "p99": 5.891,
+              "min": 5.755,
+              "max": 5.891,
+              "mean": 5.82,
+              "std": 0.028,
+              "n": 30
+            },
+            "inference": {
+              "p50": 8.786,
+              "p95": 8.858,
+              "p99": 8.868,
+              "min": 8.753,
+              "max": 8.868,
+              "mean": 8.797,
+              "std": 0.033,
+              "n": 30
+            },
+            "postprocess": {
+              "p50": 2.748,
+              "p95": 2.809,
+              "p99": 2.82,
+              "min": 2.662,
+              "max": 2.82,
+              "mean": 2.746,
+              "std": 0.043,
+              "n": 30
+            },
+            "total": {
+              "p50": 17.343,
+              "p95": 17.446,
+              "p99": 17.51,
+              "min": 17.276,
+              "max": 17.51,
+              "mean": 17.363,
+              "std": 0.056,
+              "n": 30
+            }
+          },
+          "temp_before_mean_c": 61.6,
+          "temp_after_mean_c": 61.6
+        }
+      ],
+      "median_stages": {
+        "preprocess": {
+          "p50": 5.815,
+          "p95": 5.857,
+          "p99": 5.891,
+          "min": 5.755,
+          "max": 5.891,
+          "mean": 5.82,
+          "std": 0.028
+        },
+        "inference": {
+          "p50": 8.786,
+          "p95": 8.858,
+          "p99": 8.868,
+          "min": 8.753,
+          "max": 8.868,
+          "mean": 8.797,
+          "std": 0.033
+        },
+        "postprocess": {
+          "p50": 2.748,
+          "p95": 2.809,
+          "p99": 2.82,
+          "min": 2.662,
+          "max": 2.82,
+          "mean": 2.746,
+          "std": 0.043
+        },
+        "total": {
+          "p50": 17.343,
+          "p95": 17.446,
+          "p99": 17.51,
+          "min": 17.276,
+          "max": 17.51,
+          "mean": 17.363,
+          "std": 0.056
+        }
+      },
+      "latency_p50_ms": 17.343,
+      "latency_p95_ms": 17.446,
+      "fps": 57.7,
+      "stage_sum_check": {
+        "sum_of_parts_p50": 17.349,
+        "total_p50": 17.343
+      },
+      "session_p50_spread_percent": 0.0,
+      "resources": {
+        "process_rss_peak_mb": 2303.9,
+        "process_rss_mean_mb": 2303.9,
+        "system_used_peak_mb": 4330.1,
+        "system_used_baseline_mb": 4330.1,
+        "system_used_delta_mb": 0.0,
+        "torch_gpu_allocated_mb": 7.7,
+        "torch_gpu_peak_mb": 10.6,
+        "n_samples": 3,
+        "ghi_chu": "Tren Jetson, CPU va GPU dung chung DRAM — 'gpu_peak' nam trong cung tong bo nho he thong, khong phai VRAM roi."
+      },
+      "idle_before_load": {
+        "system_used_mb": 4322.5,
+        "process_rss_mb": 2254.4
+      }
+    }
+  },
+  "device": {
+    "collected_utc": "2026-09-09T05:00:49+00:00",
+    "note": "truoc khi benchmark",
+    "is_jetson": true,
+    "hostname": "ubuntu",
+    "arch": "aarch64",
+    "kernel": "5.15.185-tegra",
+    "python": "3.10.12",
+    "l4t_release": "# R36 (release), REVISION: 5.2, GCID: 46426093, BOARD: generic, EABI: aarch64, DATE: Thu Jul 16 18:56:22 UTC 2026",
+    "board_model": "NVIDIA Jetson Orin Nano Engineering Reference Developer Kit Super",
+    "jetpack": "(none)",
+    "cuda": "Cuda compilation tools, release 12.6, V12.6.68",
+    "power_mode": {
+      "available": {
+        "0": "15W",
+        "1": "25W",
+        "2": "MAXN_SUPER"
+      },
+      "current_id": 0,
+      "current_name": "15W"
+    },
+    "jetson_clocks_locked": false,
+    "clocks": {
+      "cpu_mhz_mean": 1497.6,
+      "cpu_mhz_max_core": 1497.6,
+      "gpu_mhz": 612.0
+    },
+    "temperatures_c": {
+      "cpu-thermal": 58.468,
+      "gpu-thermal": 59.843,
+      "soc0-thermal": 58.687,
+      "soc1-thermal": 59.375,
+      "soc2-thermal": 57.375,
+      "tj-thermal": 60.031
+    },
+    "temperature_mean_c": 59.0,
+    "memory": {
+      "MemTotal": 7.79,
+      "MemAvailable": 5.26,
+      "SwapTotal": 3.89,
+      "SwapFree": 3.69
+    },
+    "libraries": {
+      "torch": "2.10.0",
+      "torchvision": "0.25.0",
+      "tensorrt": "10.3.0",
+      "onnx": "1.22.0",
+      "onnxruntime": "1.24.0",
+      "ultralytics": "8.4.132",
+      "numpy": "1.26.4",
+      "cv2": "4.11.0",
+      "torch_cuda_available": "True",
+      "torch_cuda_version": "12.6",
+      "gpu_name": "Orin",
+      "ort_providers": [
+        "TensorrtExecutionProvider",
+        "CUDAExecutionProvider",
+        "CPUExecutionProvider"
+      ]
+    }
+  },
+  "config": {
+    "models": [
+      "yolov8n",
+      "yolov8s"
+    ],
+    "backends": [
+      "pytorch",
+      "onnx",
+      "tensorrt"
+    ],
+    "imgsz": 640,
+    "conf": 0.25,
+    "iou": 0.7,
+    "warmup": 20,
+    "sessions": 1,
+    "cooldown_seconds": 0,
+    "settle_seconds": 0,
+    "split": "test",
+    "max_images": 30,
+    "allow_onnx_cpu_fallback": true,
+    "percentiles": [
+      50,
+      95,
+      99
+    ],
+    "nc": 80
+  },
+  "images": {
+    "split": "test",
+    "count": 30,
+    "first": "crazing_104.jpg",
+    "last": "crazing_28.jpg"
+  },
+  "benchmarked_utc": "2026-09-09T05:00:54+00:00",
+  "device_after": {
+    "collected_utc": "2026-09-09T05:03:09+00:00",
+    "note": "sau khi benchmark",
+    "is_jetson": true,
+    "hostname": "ubuntu",
+    "arch": "aarch64",
+    "kernel": "5.15.185-tegra",
+    "python": "3.10.12",
+    "l4t_release": "# R36 (release), REVISION: 5.2, GCID: 46426093, BOARD: generic, EABI: aarch64, DATE: Thu Jul 16 18:56:22 UTC 2026",
+    "board_model": "NVIDIA Jetson Orin Nano Engineering Reference Developer Kit Super",
+    "jetpack": "(none)",
+    "cuda": "Cuda compilation tools, release 12.6, V12.6.68",
+    "power_mode": {
+      "available": {
+        "0": "15W",
+        "1": "25W",
+        "2": "MAXN_SUPER"
+      },
+      "current_id": 0,
+      "current_name": "15W"
+    },
+    "jetson_clocks_locked": false,
+    "clocks": {
+      "cpu_mhz_mean": 1497.6,
+      "cpu_mhz_max_core": 1497.6,
+      "gpu_mhz": 612.0
+    },
+    "temperatures_c": {
+      "cpu-thermal": 61.093,
+      "gpu-thermal": 62.718,
+      "soc0-thermal": 61.125,
+      "soc1-thermal": 61.843,
+      "soc2-thermal": 60.156,
+      "tj-thermal": 62.718
+    },
+    "temperature_mean_c": 61.6,
+    "memory": {
+      "MemTotal": 7.79,
+      "MemAvailable": 3.36,
+      "SwapTotal": 3.89,
+      "SwapFree": 3.69
+    },
+    "libraries": {
+      "torch": "2.10.0",
+      "torchvision": "0.25.0",
+      "tensorrt": "10.3.0",
+      "onnx": "1.22.0",
+      "onnxruntime": "1.24.0",
+      "ultralytics": "8.4.132",
+      "numpy": "1.26.4",
+      "cv2": "4.11.0",
+      "torch_cuda_available": "True",
+      "torch_cuda_version": "12.6",
+      "gpu_name": "Orin",
+      "ort_providers": [
+        "TensorrtExecutionProvider",
+        "CUDAExecutionProvider",
+        "CPUExecutionProvider"
+      ]
+    }
+  }
+}

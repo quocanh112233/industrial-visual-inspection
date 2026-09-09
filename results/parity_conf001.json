@@ -1,0 +1,97 @@
+{
+  "model": "yolov8n",
+  "n_images": 50,
+  "iou_match": 0.5,
+  "conf": 0.001,
+  "iou_nms": 0.7,
+  "backends": [
+    "pytorch",
+    "onnx",
+    "tensorrt"
+  ],
+  "total_detections": {
+    "pytorch": 8624,
+    "onnx": 8629,
+    "tensorrt": 8631
+  },
+  "pairs": {
+    "pytorch_vs_onnx": {
+      "n_images": 50,
+      "detections": {
+        "pytorch": 8624,
+        "onnx": 8629
+      },
+      "matched": 8579,
+      "only_pytorch": 45,
+      "only_onnx": 50,
+      "match_rate": 0.989,
+      "images_with_difference": 44,
+      "mean_iou_of_matched": 0.9931,
+      "max_conf_diff": 0.1159,
+      "examples_differing": [
+        "crazing_104.jpg",
+        "crazing_106.jpg",
+        "crazing_107.jpg",
+        "crazing_119.jpg",
+        "crazing_123.jpg",
+        "crazing_129.jpg",
+        "crazing_13.jpg",
+        "crazing_131.jpg",
+        "crazing_147.jpg",
+        "crazing_149.jpg"
+      ]
+    },
+    "pytorch_vs_tensorrt": {
+      "n_images": 50,
+      "detections": {
+        "pytorch": 8624,
+        "tensorrt": 8631
+      },
+      "matched": 8567,
+      "only_pytorch": 57,
+      "only_tensorrt": 64,
+      "match_rate": 0.9861,
+      "images_with_difference": 46,
+      "mean_iou_of_matched": 0.991,
+      "max_conf_diff": 0.1158,
+      "examples_differing": [
+        "crazing_104.jpg",
+        "crazing_106.jpg",
+        "crazing_107.jpg",
+        "crazing_119.jpg",
+        "crazing_123.jpg",
+        "crazing_129.jpg",
+        "crazing_13.jpg",
+        "crazing_131.jpg",
+        "crazing_147.jpg",
+        "crazing_149.jpg"
+      ]
+    },
+    "onnx_vs_tensorrt": {
+      "n_images": 50,
+      "detections": {
+        "onnx": 8629,
+        "tensorrt": 8631
+      },
+      "matched": 8593,
+      "only_onnx": 36,
+      "only_tensorrt": 38,
+      "match_rate": 0.9915,
+      "images_with_difference": 38,
+      "mean_iou_of_matched": 0.9944,
+      "max_conf_diff": 0.0729,
+      "examples_differing": [
+        "crazing_106.jpg",
+        "crazing_119.jpg",
+        "crazing_123.jpg",
+        "crazing_129.jpg",
+        "crazing_13.jpg",
+        "crazing_131.jpg",
+        "crazing_153.jpg",
+        "crazing_175.jpg",
+        "crazing_178.jpg",
+        "crazing_19.jpg"
+      ]
+    }
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "imgsz": 640,
+  "runs": [
+    {
+      "opset": 12,
+      "stage": "onnx",
+      "status": "ok",
+      "detail": "13M"
+    },
+    {
+      "opset": 12,
+      "stage": "engine",
+      "status": "ok",
+      "detail": "9.0M"
+    },
+    {
+      "opset": 12,
+      "stage": "infer",
+      "status": "ok",
+      "detail": "results/r1_trt_op12.json"
+    },
+    {
+      "opset": 17,
+      "stage": "onnx",
+      "status": "ok",
+      "detail": "13M"
+    },
+    {
+      "opset": 17,
+      "stage": "engine",
+      "status": "ok",
+      "detail": "9.0M"
+    },
+    {
+      "opset": 17,
+      "stage": "infer",
+      "status": "ok",
+      "detail": "results/r1_trt_op17.json"
+    }
+  ]
+}

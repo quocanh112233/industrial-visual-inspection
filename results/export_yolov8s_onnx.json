@@ -1,0 +1,188 @@
+{
+  "model": "yolov8s",
+  "onnx": "models/yolov8s/best.onnx",
+  "size_mb": 44.75,
+  "checker": "pass",
+  "graph": {
+    "opset": [
+      {
+        "domain": "ai.onnx",
+        "version": 17
+      }
+    ],
+    "inputs": [
+      {
+        "name": "images",
+        "shape": [
+          1,
+          3,
+          640,
+          640
+        ]
+      }
+    ],
+    "outputs": [
+      {
+        "name": "output0",
+        "shape": [
+          1,
+          10,
+          8400
+        ]
+      }
+    ]
+  },
+  "config": {
+    "opset": 17,
+    "imgsz": 640,
+    "batch": 1,
+    "dynamic": false,
+    "simplify": true,
+    "half": false
+  },
+  "parity": {
+    "ok": true,
+    "n_images": 10,
+    "images": [
+      "crazing_104.jpg",
+      "crazing_106.jpg",
+      "crazing_107.jpg",
+      "crazing_119.jpg",
+      "crazing_123.jpg",
+      "crazing_129.jpg",
+      "crazing_13.jpg",
+      "crazing_131.jpg",
+      "crazing_147.jpg",
+      "crazing_149.jpg"
+    ],
+    "max_abs_diff": 0.0018310546875,
+    "mean_abs_diff_per_image": 0.00088043,
+    "box_max_diff_px": 0.0018310546875,
+    "box_max_relative": 8.137345503200777e-06,
+    "score_max_abs_diff": 1.043081283569336e-06,
+    "detections": {
+      "conf": 0.25,
+      "iou": 0.7,
+      "n_pytorch": 17,
+      "n_onnx": 17,
+      "matched": 17,
+      "only_pytorch": 0,
+      "only_onnx": 0,
+      "match_rate": 1.0
+    },
+    "per_image": [
+      {
+        "image": "crazing_104.jpg",
+        "raw_max": 0.00054932,
+        "box_px": 0.00054932,
+        "score_abs": 1.04e-06,
+        "n_det_pt": 2,
+        "n_det_onnx": 2
+      },
+      {
+        "image": "crazing_106.jpg",
+        "raw_max": 0.00091553,
+        "box_px": 0.00091553,
+        "score_abs": 7.2e-07,
+        "n_det_pt": 1,
+        "n_det_onnx": 1
+      },
+      {
+        "image": "crazing_107.jpg",
+        "raw_max": 0.00045776,
+        "box_px": 0.00045776,
+        "score_abs": 6.3e-07,
+        "n_det_pt": 1,
+        "n_det_onnx": 1
+      },
+      {
+        "image": "crazing_119.jpg",
+        "raw_max": 0.00061035,
+        "box_px": 0.00061035,
+        "score_abs": 5.7e-07,
+        "n_det_pt": 2,
+        "n_det_onnx": 2
+      },
+      {
+        "image": "crazing_123.jpg",
+        "raw_max": 0.00094604,
+        "box_px": 0.00094604,
+        "score_abs": 6.4e-07,
+        "n_det_pt": 2,
+        "n_det_onnx": 2
+      },
+      {
+        "image": "crazing_129.jpg",
+        "raw_max": 0.00137329,
+        "box_px": 0.00137329,
+        "score_abs": 7.2e-07,
+        "n_det_pt": 2,
+        "n_det_onnx": 2
+      },
+      {
+        "image": "crazing_13.jpg",
+        "raw_max": 0.00105286,
+        "box_px": 0.00105286,
+        "score_abs": 6.4e-07,
+        "n_det_pt": 2,
+        "n_det_onnx": 2
+      },
+      {
+        "image": "crazing_131.jpg",
+        "raw_max": 0.00183105,
+        "box_px": 0.00183105,
+        "score_abs": 6.8e-07,
+        "n_det_pt": 1,
+        "n_det_onnx": 1
+      },
+      {
+        "image": "crazing_147.jpg",
+        "raw_max": 0.00048828,
+        "box_px": 0.00048828,
+        "score_abs": 7.6e-07,
+        "n_det_pt": 2,
+        "n_det_onnx": 2
+      },
+      {
+        "image": "crazing_149.jpg",
+        "raw_max": 0.00057983,
+        "box_px": 0.00057983,
+        "score_abs": 5.7e-07,
+        "n_det_pt": 2,
+        "n_det_onnx": 2
+      }
+    ],
+    "verdict": {
+      "checks": {
+        "toa_do_hop": {
+          "gia_tri": 0.0018310546875,
+          "nguong": 0.1,
+          "don_vi": "pixel",
+          "dat": true,
+          "y_nghia": "lech duoi mot phan tram pixel thi khong the doi ket qua detection"
+        },
+        "diem_so_lop": {
+          "gia_tri": 1.043081283569336e-06,
+          "nguong": 0.001,
+          "don_vi": "tuyet doi (0..1)",
+          "dat": true,
+          "y_nghia": "diem so quyet dinh lop va viec vuot nguong conf"
+        },
+        "detection_cuoi_cung": {
+          "gia_tri": 1.0,
+          "nguong": 1.0,
+          "don_vi": "ti le khop",
+          "dat": true,
+          "y_nghia": "sau giai ma va NMS, hai dinh dang co cho ra cung cac hop khong"
+        }
+      },
+      "dat_tat_ca": true,
+      "srs_raw_metric": {
+        "gia_tri": 0.0018310546875,
+        "nguong": 0.001,
+        "dat": false,
+        "ghi_chu": "Chi so tho theo dung chu SRS FR-07. No gop toa do (pixel, gia tri toi 640) voi diem so (0..1) vao mot nguong tuyet doi duy nhat, nen bi chi phoi boi toa do va khong phan anh dung anh huong thuc te. Giu lai de doi chieu, khong dung de ket luan."
+      }
+    }
+  }
+}

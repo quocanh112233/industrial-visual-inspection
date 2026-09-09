@@ -1,0 +1,62 @@
+{
+  "yolov8s_pt": {
+    "weights": "/content/industrial-visual-inspection/models/yolov8s/best.pt",
+    "format": "pt",
+    "split": "test",
+    "imgsz": 640,
+    "conf": 0.001,
+    "iou": 0.7,
+    "overall": {
+      "mAP50": 0.7692,
+      "mAP50_95": 0.4319,
+      "mAP75": 0.4207,
+      "precision": 0.6938,
+      "recall": 0.7168
+    },
+    "per_class": {
+      "crazing": {
+        "precision": 0.5913,
+        "recall": 0.2947,
+        "mAP50": 0.4214,
+        "mAP50_95": 0.1684
+      },
+      "inclusion": {
+        "precision": 0.7076,
+        "recall": 0.7737,
+        "mAP50": 0.8326,
+        "mAP50_95": 0.4231
+      },
+      "patches": {
+        "precision": 0.7692,
+        "recall": 0.9462,
+        "mAP50": 0.9572,
+        "mAP50_95": 0.6232
+      },
+      "pitted_surface": {
+        "precision": 0.7716,
+        "recall": 0.7882,
+        "mAP50": 0.8246,
+        "mAP50_95": 0.5449
+      },
+      "rolled-in_scale": {
+        "precision": 0.5717,
+        "recall": 0.5464,
+        "mAP50": 0.6227,
+        "mAP50_95": 0.3087
+      },
+      "scratches": {
+        "precision": 0.7515,
+        "recall": 0.9518,
+        "mAP50": 0.9569,
+        "mAP50_95": 0.523
+      }
+    },
+    "speed_ms_ultralytics": {
+      "preprocess": 1.0171,
+      "inference": 8.7571,
+      "loss": 0.0008,
+      "postprocess": 1.0283
+    },
+    "evaluated_utc": "2026-09-09T08:36:38+00:00"
+  }
+}
