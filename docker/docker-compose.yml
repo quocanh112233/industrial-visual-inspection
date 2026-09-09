@@ -3,20 +3,41 @@
 # Yeu cau tren Jetson: Docker phai co nvidia runtime.
 #   docker info | grep -i 'default runtime'      # phai la 'nvidia'
 # Neu chua, sua /etc/docker/daemon.json roi: sudo systemctl restart docker
+#
+# VI SAO DUNG MANG HOST (network: host / network_mode: host)
+#
+# Mac dinh Docker cap mang cho container bang mot cap giao dien ao `veth`: mot
+# dau cam vao cau docker0 cua host, dau kia nam trong container. Kernel Jetson
+# khong co module do:
+#
+#   $ uname -r
+#   5.15.185-tegra
+#   $ sudo modprobe veth
+#   modprobe: FATAL: Module veth not found in directory /lib/modules/5.15.185-tegra
+#
+# Nen moi lenh docker dung mang cau deu chet ngay tu buoc apt-get:
+#
+#   failed to create endpoint ... on network bridge: failed to add the host
+#   (veth...) <=> sandbox (veth...) pair interfaces: operation not supported
+#
+# Dung mang host thi container xai thang ngan xep mang cua may, khong can veth.
+# Doi lai: khong con anh xa cong `8000:8000` nua — dich vu mo THANG cong 8000
+# tren host. Tren thiet bi bien nhu Jetson day thuong la dieu mong muon: bot
+# mot lop NAT tren duong anh di vao.
 
 services:
   ivid:
     build:
       context: ..
       dockerfile: docker/Dockerfile.jetson
+      network: host          # kernel Jetson khong co veth — xem ghi chu dau file
       args:
         L4T_TAG: ${L4T_TAG:-r36.4.0}
     image: ivid:jetson
     container_name: ivid
     runtime: nvidia
     restart: unless-stopped
-    ports:
-      - "8000:8000"
+    network_mode: host       # thay cho ports "8000:8000" — xem ghi chu dau file
     environment:
       # FR-17: doi mot dong nay la doi runtime, khong phai build lai image
       IVID_BACKEND: ${IVID_BACKEND:-tensorrt}

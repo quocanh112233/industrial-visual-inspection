@@ -165,3 +165,16 @@ curl http://localhost:8000/health
 | Số đo dao động > 10% giữa các phiên | throttling nhiệt (rủi ro R3) | cố định `nvpmodel`, chờ nguội lâu hơn, kiểm tra quạt |
 | OOM khi train | 8GB dùng chung CPU+GPU | dùng `configs/train_yolov8n_jetson.yaml`, giảm `batch` |
 | `docker: unknown runtime nvidia` | Docker chưa cấu hình nvidia runtime | sửa `/etc/docker/daemon.json` như mục 4 |
+| `permission denied ... /var/run/docker.sock` | tài khoản chưa thuộc nhóm `docker` | `sudo usermod -aG docker $USER` rồi `newgrp docker` (nhớ `source .venv/bin/activate` lại) |
+| `failed to add the host (veth…) <=> sandbox (veth…) pair interfaces: operation not supported` | kernel Jetson **không có module `veth`**, nên mạng cầu của Docker không dùng được | đã xử lý sẵn: `docker-compose.yml` dùng `network: host` khi build và `network_mode: host` khi chạy |
+
+Về `veth`: kiểm chứng bằng
+
+```bash
+uname -r                 # 5.15.185-tegra
+sudo modprobe veth       # FATAL: Module veth not found
+```
+
+Vì dùng mạng host nên **không có ánh xạ cổng** `8000:8000` — dịch vụ mở thẳng cổng
+8000 trên máy. `curl localhost:8000/health` vẫn đúng như cũ, nhưng nếu bạn muốn
+đổi cổng thì phải sửa lệnh chạy uvicorn trong image chứ không sửa được từ compose.
