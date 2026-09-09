@@ -68,6 +68,39 @@ Hoặc `make all` chạy tất cả.
 
 > ⏱️ `make bench` với cấu hình mặc định mất khá lâu: 5 phút chờ ổn định nhiệt + 6 cấu hình × 3 phiên × 270 ảnh + nghỉ 60s giữa các phiên. Chạy thử nhanh bằng `make bench-quick`.
 
+### Luôn `git pull` TRƯỚC khi chạy
+
+`make report --update-readme` ghi bảng benchmark thẳng vào `README.md`, và các
+bước đo ghi vào `results/`. Đó đều là file được commit. Nếu máy dev cũng vừa sửa
+một trong số đó thì `git pull` sẽ bị **hủy giữa chừng**:
+
+```
+error: Your local changes to the following files would be overwritten by merge:
+	README.md
+Aborting
+```
+
+Nguy hiểm ở chỗ `git pull` dừng nhưng các lệnh phía sau trong cùng dòng vẫn chạy
+— bằng code cũ, và kết quả trông vẫn bình thường. Đã xảy ra thật: cross-check
+báo `LECH LON` chỉ vì bản sửa chưa kịp về máy.
+
+Vì vậy trên Jetson:
+
+```bash
+git pull                       # trước tiên, và kiểm tra nó thành công
+make bench && make accuracy && make report
+git add -A && git commit -m "ket qua do tren jetson" && git push
+```
+
+Nếu `git pull` báo xung đột ở file **sinh tự động** (`README.md`, `results/*.json`,
+`docs/benchmark-report.md`, `docs/images/*.png`) thì cứ bỏ bản địa phương rồi kéo
+lại — chạy lại lệnh sinh sẽ cho ra đúng nội dung đó:
+
+```bash
+git checkout -- README.md
+git pull
+```
+
 ## 4. Chạy dịch vụ
 
 ### Trực tiếp
