@@ -34,6 +34,11 @@ def main() -> int:
     ap.add_argument("--n", type=int, default=None)
     ap.add_argument("--iou-match", type=float, default=0.5,
                     help="IoU toi thieu de coi hai box la cung mot detection")
+    ap.add_argument("--conf", type=float, default=None,
+                    help="ghi de nguong tin cay. Dung 0.001 de doi chieu voi phep do mAP, "
+                         "vi mAP quet toan bo duong PR chu khong dung mot nguong co dinh")
+    ap.add_argument("--iou", type=float, default=None, help="ghi de nguong IoU cua NMS")
+    ap.add_argument("--out", default="results/parity_check.json")
     a = ap.parse_args()
 
     root = repo_root()
@@ -41,6 +46,8 @@ def main() -> int:
     pc = cfg["parity"]
     n = a.n or int(pc["n_images_full"])
     imgsz = int(cfg["onnx"]["imgsz"])
+    conf = a.conf if a.conf is not None else float(pc["conf"])
+    iou = a.iou if a.iou is not None else float(pc["iou"])
 
     d = yaml.safe_load((root / a.data).read_text(encoding="utf-8"))
     img_dir = Path(d["path"]) / d.get("test", "test/images")
@@ -57,8 +64,7 @@ def main() -> int:
             print(f"[parity] bo qua {b}: khong thay {w.name}")
             continue
         try:
-            runners[b] = build_runner(b, w, imgsz=imgsz,
-                                      conf=float(pc["conf"]), iou=float(pc["iou"]))
+            runners[b] = build_runner(b, w, imgsz=imgsz, conf=conf, iou=iou)
             print(f"[parity] nap {b}: {w.name}")
         except Exception as e:
             print(f"[parity] bo qua {b}: {type(e).__name__}: {e}")
@@ -100,11 +106,12 @@ def main() -> int:
         }
 
     report = {"model": a.name, "n_images": len(images), "iou_match": a.iou_match,
-              "conf": float(pc["conf"]), "iou_nms": float(pc["iou"]),
+              "conf": conf, "iou_nms": iou,
               "backends": list(runners.keys()),
               "total_detections": {b: sum(len(x) for x in dets[b]) for b in runners},
               "pairs": pairs}
-    write_json(root / "results" / "parity_check.json", report)
+    out_path = Path(a.out)
+    write_json(out_path if out_path.is_absolute() else root / out_path, report)
 
     print(f"\n[parity] {'cap so sanh':<26}{'khop':>7}{'chi A':>7}{'chi B':>7}"
           f"{'ti le khop':>12}{'IoU tb':>9}{'lech conf':>11}")
@@ -114,7 +121,10 @@ def main() -> int:
               f"{v['match_rate']*100:>11.1f}%{v['mean_iou_of_matched']:>9.3f}"
               f"{v['max_conf_diff']:>11.3f}")
 
-    print("\n[parity] ghi -> results/parity_check.json")
+    print(f"\n[parity] conf={conf}  iou_nms={iou}")
+    print("[parity] tong detection: " +
+          ", ".join(f"{b}={sum(len(x) for x in dets[b])}" for b in runners))
+    print(f"[parity] ghi -> {a.out}")
     worst = min((v["match_rate"] for v in pairs.values()), default=1.0)
     if worst < 0.95:
         print(f"[parity] Ti le khop thap nhat {worst*100:.1f}%. Day la SO LIEU CAN BAO CAO, "
