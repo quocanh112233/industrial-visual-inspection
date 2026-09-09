@@ -119,11 +119,11 @@ def main() -> int:
     imgsz = a.imgsz
     if imgsz is None and a.config:
         cfg_p = Path(a.config) if Path(a.config).is_absolute() else root / a.config
-        imgsz = yaml.safe_load(cfg_p.read_text())["train"]["imgsz"]
+        imgsz = yaml.safe_load(cfg_p.read_text(encoding="utf-8"))["train"]["imgsz"]
     if imgsz is None and a.name:
         mf = root / "results" / f"train_{a.name}_manifest.json"
         if mf.exists():
-            imgsz = json.loads(mf.read_text())["config"]["train"]["imgsz"]
+            imgsz = json.loads(mf.read_text(encoding="utf-8"))["config"]["train"]["imgsz"]
     imgsz = imgsz or 640
 
     print(f"[eval] trong so : {weights}")
@@ -142,7 +142,7 @@ def main() -> int:
     payload = {}
     if out.exists():
         try:
-            payload = json.loads(out.read_text())
+            payload = json.loads(out.read_text(encoding="utf-8"))
         except json.JSONDecodeError:
             payload = {}
     payload[f"{tag}_{res['format']}"] = res

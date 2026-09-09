@@ -75,3 +75,53 @@ def test_module_import_duoc_khong_can_gpu(mod):
     """Cac module nay phai import duoc tren may khong co torch/tensorrt —
     neu khong, CI khong chay duoc va Docker build cung se hong."""
     importlib.import_module(mod)
+
+
+# --------------------------------------------------------------- encoding
+def test_moi_cho_doc_ghi_text_deu_khai_bao_encoding():
+    """Jetson chay locale C/POSIX: Python mac dinh dung ascii cho file va stdout.
+    Mot dau '—' trong bao cao la du de lam vo ca phien benchmark.
+    """
+    import re
+
+    bad = []
+    for p in list((ROOT / "src").rglob("*.py")) + list((ROOT / "tests").rglob("*.py")):
+        s = p.read_text(encoding="utf-8")
+        for m in re.finditer(r"\.(read|write)_text\(", s):
+            k, depth = m.end(), 1
+            start = k
+            while depth:
+                if s[k] == "(":
+                    depth += 1
+                elif s[k] == ")":
+                    depth -= 1
+                k += 1
+            if "encoding=" not in s[start:k - 1]:
+                bad.append(f"{p.relative_to(ROOT)}:{s[:m.start()].count(chr(10)) + 1}")
+    assert not bad, "thieu encoding='utf-8' o:\n  " + "\n  ".join(bad)
+
+
+def test_write_json_giu_duoc_ky_tu_tieng_viet(tmp_path):
+    from ivid.data.common import write_json
+
+    payload = {"ghi_chu": "Trên Jetson, CPU và GPU dùng chung DRAM — không phải VRAM rời",
+               "do_lech": "±0.5°C", "ket_luan": "✅ đạt"}
+    f = tmp_path / "x.json"
+    write_json(f, payload)
+    import json
+
+    assert json.loads(f.read_text(encoding="utf-8")) == payload
+
+
+# ---------------------------------------------------------------- warm-up
+def test_warmup_chay_ca_duong_ong_khong_chi_inference():
+    """Neu warm-up chi goi infer(), backend do TRUOC se ganh chi phi khoi tao
+    OpenCV va trong nhu tien xu ly cua no cham hon — trong khi ca ba backend
+    dung chung mot ham preprocess. Da xay ra that: 10.2 ms vs 5.6 ms.
+    """
+    import inspect
+
+    from ivid.benchmark.runners.base import BaseRunner
+
+    src = inspect.getsource(BaseRunner.warmup)
+    assert "run_array" in src, "warmup phai goi run_array, khong duoc chi goi infer"

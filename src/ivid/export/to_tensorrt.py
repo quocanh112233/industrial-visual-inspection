@@ -75,7 +75,7 @@ def build(onnx_path: Path, engine_path: Path, trtexec: str, precision: str,
     proc = subprocess.run(cmd, capture_output=True, text=True)
     dt = time.perf_counter() - t0
     log_path.parent.mkdir(parents=True, exist_ok=True)
-    log_path.write_text(proc.stdout + "\n===== stderr =====\n" + proc.stderr)
+    log_path.write_text(proc.stdout + "\n===== stderr =====\n" + proc.stderr, encoding="utf-8")
     return proc.returncode == 0, dt, proc.stdout + proc.stderr
 
 
@@ -90,7 +90,7 @@ def main() -> int:
     a = ap.parse_args()
 
     root = repo_root()
-    cfg = yaml.safe_load((root / a.config).read_text())
+    cfg = yaml.safe_load((root / a.config).read_text(encoding="utf-8"))
     tc = cfg["tensorrt"]
     precision = a.precision or tc["precision"]
 

@@ -34,7 +34,7 @@ def gather(out_dir: Path, names: list[str]) -> dict:
 
         for p in images:
             lp = lbl_dir / f"{p.stem}.txt"
-            lines = [l for l in lp.read_text().splitlines() if l.strip()] if lp.exists() else []
+            lines = [l for l in lp.read_text(encoding="utf-8").splitlines() if l.strip()] if lp.exists() else []
             boxes_per_image.append(len(lines))
             for line in lines:
                 f = line.split()
@@ -151,7 +151,7 @@ def main() -> int:
 
     out_path = root / a.out
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_text("\n".join(L) + "\n")
+    out_path.write_text("\n".join(L) + "\n", encoding="utf-8")
     write_json(root / "results" / "data_stats.json",
                {"splits": st, "total_boxes_by_class": tot_box,
                 "total_images_by_class": tot_img, "imbalance_ratio": round(imbalance, 3)})

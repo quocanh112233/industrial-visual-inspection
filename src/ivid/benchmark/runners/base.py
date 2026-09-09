@@ -28,7 +28,7 @@ def _num_classes() -> int | None:
 
         for p in (repo_root() / "data/processed/data.yaml", repo_root() / "configs/data.yaml"):
             if p.exists():
-                d = yaml.safe_load(p.read_text())
+                d = yaml.safe_load(p.read_text(encoding="utf-8"))
                 if "names" in d:
                     return len(d["names"])
     except Exception:
@@ -92,10 +92,20 @@ class BaseRunner(abc.ABC):
             "iou": self.iou,
         }
 
-    def warmup(self, n: int = 20) -> None:
-        x = np.zeros((1, 3, self.imgsz, self.imgsz), dtype=np.float32)
+    def warmup(self, n: int = 20, img_bgr: np.ndarray | None = None) -> None:
+        """Chay khong tai n lan de bo chi phi khoi tao.
+
+        PHAI di qua ca duong ong (preprocess -> infer -> postprocess), khong chi
+        infer. OpenCV khoi tao thread pool va nap nhan SIMD o lan resize dau tien;
+        neu warm-up bo qua buoc do, backend NAO DUOC DO TRUOC se ganh chi phi ay
+        va trong nhu the tien xu ly cua no cham hon — trong khi ca ba backend
+        dung chung dung mot ham. Loi nay tung lam pytorch hien 10.2 ms tien xu ly
+        con onnx chi 5.6 ms.
+        """
+        if img_bgr is None:
+            img_bgr = np.random.randint(0, 255, (self.imgsz, self.imgsz, 3), dtype=np.uint8)
         for _ in range(n):
-            self.infer(x)
+            self.run_array(img_bgr)
 
     def run_array(self, img_bgr: np.ndarray) -> RunOutput:
         """Chay tren mot anh BGR, do rieng ba giai doan."""

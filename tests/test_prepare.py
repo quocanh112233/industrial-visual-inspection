@@ -80,8 +80,7 @@ def test_voc_to_yolo_doi_dung_toa_do(tmp_path: Path):
         """<annotation><size><width>200</width><height>200</height></size>
         <object><name>scratches</name>
           <bndbox><xmin>50</xmin><ymin>60</ymin><xmax>150</xmax><ymax>160</ymax></bndbox>
-        </object></annotation>"""
-    )
+        </object></annotation>""", encoding="utf-8")
     lines = voc_to_yolo(xml, CLASSES)
     assert len(lines) == 1
     cid, cx, cy, bw, bh = lines[0].split()
@@ -98,8 +97,7 @@ def test_voc_to_yolo_kep_box_vuot_bien(tmp_path: Path):
         """<annotation><size><width>200</width><height>200</height></size>
         <object><name>crazing</name>
           <bndbox><xmin>-10</xmin><ymin>0</ymin><xmax>250</xmax><ymax>200</ymax></bndbox>
-        </object></annotation>"""
-    )
+        </object></annotation>""", encoding="utf-8")
     cid, cx, cy, bw, bh = voc_to_yolo(xml, CLASSES)[0].split()
     assert float(cx) - float(bw) / 2 >= -1e-6
     assert float(cx) + float(bw) / 2 <= 1 + 1e-6
@@ -111,8 +109,7 @@ def test_voc_to_yolo_bao_loi_khi_lop_la(tmp_path: Path):
         """<annotation><size><width>200</width><height>200</height></size>
         <object><name>khong_ton_tai</name>
           <bndbox><xmin>1</xmin><ymin>1</ymin><xmax>10</xmax><ymax>10</ymax></bndbox>
-        </object></annotation>"""
-    )
+        </object></annotation>""", encoding="utf-8")
     with pytest.raises(ValueError, match="khong_ton_tai"):
         voc_to_yolo(xml, CLASSES)
 
@@ -121,7 +118,7 @@ def test_hash_khong_phu_thuoc_thu_tu(tmp_path: Path):
     files = []
     for name, body in (("b.txt", "bbb"), ("a.txt", "aaa"), ("c.txt", "ccc")):
         p = tmp_path / name
-        p.write_text(body)
+        p.write_text(body, encoding="utf-8")
         files.append(p)
     assert sha256_of_files(files) == sha256_of_files(list(reversed(files)))
 

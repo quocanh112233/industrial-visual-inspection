@@ -27,6 +27,8 @@ log()  { printf '\033[1;34m[ivid]\033[0m %s\n' "$*"; }
 bad()  { printf '\033[1;31m[loi]\033[0m %s\n' "$*" >&2; }
 
 [[ -d "$ROOT/.venv" ]] && source "$ROOT/.venv/bin/activate"
+# Jetson chay locale C -> Python mac dinh ascii cho stdout
+export PYTHONUTF8=1 PYTHONIOENCODING=utf-8
 
 # --- 1. gom san pham cua smoke test R1 thanh mot "model" gia ---
 OPSET="${OPSET:-17}"

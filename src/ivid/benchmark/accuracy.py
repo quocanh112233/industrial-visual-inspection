@@ -39,7 +39,7 @@ def main() -> int:
     a = ap.parse_args()
 
     root = repo_root()
-    cfg = yaml.safe_load((root / a.config).read_text())
+    cfg = yaml.safe_load((root / a.config).read_text(encoding="utf-8"))
     models = a.models or cfg["models"]
     backends = a.backends or cfg["backends"]
     imgsz = int(cfg["imgsz"])
@@ -53,7 +53,7 @@ def main() -> int:
     payload = {}
     if out_path.exists():
         try:
-            payload = json.loads(out_path.read_text())
+            payload = json.loads(out_path.read_text(encoding="utf-8"))
         except json.JSONDecodeError:
             payload = {}
     payload.setdefault("accuracy", {})

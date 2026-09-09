@@ -108,7 +108,7 @@ class BackendHolder:
 
         for p in (repo_root() / "data/processed/data.yaml", repo_root() / "configs/data.yaml"):
             if p.exists():
-                d = yaml.safe_load(p.read_text())
+                d = yaml.safe_load(p.read_text(encoding="utf-8"))
                 if "names" in d:
                     return {int(k): v for k, v in d["names"].items()}
         return {}

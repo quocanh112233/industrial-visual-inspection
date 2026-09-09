@@ -14,7 +14,7 @@ from pathlib import Path
 
 def _rss_mb() -> float:
     try:
-        for line in Path("/proc/self/status").read_text().splitlines():
+        for line in Path("/proc/self/status").read_text(encoding="utf-8").splitlines():
             if line.startswith("VmRSS:"):
                 return int(line.split()[1]) / 1024.0
     except Exception:
@@ -25,7 +25,7 @@ def _rss_mb() -> float:
 def _system_used_mb() -> float:
     try:
         vals = {}
-        for line in Path("/proc/meminfo").read_text().splitlines():
+        for line in Path("/proc/meminfo").read_text(encoding="utf-8").splitlines():
             k, v = line.split(":", 1)
             vals[k] = int(v.strip().split()[0]) / 1024.0
         return round(vals.get("MemTotal", 0) - vals.get("MemAvailable", 0), 1)

@@ -77,7 +77,7 @@ def label_for(img: Path, raw_dir: Path, names: list[str]) -> tuple[list[str], st
         hits = list(raw_dir.rglob(f"{img.stem}.txt"))
         txt = hits[0] if hits else txt
     if txt.exists():
-        return [l for l in txt.read_text().splitlines() if l.strip()], "yolo"
+        return [l for l in txt.read_text(encoding="utf-8").splitlines() if l.strip()], "yolo"
 
     xmls = list(raw_dir.rglob(f"{img.stem}.xml"))
     if xmls:
@@ -166,7 +166,7 @@ def main() -> int:
             if not lines:
                 n_empty[split] += 1
             (out_dir / split / "labels" / f"{img.stem}.txt").write_text(
-                "\n".join(lines) + ("\n" if lines else "")
+                "\n".join(lines) + ("\n" if lines else ""), encoding="utf-8"
             )
 
     # --- data.yaml cho ultralytics ---
@@ -182,14 +182,13 @@ def main() -> int:
             },
             sort_keys=False,
             allow_unicode=True,
-        )
-    )
+        ), encoding="utf-8")
 
     # --- manifest tai lap (FR-06) ---
     manifest = {
         "dataset": cfg["dataset_name"],
         "raw_dir": str(raw_dir),
-        "raw_source": (raw_dir.parent / "SOURCE.txt").read_text().strip()
+        "raw_source": (raw_dir.parent / "SOURCE.txt").read_text(encoding="utf-8").strip()
         if (raw_dir.parent / "SOURCE.txt").exists()
         else "?",
         "seed": int(cfg["split"]["seed"]),

@@ -37,6 +37,8 @@ bad()  { printf '\033[1;31m  [that bai]\033[0m %s\n' "$*"; }
 
 mkdir -p "$OUT" "$RES"
 [[ -d "$ROOT/.venv" ]] && source "$ROOT/.venv/bin/activate"
+# Jetson chay locale C -> Python mac dinh ascii cho stdout
+export PYTHONUTF8=1 PYTHONIOENCODING=utf-8
 
 # ---------------------------------------------------------- 0. ghi phien ban
 log "Phien ban moi truong"

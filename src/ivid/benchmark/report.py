@@ -375,7 +375,7 @@ def main() -> int:
     if not src.exists():
         print(f"[loi] khong thay {src} — chay ivid.benchmark.latency truoc", file=sys.stderr)
         return 1
-    payload = json.loads(src.read_text())
+    payload = json.loads(src.read_text(encoding="utf-8"))
     rows = rows_from(payload)
     if not rows:
         print("[loi] file benchmark khong co ket qua nao", file=sys.stderr)
@@ -385,7 +385,7 @@ def main() -> int:
     md = build_report(payload, rows, charts, a.cycle_ms)
     out = root / a.out
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(md)
+    out.write_text(md, encoding="utf-8")
 
     print("\n".join(main_table(rows)))
     print(f"\n[report] bao cao -> {a.out}")
@@ -394,14 +394,14 @@ def main() -> int:
 
     if a.update_readme:
         readme = root / "README.md"
-        text = readme.read_text()
+        text = readme.read_text(encoding="utf-8")
         block = ("<!-- IVID_TABLE_START -->\n" + "\n".join(main_table(rows))
                  + "\n\n![latency](docs/images/latency_comparison.png)\n"
                  + "<!-- IVID_TABLE_END -->")
         if "<!-- IVID_TABLE_START -->" in text:
             head, rest = text.split("<!-- IVID_TABLE_START -->", 1)
             _, tail = rest.split("<!-- IVID_TABLE_END -->", 1)
-            readme.write_text(head + block + tail)
+            readme.write_text(head + block + tail, encoding="utf-8")
             print("[report] da cap nhat bang trong README.md")
         else:
             print("[report] README chua co moc <!-- IVID_TABLE_START --> — bo qua")

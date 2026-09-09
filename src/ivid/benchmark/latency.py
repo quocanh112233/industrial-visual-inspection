@@ -54,8 +54,17 @@ def summarize(values: list[float], percentiles: list[int]) -> dict:
     return out
 
 
+def _warm_opencv(n: int = 50) -> None:
+    """Chay preprocess vai chuc lan tren anh gia de OpenCV khoi tao xong."""
+    from ..preprocess import preprocess
+
+    dummy = np.random.randint(0, 255, (200, 200, 3), dtype=np.uint8)
+    for _ in range(n):
+        preprocess(dummy, 640)
+
+
 def test_images(data_yaml: Path, split: str, limit: int | None) -> list[Path]:
-    d = yaml.safe_load(data_yaml.read_text())
+    d = yaml.safe_load(data_yaml.read_text(encoding="utf-8"))
     img_dir = Path(d["path"]) / d.get(split, f"{split}/images")
     imgs = sorted((p for p in img_dir.iterdir() if p.suffix.lower() in IMG_EXT),
                   key=lambda p: p.name)          # thu tu co dinh cho moi dinh dang
@@ -101,8 +110,8 @@ def benchmark_backend(model: str, backend: str, images: list[Path], cfg: dict,
     # nap anh vao RAM truoc: doc dia khong phai thu can do
     images_bgr = [read_image(p) for p in images]
 
-    print(f"    warm-up {cfg['warmup']} lan...")
-    runner.warmup(int(cfg["warmup"]))
+    print(f"    warm-up {cfg['warmup']} lan (ca duong ong, bang anh that)...")
+    runner.warmup(int(cfg["warmup"]), images_bgr[0])
 
     sessions: list[dict] = []
     percentiles = [int(p) for p in cfg["percentiles"]]
@@ -201,7 +210,7 @@ def main() -> int:
     a = ap.parse_args()
 
     root = repo_root()
-    cfg = yaml.safe_load((root / a.config).read_text())
+    cfg = yaml.safe_load((root / a.config).read_text(encoding="utf-8"))
     for key, val in (("sessions", a.sessions), ("warmup", a.warmup),
                      ("settle_seconds", a.settle), ("cooldown_seconds", a.cooldown),
                      ("max_images", a.max_images), ("nc", a.nc)):
@@ -242,7 +251,7 @@ def main() -> int:
     payload = {}
     if out_path.exists():
         try:
-            payload = json.loads(out_path.read_text())
+            payload = json.loads(out_path.read_text(encoding="utf-8"))
         except json.JSONDecodeError:
             payload = {}
     payload.setdefault("runs", {})
@@ -251,6 +260,11 @@ def main() -> int:
     payload["images"] = {"split": cfg["split"], "count": len(images),
                          "first": images[0].name, "last": images[-1].name}
     payload["benchmarked_utc"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
+
+    # Ham nong OpenCV TRUOC khi do backend dau tien: lan resize dau tien phai
+    # nap nhan SIMD va dung thread pool. Khong lam viec nay thi chi phi do roi
+    # het vao backend duoc do dau tien va bang so sanh mat cong bang.
+    _warm_opencv()
 
     for model in models:
         for backend in backends:

@@ -5,6 +5,8 @@
 set -uo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 [[ -d "$ROOT/.venv" ]] && source "$ROOT/.venv/bin/activate"
+# Jetson chay locale C -> Python mac dinh ascii cho stdout
+export PYTHONUTF8=1 PYTHONIOENCODING=utf-8
 
 python - <<'PY'
 import sys, traceback

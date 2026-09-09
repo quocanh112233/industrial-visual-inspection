@@ -18,7 +18,7 @@ def repo_root() -> Path:
 
 
 def load_config(path: str | Path) -> dict[str, Any]:
-    cfg = yaml.safe_load(Path(path).read_text())
+    cfg = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
     root = repo_root()
     for key in ("raw_dir", "out_dir"):
         p = Path(cfg[key])
@@ -54,4 +54,4 @@ def sha256_of_files(paths: list[Path], chunk: int = 1 << 20) -> str:
 
 def write_json(path: Path, data: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data, indent=2, ensure_ascii=False))
+    path.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")

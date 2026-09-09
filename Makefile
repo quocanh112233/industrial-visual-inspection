@@ -1,5 +1,10 @@
 # IVID — moi buoc cua pipeline la mot lenh (rang buoc C5)
-PY      := PYTHONPATH=src python3
+#
+# PYTHONUTF8=1: Jetson chay locale C/POSIX, nen Python mac dinh dung ascii cho
+# stdout va cho file. Bao cao co ky tu tieng Viet va dau '—' se lam no
+# UnicodeEncodeError. Moi cho doc/ghi file da khai bao encoding tuong minh;
+# bien nay lo not phan in ra man hinh.
+PY      := PYTHONPATH=src PYTHONUTF8=1 PYTHONIOENCODING=utf-8 python3
 CONFIG  := configs/data.yaml
 MODEL   ?= yolov8n
 PORT    ?= 8000

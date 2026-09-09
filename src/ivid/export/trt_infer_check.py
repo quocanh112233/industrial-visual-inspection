@@ -115,7 +115,7 @@ def main() -> int:
     print(json.dumps(res, indent=2))
     if a.json:
         a.json.parent.mkdir(parents=True, exist_ok=True)
-        a.json.write_text(json.dumps(res, indent=2))
+        a.json.write_text(json.dumps(res, indent=2), encoding="utf-8")
         print(f"\n-> da ghi {a.json}")
     return 0
 

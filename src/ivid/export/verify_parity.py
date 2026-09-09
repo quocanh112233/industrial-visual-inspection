@@ -37,12 +37,12 @@ def main() -> int:
     a = ap.parse_args()
 
     root = repo_root()
-    cfg = yaml.safe_load((root / a.config).read_text())
+    cfg = yaml.safe_load((root / a.config).read_text(encoding="utf-8"))
     pc = cfg["parity"]
     n = a.n or int(pc["n_images_full"])
     imgsz = int(cfg["onnx"]["imgsz"])
 
-    d = yaml.safe_load((root / a.data).read_text())
+    d = yaml.safe_load((root / a.data).read_text(encoding="utf-8"))
     img_dir = Path(d["path"]) / d.get("test", "test/images")
     images = sorted((p for p in img_dir.iterdir() if p.suffix.lower() in IMG_EXT),
                     key=lambda p: p.name)[:n]

@@ -77,7 +77,7 @@ def main() -> int:
     if not cfg_path.exists():
         print(f"[loi] khong thay config: {cfg_path}", file=sys.stderr)
         return 1
-    cfg = yaml.safe_load(cfg_path.read_text())
+    cfg = yaml.safe_load(cfg_path.read_text(encoding="utf-8"))
 
     name = a.name or cfg["name"]
     project = Path(a.project) if a.project else root / "runs"
@@ -146,7 +146,7 @@ def main() -> int:
         "duration_minutes": round((finished - started).total_seconds() / 60, 1),
         "libraries": lib_versions(),
         "git_commit": git_commit(root),
-        "dataset": json.loads(ds_manifest.read_text()) if ds_manifest.exists() else "thieu",
+        "dataset": json.loads(ds_manifest.read_text(encoding="utf-8")) if ds_manifest.exists() else "thieu",
         "weights": {
             "best": str(dest / "best.pt"),
             "size_mb": round((dest / "best.pt").stat().st_size / 1e6, 2),

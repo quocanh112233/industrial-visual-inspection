@@ -28,13 +28,13 @@ def power_modes() -> dict:
     modes: dict[int, str] = {}
     conf = Path("/etc/nvpmodel.conf")
     if conf.exists():
-        for m in re.finditer(r"^< POWER_MODEL ID=(\d+) NAME=(\S+) >", conf.read_text(), re.M):
+        for m in re.finditer(r"^< POWER_MODEL ID=(\d+) NAME=(\S+) >", conf.read_text(encoding="utf-8"), re.M):
             modes[int(m.group(1))] = m.group(2)
 
     current = None
     status = Path("/var/lib/nvpmodel/status")
     if status.exists():
-        m = re.search(r"pmode:(\d+)", status.read_text())
+        m = re.search(r"pmode:(\d+)", status.read_text(encoding="utf-8"))
         if m:
             current = int(m.group(1))
     if current is None:
@@ -55,13 +55,13 @@ def temperatures() -> dict[str, float]:
     out: dict[str, float] = {}
     for z in sorted(Path("/sys/devices/virtual/thermal").glob("thermal_zone*")):
         try:
-            v = int((z / "temp").read_text()) / 1000.0
+            v = int((z / "temp").read_text(encoding="utf-8")) / 1000.0
         except Exception:
             continue
         # mot so zone tren x86 bao gia tri vo nghia (0.05C); bo di de trung binh
         # khong bi keo lech. Tren Jetson moi zone deu that.
         if 5.0 < v < 150.0:
-            out[(z / "type").read_text().strip()] = v
+            out[(z / "type").read_text(encoding="utf-8").strip()] = v
     return out
 
 
@@ -71,7 +71,7 @@ def clocks() -> dict:
     cpu = []
     for p in sorted(Path("/sys/devices/system/cpu").glob("cpu[0-9]*/cpufreq/scaling_cur_freq")):
         try:
-            cpu.append(int(p.read_text()) / 1000.0)
+            cpu.append(int(p.read_text(encoding="utf-8")) / 1000.0)
         except Exception:
             continue
     if cpu:
@@ -82,7 +82,7 @@ def clocks() -> dict:
         p = Path(g)
         if p.exists():
             try:
-                out["gpu_mhz"] = round(int(p.read_text()) / 1e6, 1)
+                out["gpu_mhz"] = round(int(p.read_text(encoding="utf-8")) / 1e6, 1)
                 break
             except Exception:
                 pass
@@ -127,9 +127,9 @@ def collect(note: str = "") -> dict:
         "arch": platform.machine(),
         "kernel": platform.release(),
         "python": platform.python_version(),
-        "l4t_release": Path("/etc/nv_tegra_release").read_text().splitlines()[0]
+        "l4t_release": Path("/etc/nv_tegra_release").read_text(encoding="utf-8").splitlines()[0]
         if is_jetson else None,
-        "board_model": Path("/proc/device-tree/model").read_text().strip("\x00")
+        "board_model": Path("/proc/device-tree/model").read_text(encoding="utf-8").strip("\x00")
         if Path("/proc/device-tree/model").exists() else None,
         "jetpack": _sh("apt-cache policy nvidia-jetpack 2>/dev/null | awk '/Installed/{print $2}'")
         or _sh("apt-cache show nvidia-jetpack 2>/dev/null | awk '/^Version:/{print $2; exit}'"),
@@ -149,7 +149,7 @@ def collect(note: str = "") -> dict:
 def _mem() -> dict:
     out: dict[str, float] = {}
     try:
-        for line in Path("/proc/meminfo").read_text().splitlines():
+        for line in Path("/proc/meminfo").read_text(encoding="utf-8").splitlines():
             k, v = line.split(":", 1)
             if k in ("MemTotal", "MemAvailable", "SwapTotal", "SwapFree"):
                 out[k] = round(int(v.strip().split()[0]) / 1e6, 2)  # GB
@@ -171,7 +171,7 @@ def main() -> int:
     if a.out:
         p = Path(a.out)
         p.parent.mkdir(parents=True, exist_ok=True)
-        p.write_text(json.dumps(info, indent=2, ensure_ascii=False))
+        p.write_text(json.dumps(info, indent=2, ensure_ascii=False), encoding="utf-8")
         print(f"\n-> {p}")
     return 0
 

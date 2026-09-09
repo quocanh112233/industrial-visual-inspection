@@ -64,7 +64,7 @@ def check_split(split_dir: Path, names: list[str]) -> dict:
     multi_label = 0
 
     for lp in labels:
-        lines = [l for l in lp.read_text().splitlines() if l.strip()]
+        lines = [l for l in lp.read_text(encoding="utf-8").splitlines() if l.strip()]
         if not lines:
             issues["nhan_rong"].append(lp.stem)
             continue
@@ -207,7 +207,7 @@ def main() -> int:
 
     out_path = root / a.out
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_text("\n".join(L) + "\n")
+    out_path.write_text("\n".join(L) + "\n", encoding="utf-8")
     write_json(root / "results" / "data_report.json", {"splits": report, "leaks": leaks,
                                                        "total_issues": total_issues})
 

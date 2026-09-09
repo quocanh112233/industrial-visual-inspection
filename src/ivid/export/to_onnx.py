@@ -27,7 +27,7 @@ from ..preprocess import preprocess, read_image
 
 def sample_images(data_yaml: Path, n: int) -> list[Path]:
     """Lay N anh dau tien cua tap test, theo thu tu ten -> lap lai duoc."""
-    d = yaml.safe_load(data_yaml.read_text())
+    d = yaml.safe_load(data_yaml.read_text(encoding="utf-8"))
     img_dir = Path(d["path"]) / d.get("test", "test/images")
     imgs = sorted((p for p in img_dir.iterdir() if p.suffix.lower() in IMG_EXT), key=lambda p: p.name)
     return imgs[:n]
@@ -78,7 +78,7 @@ def main() -> int:
     a = ap.parse_args()
 
     root = repo_root()
-    cfg = yaml.safe_load((root / a.config).read_text())
+    cfg = yaml.safe_load((root / a.config).read_text(encoding="utf-8"))
     oc = cfg["onnx"]
 
     pt = root / "models" / a.name / "best.pt"
