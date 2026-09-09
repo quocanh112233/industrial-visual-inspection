@@ -20,8 +20,16 @@ tensorrt:
   builder_optimization_level: 3   # mac dinh cua trtexec; tang len 5 lau hon nhieu
 
 parity:
-  n_images_onnx: 10   # FR-07: lech dau ra tho PyTorch vs ONNX
-  tolerance: 1.0e-3
+  n_images_onnx: 10   # FR-07: lech dau ra PyTorch vs ONNX tren anh that
+
+  # SRS FR-07 neu mot nguong tuyet doi duy nhat cho ca tensor dau ra. Nhung dau
+  # ra YOLOv8 la (1, 4+nc, N): 4 kenh dau la TOA DO tinh bang PIXEL (0..640),
+  # cac kenh sau la DIEM SO (0..1). Mot nguong chung se bi toa do chi phoi va
+  # khong noi len dieu gi. Vi vay giu lai chi so tho de doi chieu, nhung ket
+  # luan dua tren ba tieu chi co y nghia ben duoi.
+  tolerance: 1.0e-3         # chi so tho theo chu SRS — chi bao cao, khong ket luan
+  tolerance_box_px: 0.1     # lech toa do, tinh bang pixel cua anh 640x640
+  tolerance_score: 1.0e-3   # lech diem so lop, tuyet doi (thang do 0..1)
   n_images_full: 50   # FR-09: so sanh detection cuoi cung cua ca ba dinh dang
   conf: 0.25
   iou: 0.7
