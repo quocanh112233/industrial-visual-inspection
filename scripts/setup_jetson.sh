@@ -57,9 +57,19 @@ PY
 # --- 2. onnxruntime-gpu ban Jetson ------------------------------------------
 # Ban tren PyPI KHONG co CUDA/TensorRT EP cho aarch64 -> cot "ONNX Runtime"
 # trong bang benchmark se do nham tren CPU. Phai lay wheel cua jetson-ai-lab.
-log "Cai onnxruntime-gpu cho JetPack 6 / CUDA 12.6..."
+#
+# BAY: 'onnxruntime' (CPU) va 'onnxruntime-gpu' cai DE LEN NHAU — ca hai cung
+# giai nen vao thu muc  site-packages/onnxruntime/. Ai cai sau thi de len file
+# .so cua nguoi truoc. Neu ban CPU cai sau, import se ra CPU du pip van liet ke
+# ca hai. Ngoai ra 'pip uninstall' chay TRONG venv KHONG xoa duoc goi nam o
+# ~/.local (user-site) — phai dung python he thong.
+log "Don dep onnxruntime o user-site (~/.local) bang python he thong..."
+/usr/bin/python3 -m pip uninstall -y onnxruntime onnxruntime-gpu 2>/dev/null || true
+
+log "Cai onnxruntime-gpu vao venv cho JetPack 6 / CUDA 12.6..."
 python -m pip uninstall -y onnxruntime onnxruntime-gpu 2>/dev/null || true
-python -m pip install --index-url "$JETSON_INDEX" onnxruntime-gpu \
+python -m pip install --force-reinstall --no-cache-dir \
+  --index-url "$JETSON_INDEX" onnxruntime-gpu \
   || die "Khong tai duoc onnxruntime-gpu tu $JETSON_INDEX (kiem tra mang)."
 
 # --- 3. ultralytics KHONG keo theo torch ------------------------------------
@@ -81,10 +91,15 @@ import torch, tensorrt as trt, onnxruntime as ort
 print(f"  torch          {torch.__version__}   cuda={torch.cuda.is_available()}")
 print(f"  tensorrt       {trt.__version__}")
 print(f"  onnxruntime    {ort.__version__}")
+print(f"  ORT nap tu     {ort.__file__}")
 prov = ort.get_available_providers()
 print(f"  ORT providers  {prov}")
 if not any(p in prov for p in ("TensorrtExecutionProvider", "CUDAExecutionProvider")):
-    print("  [LOI] ORT van chi co CPU -> cot benchmark ONNX se vo nghia. Xem README.")
+    print("""  [LOI] ORT van chi co CPU.
+        Nguyen nhan hay gap: ban CPU va ban GPU chong len nhau. Kiem tra:
+          ls -d ~/.local/lib/python3.10/site-packages/onnxruntime*
+          ls -d .venv/lib/python3.10/site-packages/onnxruntime*
+        Neu con ban CPU o user-site, xoa thu cong roi chay lai script nay.""")
 else:
     print("  [ok] ORT co GPU provider")
 try:

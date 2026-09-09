@@ -57,22 +57,27 @@ def run(engine_path: Path, iters: int = 100, warmup: int = 20) -> dict:
             {"name": name, "io": mode.name, "shape": list(shape), "dtype": np.dtype(dtype).name}
         )
 
-    stream = torch.cuda.current_stream().cuda_stream
+    # TensorRT canh bao neu dung default stream (no phai chen them
+    # cudaStreamSynchronize). Tao stream rieng de tranh chi phi do.
+    torch_stream = torch.cuda.Stream()
+    stream = torch_stream.cuda_stream
 
     for t in tensors:
         if t["io"] == "INPUT":
             buffers[t["name"]].normal_()
 
-    for _ in range(warmup):
-        ctx.execute_async_v3(stream_handle=stream)
-    torch.cuda.synchronize()
+    with torch.cuda.stream(torch_stream):
+        for _ in range(warmup):
+            ctx.execute_async_v3(stream_handle=stream)
+    torch_stream.synchronize()
 
     lat = []
-    for _ in range(iters):
-        t0 = time.perf_counter()
-        ctx.execute_async_v3(stream_handle=stream)
-        torch.cuda.synchronize()
-        lat.append((time.perf_counter() - t0) * 1000.0)
+    with torch.cuda.stream(torch_stream):
+        for _ in range(iters):
+            t0 = time.perf_counter()
+            ctx.execute_async_v3(stream_handle=stream)
+            torch_stream.synchronize()
+            lat.append((time.perf_counter() - t0) * 1000.0)
 
     lat.sort()
     return {

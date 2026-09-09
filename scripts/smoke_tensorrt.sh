@@ -54,9 +54,21 @@ info = {
     "python": platform.python_version(),
     "arch": platform.machine(),
     "l4t": sh("head -1 /etc/nv_tegra_release"),
-    "jetpack": sh("dpkg-query --showformat='${Version}' --show nvidia-jetpack 2>/dev/null"),
+    # nvidia-jetpack la meta-package, thuong KHONG duoc cai -> dpkg-query rong.
+    # Lay tu apt-cache truoc, khong co thi suy ra tu nvidia-l4t-core.
+    "jetpack": (sh("apt-cache policy nvidia-jetpack 2>/dev/null | awk '/Installed/{print $2}'")
+                or sh("apt-cache show nvidia-jetpack 2>/dev/null | awk '/^Version:/{print $2; exit}'")
+                or "?"),
+    "l4t_core": sh("dpkg-query --showformat='${Version}' --show nvidia-l4t-core 2>/dev/null"),
     "cuda": sh("/usr/local/cuda/bin/nvcc --version | tail -2 | head -1"),
-    "nvpmodel": sh("cat /var/lib/nvpmodel/status 2>/dev/null || sudo -n nvpmodel -q 2>/dev/null | tr '\\n' ' '"),
+    # /var/lib/nvpmodel/status cho ra 'pmode:0000' -> doi sang so + ten che do
+    "nvpmodel_id": sh("awk -F: '{print $2+0}' /var/lib/nvpmodel/status 2>/dev/null"),
+    "nvpmodel_name": sh("grep -oP '(?<=^< POWER_MODEL ID=)[0-9]+ NAME=\\S+' /etc/nvpmodel.conf 2>/dev/null | "
+                        "awk -v id=\"$(awk -F: '{print $2+0}' /var/lib/nvpmodel/status 2>/dev/null)\" "
+                        "'$1==id{sub(/NAME=/,\"\",$2); print $2}'"),
+    "power_modes": sh("grep -oP '(?<=^< POWER_MODEL ID=).*(?= >)' /etc/nvpmodel.conf 2>/dev/null | tr '\\n' '|'"),
+    "temp_c": sh("for z in /sys/devices/virtual/thermal/thermal_zone*; do "
+                 "[ -f $z/type ] && echo \"$(cat $z/type)=$(( $(cat $z/temp)/1000 ))\"; done | tr '\\n' ' '"),
 }
 for mod in ("torch", "tensorrt", "onnx", "onnxruntime", "ultralytics"):
     try:

@@ -1,0 +1,51 @@
+{
+  "splits": {
+    "train": {
+      "n_images": 1260,
+      "n_labels": 1260,
+      "n_boxes": 2950,
+      "per_class": {
+        "crazing": 481,
+        "inclusion": 716,
+        "patches": 629,
+        "pitted_surface": 308,
+        "rolled-in_scale": 438,
+        "scratches": 378
+      },
+      "anh_nhieu_loai_loi": 96,
+      "issues": {}
+    },
+    "val": {
+      "n_images": 270,
+      "n_labels": 270,
+      "n_boxes": 624,
+      "per_class": {
+        "crazing": 100,
+        "inclusion": 158,
+        "patches": 122,
+        "pitted_surface": 64,
+        "rolled-in_scale": 93,
+        "scratches": 87
+      },
+      "anh_nhieu_loai_loi": 16,
+      "issues": {}
+    },
+    "test": {
+      "n_images": 270,
+      "n_labels": 270,
+      "n_boxes": 615,
+      "per_class": {
+        "crazing": 108,
+        "inclusion": 137,
+        "patches": 130,
+        "pitted_surface": 60,
+        "rolled-in_scale": 97,
+        "scratches": 83
+      },
+      "anh_nhieu_loai_loi": 11,
+      "issues": {}
+    }
+  },
+  "leaks": {},
+  "total_issues": 0
+}

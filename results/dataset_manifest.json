@@ -1,0 +1,41 @@
+{
+  "dataset": "NEU-DET",
+  "raw_dir": "/home/quocanh/quoc_anh/industrial-visual-inspection/data/raw/NEU-DET",
+  "raw_source": "github:Marfbin/NEU-DET-with-yolov8@main (YOLO txt, da chia san train/test)",
+  "seed": 1337,
+  "ratios": {
+    "train": 0.7,
+    "val": 0.15,
+    "test": 0.15
+  },
+  "stratify": true,
+  "names": [
+    "crazing",
+    "inclusion",
+    "patches",
+    "pitted_surface",
+    "rolled-in_scale",
+    "scratches"
+  ],
+  "annotation_source": {
+    "yolo": 1800
+  },
+  "counts": {
+    "train": 1260,
+    "val": 270,
+    "test": 270
+  },
+  "boxes": {
+    "train": 2950,
+    "val": 624,
+    "test": 615
+  },
+  "images_without_boxes": {},
+  "total_images": 1800,
+  "dataset_sha256": "757d9bccc4fbc4fada9b28078b938d0f4dca9327f3840c7cfc214be236efefa0",
+  "split_sha256": {
+    "train": "d0074f9f2008d675347e45b29badf22647dccddadae5b4bf816ca568ac5992b4",
+    "val": "3579b31523ca4b84df6a3503a21f3d9d602a37fdd05927a4e84f809c90be68bd",
+    "test": "373ca36165ed304b269d395b021ed976fac8ed4e74f4f1a9389e83ed89f1b997"
+  }
+}

@@ -1,0 +1,32 @@
+# Cau hinh chuan bi du lieu NEU-DET  (FR-01, FR-02, FR-03)
+# Moi con so o day di vao hash cau hinh -> doi mot chu la chia lai khac.
+
+dataset_name: NEU-DET
+
+# thu muc raw do scripts/download_dataset.sh tao ra
+raw_dir: data/raw/NEU-DET
+# thu muc dich, dang YOLO, da chia san
+out_dir: data/processed
+
+# 6 lop loi be mat thep can nong. THU TU NAY LA HOP DONG:
+# no quyet dinh class id trong nhan, trong ONNX va trong TensorRT engine.
+# Doi thu tu = phai train lai + export lai tat ca.
+names:
+  0: crazing
+  1: inclusion
+  2: patches
+  3: pitted_surface
+  4: rolled-in_scale
+  5: scratches
+
+split:
+  train: 0.70
+  val: 0.15
+  test: 0.15
+  seed: 1337
+  # chia deu tung lop giua cac tap (dua tren tien to ten file NEU-DET).
+  # Khong stratify thi voi 1800 anh se lech lop thay ro o tap test 270 anh.
+  stratify: true
+
+# ghi de anh cu neu chay lai
+overwrite: true
