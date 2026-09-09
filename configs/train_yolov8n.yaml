@@ -21,7 +21,10 @@ train:
   cos_lr: true
   warmup_epochs: 3
   amp: true                         # FP16 luc train — nhanh hon, khong anh huong FP16 luc infer
-  cache: ram                        # dataset chi ~30MB, nap het vao RAM cho nhanh
+  # 'disk' chu KHONG phai 'ram': ultralytics canh bao cache='ram' lam ket qua
+  # train khong tai lap duoc, ma tai lap chinh la thu FR-06 doi hoi. Dataset chi
+  # ~30MB nen cache dia cung nhanh gan bang va khong danh doi gi.
+  cache: disk
   deterministic: true               # doi lai chut toc do de lay tinh tai lap (FR-06)
   val: true
   plots: true

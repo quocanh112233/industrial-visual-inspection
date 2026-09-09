@@ -3,11 +3,12 @@
     "train": {
       "n_images": 1260,
       "n_labels": 1260,
-      "n_boxes": 2950,
+      "n_boxes": 2947,
+      "n_duplicate_boxes": 0,
       "per_class": {
-        "crazing": 481,
-        "inclusion": 716,
-        "patches": 629,
+        "crazing": 480,
+        "inclusion": 715,
+        "patches": 628,
         "pitted_surface": 308,
         "rolled-in_scale": 438,
         "scratches": 378
@@ -19,6 +20,7 @@
       "n_images": 270,
       "n_labels": 270,
       "n_boxes": 624,
+      "n_duplicate_boxes": 0,
       "per_class": {
         "crazing": 100,
         "inclusion": 158,
@@ -34,6 +36,7 @@
       "n_images": 270,
       "n_labels": 270,
       "n_boxes": 615,
+      "n_duplicate_boxes": 0,
       "per_class": {
         "crazing": 108,
         "inclusion": 137,
@@ -47,5 +50,7 @@
     }
   },
   "leaks": {},
-  "total_issues": 0
+  "total_issues": 0,
+  "fatal": 0,
+  "warnings": 0
 }

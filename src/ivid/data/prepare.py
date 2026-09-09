@@ -70,6 +70,30 @@ def voc_to_yolo(xml_path: Path, names: list[str]) -> list[str]:
     return lines
 
 
+def dedupe(lines: list[str]) -> tuple[list[str], int]:
+    """Bo cac dong nhan trung y het nhau (cung lop, cung toa do).
+
+    NEU-DET co 3 anh bi lap bbox. Ultralytics tu am tham bo chung luc train
+    ("1 duplicate labels removed"), nghia la neu khong bo o day thi manifest se
+    ghi so bbox KHAC voi so bbox model that su hoc — va con so trong bao cao
+    khong con khop voi thuc te.
+    """
+    seen: set[tuple] = set()
+    out, removed = [], 0
+    for line in lines:
+        f = line.split()
+        try:
+            key = (int(f[0]), *(round(float(v), 6) for v in f[1:5])) if len(f) == 5 else (line,)
+        except ValueError:
+            key = (line,)
+        if key in seen:
+            removed += 1
+            continue
+        seen.add(key)
+        out.append(line)
+    return out, removed
+
+
 def label_for(img: Path, raw_dir: Path, names: list[str]) -> tuple[list[str], str]:
     """Tra ve (cac dong nhan YOLO, nguon: 'yolo'|'voc'|'missing')."""
     txt = img.parent.parent / "labels" / f"{img.stem}.txt"
@@ -156,11 +180,14 @@ def main() -> int:
     src_kinds: dict[str, int] = defaultdict(int)
     n_boxes: dict[str, int] = defaultdict(int)
     n_empty: dict[str, int] = defaultdict(int)
+    n_dupes: dict[str, int] = defaultdict(int)
 
     for split, items in splits.items():
         for img in items:
             shutil.copy2(img, out_dir / split / "images" / img.name)
             lines, kind = label_for(img, raw_dir, names)
+            lines, removed = dedupe(lines)
+            n_dupes[split] += removed
             src_kinds[kind] += 1
             n_boxes[split] += len(lines)
             if not lines:
@@ -198,6 +225,7 @@ def main() -> int:
         "annotation_source": dict(src_kinds),
         "counts": {s: len(splits[s]) for s in SPLITS},
         "boxes": dict(n_boxes),
+        "duplicate_boxes_removed": dict(n_dupes),
         "images_without_boxes": dict(n_empty),
         "total_images": len(images),
         "dataset_sha256": sha256_of_files(images),
@@ -211,7 +239,7 @@ def main() -> int:
     print(f"[prepare] nguon nhan: {dict(src_kinds)}")
     for s in SPLITS:
         print(f"[prepare] {s:<6}: {len(splits[s]):5d} anh  {n_boxes[s]:5d} bbox  "
-              f"{n_empty[s]:3d} anh khong co bbox")
+              f"{n_empty[s]:3d} anh khong co bbox  {n_dupes[s]:2d} bbox trung lap da bo")
     print(f"[prepare] tong     : {sum(len(v) for v in splits.values())} anh (goc {len(images)})")
     print(f"[prepare] ghi      : {ds_yaml}")
     print(f"[prepare] manifest : results/dataset_manifest.json")

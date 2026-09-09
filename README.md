@@ -50,18 +50,23 @@ Train: mở [`notebooks/ivid_colab.ipynb`](https://colab.research.google.com/git
 
 ## Dữ liệu
 
-NEU-DET — 1800 ảnh xám 200×200, 4189 bounding box, 6 loại lỗi:
+NEU-DET — 1800 ảnh xám 200×200, 4189 bounding box thô (**4186** sau khi loại 3 hộp
+trùng lặp), 6 loại lỗi:
 `crazing`, `inclusion`, `patches`, `pitted_surface`, `rolled-in_scale`, `scratches`.
 
 Chia 70/15/15 phân tầng theo lớp, seed `1337`, chạy lại cho kết quả **giống hệt**:
 
 | Tập | Ảnh | Bbox | Mỗi lớp |
 |---|---:|---:|---:|
-| train | 1260 | 2950 | 210 |
+| train | 1260 | 2947 | 210 |
 | val | 270 | 624 | 45 |
 | test | 270 | 615 | 45 |
 
-Kiểm tra toàn vẹn: **0 bất thường**. 123/1800 ảnh chứa nhiều hơn một loại lỗi.
+Kiểm tra toàn vẹn: **0 lỗi, 0 cảnh báo**. 123/1800 ảnh chứa nhiều hơn một loại lỗi.
+
+3 hộp trùng lặp trong `crazing_120`, `inclusion_62`, `patches_198` được loại ở bước
+`prepare`. Ultralytics vẫn tự loại chúng lúc train dù ta có làm hay không — nếu không
+loại, manifest sẽ ghi số bbox **khác** với số bbox model thật sự học.
 Chi tiết: [docs/dataset.md](docs/dataset.md) · `results/data_report.md`
 
 ## Thiết kế đáng chú ý

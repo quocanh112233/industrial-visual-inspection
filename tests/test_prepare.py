@@ -164,3 +164,43 @@ def test_preprocess_doi_bgr_sang_rgb():
     # sau khi doi sang RGB, kenh 2 (B) moi la kenh day
     assert x[0, 2].mean() == pytest.approx(1.0, abs=1e-3)
     assert x[0, 0].mean() == pytest.approx(0.0, abs=1e-3)
+
+
+# ------------------------------------------------------------ nhan trung lap
+def test_dedupe_bo_dong_trung_y_het():
+    from ivid.data.prepare import dedupe
+
+    lines = [
+        "0 0.6525 0.1575 0.475 0.255",
+        "0 0.295 0.5675 0.58 0.325",
+        "0 0.295 0.5675 0.58 0.325",   # trung
+        "0 0.725 0.655 0.54 0.21",
+    ]
+    out, removed = dedupe(lines)
+    assert removed == 1
+    assert len(out) == 3
+    assert out[1] == "0 0.295 0.5675 0.58 0.325"
+
+
+def test_dedupe_giu_box_cung_toa_do_nhung_khac_lop():
+    """Hai loai loi chong len nhau tren cung vi tri la chuyen that o be mat thep."""
+    from ivid.data.prepare import dedupe
+
+    out, removed = dedupe(["1 0.5 0.5 0.2 0.2", "3 0.5 0.5 0.2 0.2"])
+    assert removed == 0 and len(out) == 2
+
+
+def test_dedupe_giu_nguyen_thu_tu():
+    from ivid.data.prepare import dedupe
+
+    lines = ["2 0.1 0.1 0.1 0.1", "1 0.9 0.9 0.1 0.1", "2 0.1 0.1 0.1 0.1"]
+    out, _ = dedupe(lines)
+    assert out == ["2 0.1 0.1 0.1 0.1", "1 0.9 0.9 0.1 0.1"]
+
+
+def test_dedupe_khong_lam_gi_khi_khong_co_trung():
+    from ivid.data.prepare import dedupe
+
+    lines = [f"0 0.{i} 0.5 0.1 0.1" for i in range(5)]
+    out, removed = dedupe(lines)
+    assert removed == 0 and out == lines

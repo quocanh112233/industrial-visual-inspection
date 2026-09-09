@@ -2,12 +2,12 @@
   "splits": {
     "train": {
       "n_images": 1260,
-      "n_boxes": 2950,
+      "n_boxes": 2947,
       "boxes_per_image_mean": 2.34,
       "boxes_by_class": {
-        "crazing": 481,
-        "inclusion": 716,
-        "patches": 629,
+        "crazing": 480,
+        "inclusion": 715,
+        "patches": 628,
         "pitted_surface": 308,
         "rolled-in_scale": 438,
         "scratches": 378
@@ -21,9 +21,9 @@
         "scratches": 210
       },
       "area_median_by_class": {
-        "crazing": 0.2128,
-        "inclusion": 0.041,
-        "patches": 0.0923,
+        "crazing": 0.2135,
+        "inclusion": 0.0413,
+        "patches": 0.0921,
         "pitted_surface": 0.5304,
         "rolled-in_scale": 0.1216,
         "scratches": 0.0779
@@ -113,9 +113,9 @@
     }
   },
   "total_boxes_by_class": {
-    "crazing": 689,
-    "inclusion": 1011,
-    "patches": 881,
+    "crazing": 688,
+    "inclusion": 1010,
+    "patches": 880,
     "pitted_surface": 432,
     "rolled-in_scale": 628,
     "scratches": 548
@@ -128,5 +128,5 @@
     "rolled-in_scale": 300,
     "scratches": 300
   },
-  "imbalance_ratio": 2.34
+  "imbalance_ratio": 2.338
 }

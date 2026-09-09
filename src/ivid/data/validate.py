@@ -9,9 +9,15 @@ Tim va dem cac bat thuong sau, tren ca ba tap:
   5. class id nam ngoai danh sach lop
   6. anh hong / khong doc duoc
   7. anh trung ten giua cac tap (ro ri du lieu train sang test)
-  8. lop trong nhan khong khop tien to ten file (rieng NEU-DET)
+  8. bounding box TRUNG LAP trong cung mot file nhan
+  9. lop trong nhan khong khop tien to ten file (rieng NEU-DET)
 
-Muc 8 khong phai loi — NEU-DET co anh chua nhieu loai loi cung luc. No duoc
+Muc 8 phat hien tu log train: ultralytics tu bo nhan trung ("1 duplicate labels
+removed") tren 3 anh cua NEU-DET, trong khi validate.py truoc do bao "0 bat
+thuong". Mot cong cu kiem tra du lieu bo sot cai ma thu vien train nhin ra thi
+khong dang tin — nen kiem tra nay duoc them vao.
+
+Muc 9 khong phai loi — NEU-DET co anh chua nhieu loai loi cung luc. No duoc
 bao cao de biet muc do "nhieu nhan mot anh", vi con so do anh huong toi cach
 doc mAP theo tung lop sau nay.
 
@@ -60,6 +66,7 @@ def check_split(split_dir: Path, names: list[str]) -> dict:
         issues["_canh_bao"].append("chua cai Pillow -> bo qua kiem tra anh hong")
 
     n_boxes = 0
+    n_duplicate = 0
     per_class: dict[int, int] = defaultdict(int)
     multi_label = 0
 
@@ -68,6 +75,23 @@ def check_split(split_dir: Path, names: list[str]) -> dict:
         if not lines:
             issues["nhan_rong"].append(lp.stem)
             continue
+
+        # bbox trung lap: cung lop, cung toa do. Ultralytics tu bo chung luc
+        # train ("1 duplicate labels removed") — cong cu kiem tra du lieu ma
+        # khong thay thi khong dang tin.
+        seen: set[tuple] = set()
+        for line in lines:
+            f = line.split()
+            if len(f) == 5:
+                try:
+                    key = (int(f[0]), *(round(float(v), 6) for v in f[1:]))
+                except ValueError:
+                    continue
+                if key in seen:
+                    n_duplicate += 1
+                    issues["bbox_trung_lap"].append(f"{lp.name}: {line}")
+                seen.add(key)
+
         ids_here = set()
         for ln, line in enumerate(lines, 1):
             f = line.split()
@@ -93,7 +117,7 @@ def check_split(split_dir: Path, names: list[str]) -> dict:
                     or cy - bh / 2 < -EPS or cy + bh / 2 > 1 + EPS):
                 issues["bbox_vuot_bien"].append(f"{lp.name}:{ln}")
 
-        # muc 8: anh co nhieu loai loi
+        # muc 9: anh co nhieu loai loi
         prefix = primary_class(lp)
         expected = names.index(prefix) if prefix in names else None
         if expected is not None and ids_here - {expected}:
@@ -103,6 +127,7 @@ def check_split(split_dir: Path, names: list[str]) -> dict:
         "n_images": len(images),
         "n_labels": len(labels),
         "n_boxes": n_boxes,
+        "n_duplicate_boxes": n_duplicate,
         "per_class": {names[k]: v for k, v in sorted(per_class.items()) if 0 <= k < len(names)},
         "anh_nhieu_loai_loi": multi_label,
         "issues": {k: v for k, v in issues.items()},
@@ -135,9 +160,17 @@ def main() -> int:
             if common:
                 leaks[f"{a1}∩{a2}"] = sorted(common)[:20]
 
-    total_issues = sum(
-        len(v) for s in SPLITS for k, v in report[s]["issues"].items() if not k.startswith("_")
-    ) + sum(len(v) for v in leaks.values())
+    # Phan biet loi CHAN duong (du lieu khong dung duoc) voi canh bao (dung duoc
+    # nhung nen biet). Neu tron lam mot, mot bbox trung lap vo hai se lam
+    # 'make data' dung han — va nguoi dung se hoc cach bo qua ma loi tra ve.
+    FATAL = {"anh_khong_co_nhan", "nhan_khong_co_anh", "anh_hong",
+             "bbox_vuot_bien", "bbox_rong_hoac_am", "class_id_ngoai_pham_vi",
+             "dong_nhan_sai_dinh_dang"}
+    n_fatal = sum(len(v) for s in SPLITS for k, v in report[s]["issues"].items()
+                  if k in FATAL) + sum(len(v) for v in leaks.values())
+    n_warn = sum(len(v) for s in SPLITS for k, v in report[s]["issues"].items()
+                 if k not in FATAL and not k.startswith("_"))
+    total_issues = n_fatal + n_warn
 
     # ---------------------------------------------------------------- bao cao
     L: list[str] = []
@@ -165,6 +198,7 @@ def main() -> int:
         ("bbox_rong_hoac_am", "Bounding box rỗng hoặc kích thước âm"),
         ("class_id_ngoai_pham_vi", "Class id ngoài danh sách lớp"),
         ("dong_nhan_sai_dinh_dang", "Dòng nhãn sai định dạng"),
+        ("bbox_trung_lap", "Bounding box trùng lặp trong cùng file"),
         ("anh_hong", "Ảnh hỏng / không đọc được"),
     ]
     L.append("| Loại bất thường | train | val | test | tổng |")
@@ -203,21 +237,25 @@ def main() -> int:
     if total_issues == 0:
         L.append("✅ **Không phát hiện bất thường nào.** Dữ liệu sẵn sàng để train.")
     else:
-        L.append(f"⚠️ **Phát hiện {total_issues} bất thường** — xem chi tiết bên trên.")
+        if n_fatal:
+            L.append(f"❌ **{n_fatal} lỗi chặn đường** — dữ liệu chưa dùng được, xem chi tiết bên trên.")
+        if n_warn:
+            L.append(f"⚠️ **{n_warn} cảnh báo** — dùng được nhưng nên biết.")
 
     out_path = root / a.out
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text("\n".join(L) + "\n", encoding="utf-8")
-    write_json(root / "results" / "data_report.json", {"splits": report, "leaks": leaks,
-                                                       "total_issues": total_issues})
+    write_json(root / "results" / "data_report.json",
+               {"splits": report, "leaks": leaks, "total_issues": total_issues,
+                "fatal": n_fatal, "warnings": n_warn})
 
     for s in SPLITS:
         r = report[s]
         print(f"[validate] {s:<6}: {r['n_images']:5d} anh  {r['n_boxes']:5d} bbox  "
               f"{r['anh_nhieu_loai_loi']:3d} anh nhieu loai loi")
-    print(f"[validate] tong bat thuong: {total_issues}")
+    print(f"[validate] loi chan duong: {n_fatal}   canh bao: {n_warn}")
     print(f"[validate] bao cao -> {a.out}")
-    return 0 if total_issues == 0 else 2
+    return 0 if n_fatal == 0 else 2
 
 
 if __name__ == "__main__":
