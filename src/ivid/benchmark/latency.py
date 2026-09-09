@@ -83,6 +83,10 @@ def benchmark_backend(model: str, backend: str, images: list[Path], cfg: dict,
         return {"skipped": True, "reason": f"khong thay {weights.relative_to(root)}"}
 
     kw = dict(imgsz=int(cfg["imgsz"]), conf=float(cfg["conf"]), iou=float(cfg["iou"]))
+    if cfg.get("nc"):
+        # Ghi de so lop. Can khi do thu bang model pretrained COCO (80 lop)
+        # thay vi model da fine-tune cho NEU-DET (6 lop).
+        kw["nc"] = int(cfg["nc"])
     if backend == "onnx":
         kw["allow_cpu_fallback"] = bool(cfg.get("allow_onnx_cpu_fallback", True))
 
@@ -190,6 +194,8 @@ def main() -> int:
     ap.add_argument("--settle", type=int, default=None, help="giay cho on dinh nhiet truoc khi do")
     ap.add_argument("--cooldown", type=int, default=None)
     ap.add_argument("--max-images", type=int, default=None)
+    ap.add_argument("--nc", type=int, default=None,
+                    help="ghi de so lop (vd 80 khi do thu bang model COCO pretrained)")
     ap.add_argument("--out", default="results/benchmark.json")
     ap.add_argument("--allow-non-jetson", action="store_true")
     a = ap.parse_args()
@@ -198,7 +204,7 @@ def main() -> int:
     cfg = yaml.safe_load((root / a.config).read_text())
     for key, val in (("sessions", a.sessions), ("warmup", a.warmup),
                      ("settle_seconds", a.settle), ("cooldown_seconds", a.cooldown),
-                     ("max_images", a.max_images)):
+                     ("max_images", a.max_images), ("nc", a.nc)):
         if val is not None:
             cfg[key] = val
     models = a.models or cfg["models"]

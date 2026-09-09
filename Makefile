@@ -4,7 +4,7 @@ CONFIG  := configs/data.yaml
 MODEL   ?= yolov8n
 PORT    ?= 8000
 
-.PHONY: help data prepare validate stats train train-jetson eval \
+.PHONY: help data prepare validate stats train train-jetson eval check-stack smoke-pipeline \
         export-onnx export-trt parity bench accuracy report all \
         serve docker-build docker-up docker-down smoke test lint clean
 
@@ -88,6 +88,12 @@ docker-down:
 # ---------------------------------------------------------------- khac
 smoke: ## Kiem chung rui ro R1 tren Jetson (.pt -> .onnx -> .engine)
 	bash scripts/smoke_tensorrt.sh
+
+smoke-pipeline: ## Kiem chung ca bo do bang model pretrained (truoc khi train)
+	bash scripts/smoke_pipeline.sh
+
+check-stack: ## Kiem tra cac thu vien lam viec duoc voi nhau
+	bash scripts/check_stack.sh
 
 test: ## Chay unit test
 	$(PY) -m pytest tests -q

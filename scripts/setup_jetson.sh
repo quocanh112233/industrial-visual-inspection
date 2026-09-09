@@ -16,6 +16,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 VENV="$ROOT/.venv"
 JETSON_INDEX="https://pypi.jetson-ai-lab.io/jp6/cu126"
 
+warn() { printf '\033[1;33m[canh bao]\033[0m %s\n' "$*"; }
 log()  { printf '\033[1;34m[ivid]\033[0m %s\n' "$*"; }
 die()  { printf '\033[1;31m[loi]\033[0m %s\n' "$*" >&2; exit 1; }
 
@@ -66,6 +67,15 @@ PY
 log "Don dep onnxruntime o user-site (~/.local) bang python he thong..."
 /usr/bin/python3 -m pip uninstall -y onnxruntime onnxruntime-gpu 2>/dev/null || true
 
+# Ghim numpy TRUOC: neu de pip tu chon, no keo numpy 2.x moi nhat vao venv va
+# de len ban 1.26.4 ma torch/opencv/ultralytics cua L4T duoc build cung. Cac goi
+# do van import duoc nhung co the no khi truyen mang qua lai.
+SYS_NUMPY="$(/usr/bin/python3 -c 'import numpy; print(numpy.__version__)' 2>/dev/null || echo '')"
+if [[ -n "$SYS_NUMPY" ]]; then
+  log "Ghim numpy==$SYS_NUMPY cho khop voi ban he thong..."
+  python -m pip install "numpy==$SYS_NUMPY"
+fi
+
 log "Cai onnxruntime-gpu vao venv cho JetPack 6 / CUDA 12.6..."
 python -m pip uninstall -y onnxruntime onnxruntime-gpu 2>/dev/null || true
 python -m pip install --force-reinstall --no-cache-dir \
@@ -76,7 +86,7 @@ python -m pip install --force-reinstall --no-cache-dir \
 log "Cai ultralytics (--no-deps) + cac phu thuoc an toan..."
 python -m pip install --no-deps ultralytics
 python -m pip install \
-  "numpy<2.3" opencv-python-headless pillow pyyaml requests scipy \
+  opencv-python-headless pillow pyyaml requests scipy \
   matplotlib pandas psutil py-cpuinfo tqdm ultralytics-thop
 
 # --- 4. phan con lai cua du an ----------------------------------------------
@@ -109,5 +119,8 @@ try:
 except Exception as e:
     print("  [loi] ultralytics:", e)
 PY
+
+log "Kiem tra tuong thich giua cac thu vien:"
+bash "$ROOT/scripts/check_stack.sh" || warn "Stack co van de — xem o tren truoc khi chay tiep"
 
 log "Xong. Kich hoat bang:  source $VENV/bin/activate"
