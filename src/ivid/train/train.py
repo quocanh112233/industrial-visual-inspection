@@ -119,6 +119,17 @@ def main() -> int:
 
     started = datetime.now(timezone.utc)
     model = YOLO(cfg["model"])
+
+    # Ghi so tham so vao manifest. Neu config tro nham trong so (vi du
+    # train_yolov8s.yaml lai nap yolov8n.pt), so nay la thu duy nhat lo ra —
+    # ten run, thu muc va ten file ket qua deu van trong dung. Da xay ra that.
+    try:
+        n_params = sum(x.numel() for x in model.model.parameters())
+    except Exception:
+        n_params = None
+    if n_params:
+        print(f"[train] tham so : {n_params:,}")
+
     model.train(**targs)
     finished = datetime.now(timezone.utc)
 
@@ -141,6 +152,8 @@ def main() -> int:
         "config": cfg,
         "train_args": {k: str(v) for k, v in sorted(targs.items())},
         "seed": int(cfg["seed"]),
+        "pretrained_weights": str(cfg["model"]),
+        "n_parameters": n_params,
         "started_utc": started.isoformat(timespec="seconds"),
         "finished_utc": finished.isoformat(timespec="seconds"),
         "duration_minutes": round((finished - started).total_seconds() / 60, 1),

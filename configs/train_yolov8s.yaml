@@ -2,8 +2,8 @@
 # Cau hinh nay danh cho GPU roi (Colab T4 / L4). Train tren Jetson: dung
 # configs/train_yolov8n_jetson.yaml.
 
-name: yolov8n                       # ten run -> models/yolov8n/best.pt
-model: yolov8n.pt                   # trong so pretrained COCO
+name: yolov8s                       # ten run -> models/yolov8s/best.pt
+model: yolov8s.pt                   # trong so pretrained COCO
 data: data/processed/data.yaml      # do ivid.data.prepare sinh ra
 seed: 1337                          # cung seed voi buoc chia du lieu
 
@@ -13,7 +13,7 @@ train:
   epochs: 100
   patience: 30                      # dung som neu 30 epoch khong cai thien
   imgsz: 640
-  batch: 16
+  batch: 16                        # yolov8s nang gap ~3.5x yolov8n
   workers: 8
   optimizer: auto
   lr0: 0.01

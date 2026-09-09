@@ -118,6 +118,7 @@ curl -F "file=@data/processed/test/images/scratches_10.jpg" localhost:8000/predi
 ## Tài liệu
 
 - [docs/dataset.md](docs/dataset.md) — phân bố lớp, hình dạng bbox, nhận xét
+- [docs/reproducibility.md](docs/reproducibility.md) — phép thử FR-06 thật, hai lần train cùng seed
 - [docs/deployment.md](docs/deployment.md) — dựng trên Jetson, Docker, sự cố thường gặp
 - [notebooks/ivid_colab.ipynb](notebooks/ivid_colab.ipynb) — notebook train sẵn, mở thẳng bằng Colab
 - [docs/colab-training.md](docs/colab-training.md) — giải thích chi tiết từng bước Colab
@@ -129,7 +130,7 @@ curl -F "file=@data/processed/test/images/scratches_10.jpg" localhost:8000/predi
 |---|---|
 | Dữ liệu (FR-01..03) | ✅ chạy thật, 0 bất thường |
 | Chuỗi export TensorRT | ✅ kiểm chứng trên Jetson |
-| Train + đánh giá (FR-04..06) | ⏳ code xong, chờ chạy |
+| Train + đánh giá (FR-04..06) | ✅ YOLOv8n mAP@0.5 = **0.763** trên test; FR-06 kiểm chứng |
 | Export + parity (FR-07..09) | ⏳ code xong, chờ có `best.pt` |
 | Benchmark (FR-10..15) | ⏳ code xong, chờ có engine |
 | Dịch vụ + Docker (FR-16..20) | ⏳ code xong, test API pass |

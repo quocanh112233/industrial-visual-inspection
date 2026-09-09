@@ -1,0 +1,77 @@
+{
+  "yeu_cau": "FR-06 — chay lai tu file cau hinh luu lai, chenh lech mAP <= 0.02",
+  "model": "yolov8n",
+  "seed": 1337,
+  "epochs": 100,
+  "imgsz": 640,
+  "moi_truong": "Google Colab, Tesla T4, Python 3.13, torch 2.11.0+cu128, ultralytics 8.4.144",
+  "khac_biet_giua_hai_lan": "chi doi cache tu 'ram' sang 'disk'; du lieu train hieu dung giong het (3 bbox trung lap bi loai o ca hai lan, chi khac ai loai)",
+  "runs": {
+    "run1": {
+      "config": "cache: ram (truoc khi sua)",
+      "duplicate_labels_removed_by": "ultralytics (tu dong)",
+      "train_minutes": 33.2,
+      "val": {
+        "mAP50": 0.782,
+        "mAP50_95": 0.433
+      },
+      "test": {
+        "mAP50": 0.7749,
+        "mAP50_95": 0.4378,
+        "precision": 0.6862,
+        "recall": 0.731
+      },
+      "per_class_test": {
+        "crazing": 0.4781,
+        "inclusion": 0.822,
+        "patches": 0.9634,
+        "pitted_surface": 0.8381,
+        "rolled-in_scale": 0.6044,
+        "scratches": 0.9434
+      },
+      "recall_test": {
+        "crazing": 0.3519
+      }
+    },
+    "run2": {
+      "config": "cache: disk (da sua)",
+      "duplicate_labels_removed_by": "ivid.data.prepare",
+      "train_minutes": 36.3,
+      "val": {
+        "mAP50": 0.786,
+        "mAP50_95": 0.435
+      },
+      "test": {
+        "mAP50": 0.7634,
+        "mAP50_95": 0.4352,
+        "precision": 0.677,
+        "recall": 0.7445
+      },
+      "per_class_test": {
+        "crazing": 0.4576,
+        "inclusion": 0.7987,
+        "patches": 0.9555,
+        "pitted_surface": 0.8174,
+        "rolled-in_scale": 0.6026,
+        "scratches": 0.9488
+      },
+      "recall_test": {
+        "crazing": 0.3889
+      }
+    }
+  },
+  "delta_mAP50_test": -0.0115,
+  "delta_mAP50_95_test": -0.0026,
+  "nguong_FR06": 0.02,
+  "dat": true,
+  "delta_theo_lop": {
+    "crazing": -0.0205,
+    "inclusion": -0.0233,
+    "patches": -0.0079,
+    "pitted_surface": -0.0207,
+    "rolled-in_scale": -0.0018,
+    "scratches": 0.0054
+  },
+  "delta_theo_lop_lon_nhat": 0.0233,
+  "ket_luan": "Dat nguong FR-06 (|0.0115| <= 0.02). Nhung do lech THEO TUNG LOP len toi 0.0233 (inclusion) — gap doi do lech tong the. Nghia la: khi so sanh hai MODEL duoc train rieng (yolov8n vs yolov8s), chenh lech mAP nho hon ~0.02 khong duoc coi la that. Rang buoc nay KHONG ap dung cho FR-13 (so sanh ba dinh dang cua CUNG mot trong so): o do khong co nhieu tu qua trinh train, moi chenh lech deu den tu do chinh xac so hoc."
+}
