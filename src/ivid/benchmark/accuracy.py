@@ -8,27 +8,39 @@ VI SAO KHONG DUNG ultralytics.val()
 
 Ban dau buoc nay goi `ultralytics.val()` cho ca ba dinh dang, voi ly do "cung
 mot ham cham diem thi khong the lech vi cach cham". Do la sai lam: goi CUNG MOT
-HAM khong co nghia la dung CUNG MOT PHEP DO — ultralytics doi pipeline danh gia
-ben duoi tuy theo dinh dang model. Ket qua no bao:
+HAM khong co nghia la dung CUNG MOT PHEP DO. No bao:
 
     yolov8n PyTorch  mAP@0.5 0.7621   mAP@0.5:0.95 0.4348
     yolov8n ONNX     mAP@0.5 0.7312   mAP@0.5:0.95 0.3520   (-0.031 / -0.083)
 
-Con so do khong the dung, vi ba phep do doc lap khac deu cho thay ONNX (FP32)
-gan nhu dong nhat voi PyTorch:
-  * export parity: diem so lop lech 1.371e-06, toa do lech 0.002 pixel
-  * parity @ conf 0.25 : 93/93 detection khop, IoU 0.999
-  * parity @ conf 0.001: 8629 vs 8624 detection, khop 98.9%, IoU 0.993
+Chenh lech ay khong phai do ONNX kem hon: no la FP32, diem so lop chi lech
+1.371e-06 so voi PyTorch, va parity @ conf 0.001 cho 8629 vs 8624 detection
+khop 98.9%. Nguyen nhan that da truy ra duoc bang scripts/diag_rect.py —
+ultralytics dat rect=True cho ban .pt nhung ep rect=False cho moi dinh dang
+xuat (engine/validator.py). O che do rect voi pad=0.5, khung anh khong phai
+640 ma la ceil(640/32 + 0.5) * 32 = 672: anh 640 nam giua mot khung 672 co
+vien xam 16 px moi ben. Do lai tren CUNG mot ban .pt:
 
-Chu ky P tang / R giam trong ket qua cua ultralytics cho thay pipeline export
-ap dung mot nguong khac, chu khong phai model kem di.
+    rect=True  imgsz=640   mAP@0.5 0.7621   mAP@0.5:0.95 0.4348
+    rect=False imgsz=640   mAP@0.5 0.7310   mAP@0.5:0.95 0.3521
+    rect=False imgsz=672   mAP@0.5 0.7279   mAP@0.5:0.95 0.3410
 
-Vi vay module nay tu chay tap test qua chinh runner cua du an — von dung chung
+Dong thu ba loai bo cach giai thich "do phan giai cao hon": phong thang anh len
+672 con KEM hon. Thu tao ra khoang cach la VIEN XAM cua che do rect.
+
+Engine ONNX/TensorRT co dau vao co dinh 640x640 nen khong tai lap duoc che do
+ay. Vi vay 0.7621 la con so cua trinh danh gia chu khong phai con so chay duoc
+tren day chuyen — dung luan diem SRS 3.1.
+
+Module nay tu chay tap test qua chinh runner cua du an — von dung chung
 ivid.preprocess va ivid.postprocess cho ca ba dinh dang — roi tinh mAP bang
 ivid.benchmark.metrics. Chenh lech con lai chi den tu ban than runtime.
 
-Ban .pt duoc doi chieu voi con so cua ultralytics de xac nhan phep tinh mAP tu
-viet la dung (--cross-check).
+Ban .pt duoc doi chieu voi ultralytics.val(rect=False) — DUNG moc, cung che do
+khung anh — de xac nhan phep tinh mAP tu viet la dung (--cross-check). Phep tinh
+ay con duoc kiem chung doc lap bang scripts/diag_map.py: cham cung mot tap
+detection bang chinh ma ultralytics (match_predictions + ap_per_class) cho ket
+qua lech 0.0004.
 
     PYTHONPATH=src python -m ivid.benchmark.accuracy
 """
@@ -90,11 +102,12 @@ def evaluate_backend(model: str, backend: str, images: list[Path], gts: list,
 
 def cross_check_pt(model: str, data: Path, imgsz: int, conf: float, iou: float,
                    root: Path) -> dict:
-    """Chay ultralytics.val() tren ban .pt de doi chieu phep tinh mAP tu viet.
+    """Chay ultralytics.val(rect=False) tren ban .pt de doi chieu phep tinh mAP.
 
-    Chi lam voi .pt: do la duong duy nhat ma ultralytics xu ly "nguyen ban",
-    nen no la moc doi chieu hop le. Neu con so cua ta lech nhieu so voi ho tren
-    cung mot model thi phep tinh cua ta sai, va ca cot mAP mat gia tri.
+    PHAI ep rect=False. Mac dinh ultralytics dung rect=True cho .pt, tuc cham
+    diem o khung 672x672 co vien xam — mot che do ma engine 640x640 khong tai
+    lap duoc. So sanh voi che do ay la so sanh nham moc: no tung lam cross-check
+    bao "LECH LON 0.0304" trong khi phep tinh mAP hoan toan dung.
     """
     from ..train.evaluate import evaluate as ul_evaluate
 
@@ -102,7 +115,8 @@ def cross_check_pt(model: str, data: Path, imgsz: int, conf: float, iou: float,
     if not w.exists():
         return {"skipped": True, "reason": "khong thay best.pt"}
     try:
-        r = ul_evaluate(w, data, "test", imgsz, batch=1, device=None, conf=conf, iou=iou)
+        r = ul_evaluate(w, data, "test", imgsz, batch=1, device=None, conf=conf,
+                        iou=iou, rect=False)
         return {"skipped": False, "mAP50": r["overall"]["mAP50"],
                 "mAP50_95": r["overall"]["mAP50_95"]}
     except Exception as e:
@@ -181,9 +195,14 @@ def main() -> int:
 
     # --- doi chieu phep tinh mAP tu viet voi ultralytics, tren ban .pt ---
     if a.cross_check:
-        payload["accuracy_cross_check"] = {}
+        payload["accuracy_cross_check"] = {
+            "ghi_chu": "ultralytics.val() duoc ep rect=False de cung che do khung anh "
+                       "640x640 voi engine trien khai. Mac dinh rect=True cua no cham o "
+                       "khung 672x672 co vien xam va cho mAP cao hon ~0.031 — xem "
+                       "scripts/diag_rect.py va docstring ivid/train/evaluate.py.",
+        }
         for model in models:
-            print(f"\n[acc] === doi chieu {model}/.pt voi ultralytics.val() ===")
+            print(f"\n[acc] === doi chieu {model}/.pt voi ultralytics.val(rect=False) ===")
             ul = cross_check_pt(model, data, imgsz, a.conf, a.iou, root)
             ours = payload["accuracy"].get(f"{model}|pytorch", {})
             if not ul.get("skipped") and not ours.get("skipped"):

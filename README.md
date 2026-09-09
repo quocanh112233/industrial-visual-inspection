@@ -143,6 +143,17 @@ phía model nhỏ. YOLOv8s lớn gấp 3.7× nhưng không mua được độ ch
 Điều này trả lời trực tiếp câu 3 của SRS §7.3: *không đáng đổi độ trễ lấy YOLOv8s,
 vì không có mAP cao hơn để mà đổi.* Số liệu: `results/model_comparison.json`.
 
+> **Vì sao bảng này và bảng benchmark ở đầu README cho mAP khác nhau.** Bảng trên
+> đo bằng `ultralytics.val()` ở chế độ mặc định của nó cho bản `.pt` — `rect=True`,
+> nghĩa là ảnh được chấm trong khung **672×672** có viền xám 16 px mỗi bên
+> (`ceil(640/32 + 0.5) × 32 = 672`). Engine ONNX/TensorRT có đầu vào cố định
+> 640×640 nên **không tái lập được** chế độ đó. Cùng bản `.pt` ấy chấm ở 640×640
+> cho **0.7310** thay vì 0.7621 — chênh 0.031 mAP@0.5 và 0.083 mAP@0.5:0.95, chỉ
+> vì một tham số của trình đánh giá. Hai bảng dùng hai chế độ khác nhau là có chủ
+> đích: bảng này để **so hai model với nhau** (cùng chế độ nên so được), bảng
+> benchmark để biết **cái gì thật sự chạy được trên dây chuyền**. Bằng chứng:
+> `make diag-rect`.
+
 ## Trạng thái
 
 | Giai đoạn | Trạng thái |

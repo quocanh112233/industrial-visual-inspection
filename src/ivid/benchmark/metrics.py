@@ -10,12 +10,22 @@ danh gia ben duoi tuy theo dinh dang model.
 Bang chung: tren cung 50 anh o conf=0.001, PyTorch sinh 8624 detection va ONNX
 sinh 8629, khop nhau 98.9% voi IoU trung binh 0.993 (results/parity_conf001.json).
 Hai model gan nhu dong nhat. Nhung ultralytics.val() bao ONNX mat 0.031 mAP@0.5
-va 0.083 mAP@0.5:0.95 — mot con so khong the giai thich bang bat ky co che nao,
-vi ONNX la FP32 va lech diem so chi 1.4e-06.
+va 0.083 mAP@0.5:0.95. Co che gay ra chenh lech ay sau do da truy ra duoc
+(scripts/diag_rect.py): ultralytics dat rect=True cho .pt nhung ep rect=False
+cho dinh dang xuat, va o che do rect thi khung anh la 672x672 (anh 640 co vien
+xam 16 px) chu khong phai 640x640. Cung mot ban .pt cham o rect=False cho
+0.7310 — dung bang con so ma module nay tinh ra. Tuc khong phai model kem di,
+ma la hai che do danh gia khac nhau bi dem ra so voi nhau.
 
 Module nay nhan detection tu chinh runner cua du an (dung chung ivid.preprocess
 va ivid.postprocess, da duoc kiem chung la tuong duong) roi tinh mAP. Nho vay
-chenh lech giua ba dinh dang chi con den tu ban than runtime.
+chenh lech giua ba dinh dang chi con den tu ban than runtime, va ca ba deu duoc
+cham o dung che do ma engine trien khai thuc su chay: 640x640, khong vien.
+
+Phep tinh trong file nay da duoc kiem chung doc lap bang scripts/diag_map.py:
+cham CUNG MOT tap detection hai lan — mot lan bang ham o day, mot lan bang chinh
+ma cua ultralytics (BaseValidator.match_predictions + utils.metrics.ap_per_class)
+— cho ket qua lech 0.0004 mAP@0.5.
 
 Thuat toan theo COCO: ghep detection voi ground truth theo tung nguong IoU
 0.50:0.05:0.95, tinh duong precision-recall, lay AP bang noi suy 101 diem.

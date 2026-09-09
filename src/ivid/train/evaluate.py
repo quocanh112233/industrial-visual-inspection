@@ -31,12 +31,33 @@ def _to_float(x) -> float:
 
 
 def evaluate(weights: Path, data: Path, split: str, imgsz: int, batch: int,
-             device: str | None, conf: float, iou: float) -> dict:
+             device: str | None, conf: float, iou: float,
+             rect: bool | None = None) -> dict:
+    """Chay ultralytics.val(). `rect` de None nghia la de ultralytics tu quyet.
+
+    CAN BIET VE `rect`. Ultralytics dat rect=True cho ban .pt nhung ep
+    rect=False cho moi dinh dang xuat (engine/validator.py). O che do rect voi
+    pad=0.5, khung anh khong phai 640 ma la ceil(640/32 + 0.5) * 32 = 672: anh
+    640 nam giua mot khung 672 co vien xam 16 px moi ben. Do duoc tren yolov8n:
+
+        rect=True  imgsz=640   mAP@0.5 0.7621   mAP@0.5:0.95 0.4348
+        rect=False imgsz=640   mAP@0.5 0.7310   mAP@0.5:0.95 0.3521
+        rect=False imgsz=672   mAP@0.5 0.7279   mAP@0.5:0.95 0.3410
+
+    Tuc la CUNG MOT BO TRONG SO cho hai con so cach nhau 0.031 mAP@0.5, chi vi
+    mot tham so cua trinh danh gia. Dong thu ba cho thay nguyen nhan la VIEN XAM
+    chu khong phai do phan giai — phong thang len 672 con kem hon.
+
+    Hau qua thuc te: engine ONNX/TensorRT co dau vao co dinh 640x640 khong the
+    tai lap che do rect, nen 0.7621 KHONG phai con so chay duoc tren day chuyen.
+    """
     from ultralytics import YOLO
 
     model = YOLO(str(weights))
     kw = dict(data=str(data), split=split, imgsz=imgsz, batch=batch,
               conf=conf, iou=iou, plots=False, verbose=False)
+    if rect is not None:
+        kw["rect"] = rect
     if device is not None:
         kw["device"] = device
     m = model.val(**kw)
@@ -98,6 +119,9 @@ def main() -> int:
     ap.add_argument("--device", default=None)
     ap.add_argument("--conf", type=float, default=0.001, help="thap de mAP khong bi cat ngon")
     ap.add_argument("--iou", type=float, default=0.7, help="nguong IoU cua NMS")
+    ap.add_argument("--rect", default=None, choices=["true", "false"],
+                    help="ep che do rect. Bo trong = de ultralytics tu quyet "
+                         "(True cho .pt, False cho dinh dang xuat) — xem docstring evaluate()")
     ap.add_argument("--out", default=None)
     a = ap.parse_args()
 
@@ -129,7 +153,8 @@ def main() -> int:
     print(f"[eval] trong so : {weights}")
     print(f"[eval] tap      : {a.split}  imgsz={imgsz}  conf={a.conf}  iou={a.iou}")
 
-    res = evaluate(weights, data, a.split, imgsz, a.batch, a.device, a.conf, a.iou)
+    rect = None if a.rect is None else (a.rect == "true")
+    res = evaluate(weights, data, a.split, imgsz, a.batch, a.device, a.conf, a.iou, rect)
 
     tag = a.name or weights.stem
     out = Path(a.out) if a.out else root / "results" / (

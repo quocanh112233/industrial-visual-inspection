@@ -26,6 +26,7 @@ from __future__ import annotations
 import argparse
 import contextlib
 import sys
+from collections import Counter
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
@@ -39,11 +40,14 @@ def chay(weights: Path, data: Path, imgsz: int, rect: bool, conf: float,
     from ultralytics import YOLO
 
     model = YOLO(str(weights))
-    thay: list[str] = []
+    thay: Counter[str] = Counter()
 
     def hook(_mod, inp):
-        if not thay and inp and hasattr(inp[0], "shape"):
-            thay.append("x".join(str(int(v)) for v in inp[0].shape))
+        # KHONG lay lan forward dau tien: truoc vong val, ultralytics con chay
+        # mot luot dung stride bang tensor gia rat nho (32x32). Dem tan suat roi
+        # lay hinh dang pho bien nhat moi ra dung anh that.
+        if inp and hasattr(inp[0], "shape") and len(inp[0].shape) == 4:
+            thay["x".join(str(int(v)) for v in inp[0].shape)] += 1
 
     h = None
     with contextlib.suppress(Exception):
@@ -53,7 +57,8 @@ def chay(weights: Path, data: Path, imgsz: int, rect: bool, conf: float,
                   rect=rect, conf=conf, iou=iou, plots=False, verbose=False)
     if h is not None:
         h.remove()
-    return float(m.box.map50), float(m.box.map), (thay[0] if thay else "?")
+    pho_bien = thay.most_common(1)[0][0] if thay else "?"
+    return float(m.box.map50), float(m.box.map), pho_bien
 
 
 def main() -> int:
