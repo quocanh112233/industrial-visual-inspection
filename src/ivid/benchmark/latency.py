@@ -207,6 +207,8 @@ def main() -> int:
                     help="ghi de so lop (vd 80 khi do thu bang model COCO pretrained)")
     ap.add_argument("--out", default="results/benchmark.json")
     ap.add_argument("--allow-non-jetson", action="store_true")
+    ap.add_argument("--force", action="store_true",
+                    help="cho phep ghi de ket qua da do voi nhieu anh/phien hon")
     a = ap.parse_args()
 
     root = repo_root()
@@ -270,6 +272,20 @@ def main() -> int:
         for backend in backends:
             key = f"{model}|{backend}"
             print(f"\n[bench] === {model} / {backend} ===")
+            # Chan ghi de mot phep do DAY DU HON bang mot phep do thu nhanh.
+            # Da xay ra that: 'make bench-quick' (20 anh, 1 phien) ghi de len ket
+            # qua 'make bench' (270 anh, 3 phien) va lam mat 30 phut do dac.
+            old = payload["runs"].get(key)
+            if old and not old.get("skipped") and not a.force:
+                old_n = old.get("sessions", [{}])[0].get("n_images", 0)
+                old_s = len(old.get("sessions", []))
+                new_n, new_s = len(images), int(cfg["sessions"])
+                if (old_n, old_s) > (new_n, new_s):
+                    print(f"    BO QUA: da co phep do day du hon ({old_n} anh x {old_s} phien) "
+                          f"— lan nay chi {new_n} anh x {new_s} phien.")
+                    print("            Dung --force de ghi de, hoac --out de ghi ra file khac.")
+                    continue
+
             res = benchmark_backend(model, backend, images, cfg, root)
             payload["runs"][key] = res
             if res.get("skipped"):

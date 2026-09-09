@@ -54,8 +54,9 @@ parity: ## FR-09 so sanh detection cua ba dinh dang
 bench: ## FR-10..12 do latency + tai nguyen (CHI TREN JETSON)
 	$(PY) -m ivid.benchmark.latency --config configs/benchmark.yaml
 
-bench-quick: ## Chay thu nhanh: 1 phien, 20 anh, khong cho on dinh nhiet
-	$(PY) -m ivid.benchmark.latency --sessions 1 --settle 0 --cooldown 0 --max-images 20
+bench-quick: ## Chay thu nhanh: 1 phien, 20 anh -> results/benchmark_quick.json
+	$(PY) -m ivid.benchmark.latency --sessions 1 --settle 0 --cooldown 0 \
+		--max-images 20 --out results/benchmark_quick.json
 
 accuracy: ## FR-13 do mAP cho tung dinh dang
 	$(PY) -m ivid.benchmark.accuracy
