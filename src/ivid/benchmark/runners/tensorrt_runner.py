@@ -65,7 +65,20 @@ class TensorRTRunner(BaseRunner):
         cudart = _nap_cudart()
         self.trt, self.cudart = trt, cudart
 
-        so_gpu = kiem_tra(cudart.cudaGetDeviceCount())
+        # Kiem tra phien ban TRUOC khi lam gi khac. cuda-python mang theo runtime
+        # CUDA cua chinh no, va neu no moi hon driver thi MOI loi goi CUDA deu tra
+        # ve cudaErrorInsufficientDriver (35) — mot ma loi khong he goi y nguyen
+        # nhan. Da mat thoi gian vi no: cuda-python 13.3.1 tren JetPack 6.2
+        # (driver CUDA 12.6) bao runtime 13030 roi hong toan bo.
+        ver = int(kiem_tra(cudart.cudaRuntimeGetVersion()))
+        err, so_gpu = cudart.cudaGetDeviceCount()
+        if int(err) == 35:                       # cudaErrorInsufficientDriver
+            raise RuntimeError(
+                f"cuda-python mang runtime CUDA {ver // 1000}.{ver % 1000 // 10} nhung "
+                "driver tren may cu hon, nen khong loi goi CUDA nao chay duoc.\n"
+                'Cai ban khop voi driver:  pip install "cuda-python<13"'
+            )
+        kiem_tra((err, so_gpu))
         if not so_gpu:
             raise RuntimeError("CUDA khong thay GPU nao — khong chay duoc TensorRT")
 

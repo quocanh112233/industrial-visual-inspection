@@ -40,12 +40,15 @@ RUN python3 -m pip install --upgrade pip \
 # runner ONNX chi can onnxruntime-gpu. Ca hai deu khong can framework huan
 # luyen. Nho vay anh nho hon vai GB.
 #
+# cuda-python phai ghim <13: no mang theo runtime CUDA cua chinh no, ban 13.x
+# doi driver CUDA 13 con JetPack 6.2 chi co 12.6 -> cudaErrorInsufficientDriver.
+#
 # Hau qua can biet: IVID_BACKEND=pytorch KHONG chay duoc trong container nay —
 # co y nhu vay. Bang benchmark cua chinh du an khuyen nghi TensorRT FP16
 # (14.6 ms, 68 FPS) chu khong phai PyTorch (34.7 ms), nen dinh dang duy nhat
 # khong nen dung lai la dinh dang duy nhat bi bo ra.
 RUN python3 -m pip install \
-        cuda-python \
+        "cuda-python<13" \
         "numpy<2.3" opencv-python-headless pillow pyyaml requests \
         fastapi "uvicorn[standard]" python-multipart "pydantic>=2"
 

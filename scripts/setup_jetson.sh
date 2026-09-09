@@ -94,7 +94,12 @@ python -m pip install --force-reinstall --no-cache-dir \
 log "Cai ultralytics (--no-deps) + cac phu thuoc an toan..."
 # cuda-python: runner TensorRT cap phat bo nho GPU qua cudart thay vi torch,
 # de anh Docker khong phai keo ca torch ve chi de chay mot engine 9 MB.
-python -m pip install cuda-python
+#
+# PHAI ghim <13. cuda-python mang theo runtime CUDA cua chinh no: ban 13.x doi
+# driver CUDA 13, con JetPack 6.2 chi co 12.6. Cai nham ban 13 thi
+# cudaRuntimeGetVersion bao 13030 va moi loi goi CUDA tra ve
+# cudaErrorInsufficientDriver (35) — engine khong chay duoc mot dong nao.
+python -m pip install "cuda-python<13"
 
 python -m pip install --no-deps ultralytics
 python -m pip install \
