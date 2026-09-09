@@ -47,7 +47,7 @@ def compare_outputs(pt_path: Path, onnx_path: Path, images: list[Path], imgsz: i
         y_ort = sess.run(None, {in_name: x})[0]
 
         if y_pt.shape != y_ort.shape:
-            return {"ok": False, "reason": f"shape lech: torch {y_pt.shape} vs onnx {y_ort.shape}"}
+            return {"ok": False, "reason": f"shape lệch: torch {y_pt.shape} vs onnx {y_ort.shape}"}
 
         d = np.abs(y_pt - y_ort)
         raw_max.append(float(d.max()))
@@ -93,38 +93,38 @@ def compare_outputs(pt_path: Path, onnx_path: Path, images: list[Path], imgsz: i
 def judge(par: dict, tol_raw: float, tol_box_px: float, tol_score: float) -> dict:
     checks = {
         "toa_do_hop": {
-            "gia_tri": par["box_max_diff_px"], "nguong": tol_box_px, "don_vi": "pixel",
+            "gia_tri": par["box_max_diff_px"], "ngưỡng": tol_box_px, "don_vi": "pixel",
             "dat": par["box_max_diff_px"] <= tol_box_px,
-            "y_nghia": "lech duoi mot phan tram pixel thi khong the doi ket qua detection",
+            "y_nghia": "lệch dưới một phần trăm pixel thì không thể đổi kết quả detection",
         },
         "diem_so_lop": {
-            "gia_tri": par["score_max_abs_diff"], "nguong": tol_score, "don_vi": "tuyet doi (0..1)",
+            "gia_tri": par["score_max_abs_diff"], "ngưỡng": tol_score, "don_vi": "tuyệt đối (0..1)",
             "dat": par["score_max_abs_diff"] <= tol_score,
-            "y_nghia": "diem so quyet dinh lop va viec vuot nguong conf",
+            "y_nghia": "điểm số quyết định lớp và việc vượt ngưỡng conf",
         },
         "detection_cuoi_cung": {
-            "gia_tri": par["detections"]["match_rate"], "nguong": 1.0, "don_vi": "ti le khop",
+            "gia_tri": par["detections"]["match_rate"], "ngưỡng": 1.0, "don_vi": "ti le khớp",
             "dat": par["detections"]["match_rate"] >= 1.0,
-            "y_nghia": "sau giai ma va NMS, hai dinh dang co cho ra cung cac hop khong",
+            "y_nghia": "sau giải mã và NMS, hai định dạng có cho ra cùng các hộp không",
         },
     }
     return {
         "checks": checks,
         "dat_tat_ca": all(c["dat"] for c in checks.values()),
         "srs_raw_metric": {
-            "gia_tri": par["max_abs_diff"], "nguong": tol_raw,
+            "gia_tri": par["max_abs_diff"], "ngưỡng": tol_raw,
             "dat": par["max_abs_diff"] <= tol_raw,
-            "ghi_chu": ("Chi so tho theo dung chu SRS FR-07. No gop toa do (pixel, gia tri "
-                        "toi 640) voi diem so (0..1) vao mot nguong tuyet doi duy nhat, nen "
-                        "bi chi phoi boi toa do va khong phan anh dung anh huong thuc te. "
-                        "Giu lai de doi chieu, khong dung de ket luan."),
+            "ghi_chu": ("Chỉ số thô theo đúng chữ SRS FR-07. Nó gộp toạ độ (pixel, giá trị "
+                        "tới 640) với điểm số (0..1) vào một ngưỡng tuyệt đối duy nhất, nên "
+                        "bị chi phối bởi toạ độ và không phản ánh đúng ảnh hưởng thực tế. "
+                        "Giữ lại để đối chiếu, không dùng để kết luận."),
         },
     }
 
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--name", required=True, help="ten model, vd yolov8n")
+    ap.add_argument("--name", required=True, help="tên model, vd yolov8n")
     ap.add_argument("--config", default="configs/export.yaml")
     ap.add_argument("--data", default="data/processed/data.yaml")
     ap.add_argument("--skip-parity", action="store_true")
@@ -136,11 +136,11 @@ def main() -> int:
 
     pt = root / "models" / a.name / "best.pt"
     if not pt.exists():
-        print(f"[loi] khong thay {pt} — train truoc da", file=sys.stderr)
+        print(f"[lỗi] không thấy {pt} — train trước đã", file=sys.stderr)
         return 1
     onnx_path = pt.with_suffix(".onnx")
 
-    print(f"[onnx] nguon : {pt}")
+    print(f"[onnx] nguồn : {pt}")
     print(f"[onnx] opset={oc['opset']} imgsz={oc['imgsz']} batch={oc['batch']} "
           f"dynamic={oc['dynamic']} simplify={oc['simplify']}")
 
@@ -184,11 +184,11 @@ def main() -> int:
         import yaml as _yaml
 
         nc = len(_yaml.safe_load((root / a.data).read_text(encoding="utf-8"))["names"])
-        print(f"[onnx] so sanh so hoc PyTorch vs ONNX tren {len(imgs)} anh that...")
+        print(f"[onnx] so sánh số học PyTorch vs ONNX trên {len(imgs)} ảnh thật...")
         par = compare_outputs(pt, onnx_path, imgs, int(oc["imgsz"]), nc,
                               float(pc.get("conf", 0.25)), float(pc.get("iou", 0.7)))
         if not par["ok"]:
-            print(f"[loi] {par['reason']}", file=sys.stderr)
+            print(f"[lỗi] {par['reason']}", file=sys.stderr)
             report["parity"] = par
             write_json(root / "results" / f"export_{a.name}_onnx.json", report)
             return 1
@@ -200,22 +200,22 @@ def main() -> int:
         report["parity"] = par
         passed = verdict["dat_tat_ca"]
 
-        print(f"[onnx] do lech tho toan tensor = {par['max_abs_diff']:.3e}   "
-              f"(chi so tho cua SRS, gop lan toa do va diem so)")
-        print(f"[onnx] {'muc kiem tra':<22}{'gia tri':>12}{'nguong':>12}   ket qua")
+        print(f"[onnx] độ lệch thô toàn tensor = {par['max_abs_diff']:.3e}   "
+              f"(chỉ số thô của SRS, gộp lẫn toạ độ và điểm số)")
+        print(f"[onnx] {'mục kiểm tra':<22}{'giá trị':>12}{'ngưỡng':>12}   kết quả")
         for name, c in verdict["checks"].items():
-            print(f"       {name:<22}{c['gia_tri']:>12.3e}{c['nguong']:>12.3e}   "
+            print(f"       {name:<22}{c['gia_tri']:>12.3e}{c['ngưỡng']:>12.3e}   "
                   f"{'DAT' if c['dat'] else 'KHONG DAT'}")
         det = par["detections"]
         print(f"[onnx] detection: PyTorch {det['n_pytorch']}, ONNX {det['n_onnx']}, "
-              f"khop {det['matched']} ({det['match_rate']*100:.1f}%)")
+              f"khớp {det['matched']} ({det['match_rate']*100:.1f}%)")
         if not passed:
-            print("[canh bao] Co muc kiem tra KHONG DAT — xem "
-                  f"results/export_{a.name}_onnx.json truoc khi build engine.", file=sys.stderr)
+            print("[cảnh báo] Có mục kiểm tra KHÔNG ĐẠT — xem "
+                  f"results/export_{a.name}_onnx.json trước khi build engine.", file=sys.stderr)
 
     write_json(root / "results" / f"export_{a.name}_onnx.json", report)
     print(f"[onnx] -> {onnx_path}")
-    print(f"[onnx] bao cao -> results/export_{a.name}_onnx.json")
+    print(f"[onnx] báo cáo -> results/export_{a.name}_onnx.json")
     print(f"[onnx] buoc tiep (TREN JETSON): "
           f"PYTHONPATH=src python -m ivid.export.to_tensorrt --name {a.name}")
     return 0 if passed else 2

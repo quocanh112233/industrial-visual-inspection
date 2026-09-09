@@ -34,7 +34,7 @@ def device_metadata() -> dict:
         try:
             md[mod] = getattr(__import__(mod), "__version__", "?")
         except Exception:
-            md[mod] = "khong cai"
+            md[mod] = "không cài"
     return md
 
 
@@ -53,7 +53,7 @@ def build(onnx_path: Path, engine_path: Path, trtexec: str, precision: str,
     elif precision.lower() == "int8":
         cmd.append("--int8")
     elif precision.lower() not in ("fp32", ""):
-        raise ValueError(f"precision khong ho tro: {precision}")
+        raise ValueError(f"precision không ho tro: {precision}")
 
     print(f"[trt] {' '.join(cmd)}")
     t0 = time.perf_counter()
@@ -68,10 +68,10 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--name", required=True)
     ap.add_argument("--config", default="configs/export.yaml")
-    ap.add_argument("--precision", default=None, help="ghi de fp16/fp32/int8")
+    ap.add_argument("--precision", default=None, help="ghi đè fp16/fp32/int8")
     ap.add_argument("--allow-non-jetson", action="store_true",
-                    help="cho phep build ngoai Jetson (engine se KHONG dung duoc tren Jetson)")
-    ap.add_argument("--skip-check", action="store_true", help="bo qua buoc nap engine chay thu")
+                    help="cho phép build ngoài Jetson (engine sẽ KHÔNG chạy được trên Jetson)")
+    ap.add_argument("--skip-check", action="store_true", help="bỏ qua bước nạp engine chạy thử")
     a = ap.parse_args()
 
     root = repo_root()
@@ -80,21 +80,21 @@ def main() -> int:
     precision = a.precision or tc["precision"]
 
     if platform.machine() != "aarch64" and not a.allow_non_jetson:
-        print("[loi] Dang khong chay tren Jetson (aarch64).\n"
-              "      Engine TensorRT khong di chuyen duoc giua cac may — build o day\n"
-              "      thi tren Jetson se khong nap duoc. Chay lai script nay tren Jetson,\n"
-              "      hoac them --allow-non-jetson neu ban that su muon.", file=sys.stderr)
+        print("[lỗi] Đang không chạy trên Jetson (aarch64).\n"
+              "      Engine TensorRT không di chuyển được giữa các máy — build ở đây\n"
+              "      thì trên Jetson sẽ không nạp được. Chạy lại script này trên Jetson,\n"
+              "      hoặc thêm --allow-non-jetson nếu bạn thật sự muốn.", file=sys.stderr)
         return 1
 
     onnx_path = root / "models" / a.name / "best.onnx"
     if not onnx_path.exists():
-        print(f"[loi] khong thay {onnx_path}\n"
-              f"      chay truoc: python -m ivid.export.to_onnx --name {a.name}", file=sys.stderr)
+        print(f"[lỗi] không thấy {onnx_path}\n"
+              f"      chạy trước: python -m ivid.export.to_onnx --name {a.name}", file=sys.stderr)
         return 1
 
     trtexec = tc["trtexec"]
     if not (Path(trtexec).exists() or shutil.which(trtexec)):
-        print(f"[loi] khong thay trtexec tai {trtexec}", file=sys.stderr)
+        print(f"[lỗi] không thấy trtexec tại {trtexec}", file=sys.stderr)
         return 1
 
     engine_path = onnx_path.with_suffix(".engine")
@@ -106,7 +106,7 @@ def main() -> int:
 
     print(f"[trt] onnx      : {onnx_path}")
     print(f"[trt] precision : {precision}   workspace: {tc['workspace_mib']} MiB")
-    print("[trt] build co the mat 3-8 phut, dung ngat...")
+    print("[trt] build có thể mất 3-8 phút, đừng ngắt...")
 
     ok, dt, out = build(onnx_path, engine_path, trtexec, precision,
                         int(tc["workspace_mib"]), log_path, extra)
@@ -124,7 +124,7 @@ def main() -> int:
     }
 
     if not ok:
-        print(f"[loi] trtexec that bai sau {dt:.0f}s — xem {log_path}", file=sys.stderr)
+        print(f"[lỗi] trtexec thất bại sau {dt:.0f}s — xem {log_path}", file=sys.stderr)
         for line in out.splitlines()[-20:]:
             print("   ", line, file=sys.stderr)
         write_json(root / "results" / f"export_{a.name}_tensorrt.json", report)
@@ -138,23 +138,23 @@ def main() -> int:
     print(f"[trt] engine OK sau {dt:.0f}s -> {engine_path} ({report['engine_size_mb']} MB)")
 
     if not a.skip_check:
-        print("[trt] nap engine va chay thu...")
+        print("[trt] nạp engine và chạy thử...")
         from .trt_infer_check import run as trt_run
 
         try:
             chk = trt_run(engine_path, iters=50, warmup=20)
             report["load_check"] = chk
-            print(f"[trt] chay thu OK: p50 {chk['latency_ms']['p50']} ms "
-                  f"({chk['fps']} FPS, chi inference thuan)")
+            print(f"[trt] chạy thử OK: p50 {chk['latency_ms']['p50']} ms "
+                  f"({chk['fps']} FPS, chỉ inference thuan)")
             print("[trt] io: " + ", ".join(f"{t['name']}{t['shape']}" for t in chk["tensors"]))
         except Exception as e:
             report["load_check"] = {"ok": False, "error": f"{type(e).__name__}: {e}"}
-            print(f"[loi] nap engine that bai: {e}", file=sys.stderr)
+            print(f"[lỗi] nạp engine thất bại: {e}", file=sys.stderr)
             write_json(root / "results" / f"export_{a.name}_tensorrt.json", report)
             return 1
 
     write_json(root / "results" / f"export_{a.name}_tensorrt.json", report)
-    print(f"[trt] bao cao -> results/export_{a.name}_tensorrt.json")
+    print(f"[trt] báo cáo -> results/export_{a.name}_tensorrt.json")
     return 0
 
 

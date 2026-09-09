@@ -7,7 +7,7 @@ DEST="$ROOT/models/_smoke"
 OUT="$ROOT/results/smoke_pipeline.json"
 
 log()  { printf '\033[1;34m[ivid]\033[0m %s\n' "$*"; }
-bad()  { printf '\033[1;31m[loi]\033[0m %s\n' "$*" >&2; }
+bad()  { printf '\033[1;31m[lỗi]\033[0m %s\n' "$*" >&2; }
 
 [[ -d "$ROOT/.venv" ]] && source "$ROOT/.venv/bin/activate"
 export PYTHONUTF8=1 PYTHONIOENCODING=utf-8
@@ -21,22 +21,22 @@ cp -f "$SMOKE/yolov8n_op${OPSET}.engine"   "$DEST/best.engine"  2>/dev/null
 missing=0
 for f in best.pt best.onnx best.engine; do
   if [[ -f "$DEST/$f" ]]; then
-    printf '  co  %-13s %s\n' "$f" "$(du -h "$DEST/$f" | cut -f1)"
+    printf '  có  %-13s %s\n' "$f" "$(du -h "$DEST/$f" | cut -f1)"
   else
     printf '  THIEU %s\n' "$f"; missing=1
   fi
 done
 if [[ $missing -eq 1 ]]; then
-  bad "Chay 'bash scripts/smoke_tensorrt.sh' truoc de sinh ra cac file nay."
+  bad "Chạy 'bash scripts/smoke_tensorrt.sh' trước để sinh ra các file này."
   exit 1
 fi
 
 if [[ ! -f "$ROOT/data/processed/data.yaml" ]]; then
-  log "Chua co dataset — chay 'make data' truoc"
+  log "Chưa có dataset — chạy 'make data' trước"
   exit 1
 fi
 
-log "Do thu ba runner (nc=80 vi day la model COCO pretrained)..."
+log "Đo thử ba runner (nc=80 vì đây là model COCO pretrained)..."
 PYTHONPATH="$ROOT/src" python -m ivid.benchmark.latency \
   --models _smoke \
   --backends pytorch onnx tensorrt \
@@ -46,11 +46,11 @@ PYTHONPATH="$ROOT/src" python -m ivid.benchmark.latency \
 rc=$?
 
 if [[ $rc -ne 0 ]]; then
-  bad "latency.py that bai (ma loi $rc)"
+  bad "latency.py thất bại (mã lỗi $rc)"
   exit $rc
 fi
 
-log "Sinh bao cao thu..."
+log "Sinh báo cáo thử..."
 PYTHONPATH="$ROOT/src" python -m ivid.benchmark.report \
   --input results/smoke_pipeline.json \
   --out results/smoke_pipeline_report.md \
@@ -65,9 +65,9 @@ runs = d.get("runs", {})
 ok = [k for k, v in runs.items() if not v.get("skipped")]
 bad = {k: v.get("reason") for k, v in runs.items() if v.get("skipped")}
 
-print(f"  runner chay duoc : {len(ok)}/3  -> {', '.join(x.split('|')[1] for x in ok)}")
+print(f"  runner chạy được : {len(ok)}/3  -> {', '.join(x.split('|')[1] for x in ok)}")
 for k, why in bad.items():
-    print(f"  KHONG chay duoc  : {k.split('|')[1]} — {why}")
+    print(f"  KHONG chạy được  : {k.split('|')[1]} — {why}")
 
 for k in ok:
     v = runs[k]
@@ -76,7 +76,7 @@ for k in ok:
     delta = abs(chk["sum_of_parts_p50"] - chk["total_p50"])
     print(f"\n  {k.split('|')[1]:<9} total p50 {v['latency_p50_ms']:7.2f} ms  ({v['fps']:6.1f} FPS)")
     print(f"            pre {ms['preprocess']['p50']:.2f} + infer {ms['inference']['p50']:.2f} "
-          f"+ post {ms['postprocess']['p50']:.2f}   (FR-11 lech {delta:.3f} ms)")
+          f"+ post {ms['postprocess']['p50']:.2f}   (FR-11 lệch {delta:.3f} ms)")
     bi = v["backend_info"]
     if bi.get("providers_active"):
         print(f"            ORT providers: {bi['providers_active']}")
@@ -85,10 +85,10 @@ for k in ok:
 
 print()
 if len(ok) == 3:
-    print("  >>> BO DO HOAT DONG DAY DU. San sang train that.")
+    print("  >>> BO DO HOAT DONG DAY DU. Sẵn sang train thật.")
 else:
-    print("  >>> Con runner chua chay duoc — sua truoc khi train.")
+    print("  >>> Còn runner chưa chạy được — sua trước khi train.")
 PY
 
-log "Chi tiet: results/smoke_pipeline.json va results/smoke_pipeline_report.md"
-log "Xoa model gia sau khi xong:  rm -rf models/_smoke"
+log "Chỉ tiết: results/smoke_pipeline.json và results/smoke_pipeline_report.md"
+log "Xoá model giả sau khi xong:  rm -rf models/_smoke"

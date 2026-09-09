@@ -74,7 +74,7 @@ def benchmark_backend(model: str, backend: str, images: list[Path], cfg: dict,
                       root: Path) -> dict:
     weights = weights_for(root / "models" / model, backend)
     if not weights.exists():
-        return {"skipped": True, "reason": f"khong thay {weights.relative_to(root)}"}
+        return {"skipped": True, "reason": f"không thấy {weights.relative_to(root)}"}
 
     kw = dict(imgsz=int(cfg["imgsz"]), conf=float(cfg["conf"]), iou=float(cfg["iou"]),
               resize_to=(int(cfg["resize_to"]) if cfg.get("resize_to") else None))
@@ -93,7 +93,7 @@ def benchmark_backend(model: str, backend: str, images: list[Path], cfg: dict,
 
     images_bgr = [read_image(p) for p in images]
 
-    print(f"    warm-up {cfg['warmup']} lan (ca duong ong, bang anh that)...")
+    print(f"    warm-up {cfg['warmup']} lần (cả đường ống, bằng ảnh thật)...")
     runner.warmup(int(cfg["warmup"]), images_bgr[0])
 
     sessions: list[dict] = []
@@ -103,7 +103,7 @@ def benchmark_backend(model: str, backend: str, images: list[Path], cfg: dict,
     with ResourceMonitor() as rm:
         for s in range(n_sessions):
             if s > 0 and cfg["cooldown_seconds"]:
-                print(f"    de nguoi {cfg['cooldown_seconds']}s truoc phien {s+1}...")
+                print(f"    để nguội {cfg['cooldown_seconds']}s trước phiên {s+1}...")
                 time.sleep(float(cfg["cooldown_seconds"]))
             temps_before = device_info.temperatures()
             t0 = time.perf_counter()
@@ -180,15 +180,15 @@ def main() -> int:
     ap.add_argument("--backends", nargs="*", default=None)
     ap.add_argument("--sessions", type=int, default=None)
     ap.add_argument("--warmup", type=int, default=None)
-    ap.add_argument("--settle", type=int, default=None, help="giay cho on dinh nhiet truoc khi do")
+    ap.add_argument("--settle", type=int, default=None, help="giây chờ ổn định nhiệt trước khi đo")
     ap.add_argument("--cooldown", type=int, default=None)
     ap.add_argument("--max-images", type=int, default=None)
     ap.add_argument("--nc", type=int, default=None,
-                    help="ghi de so lop (vd 80 khi do thu bang model COCO pretrained)")
+                    help="ghi đè số lớp (vd 80 khi đo thử bằng model COCO pretrained)")
     ap.add_argument("--out", default="results/benchmark.json")
     ap.add_argument("--allow-non-jetson", action="store_true")
     ap.add_argument("--force", action="store_true",
-                    help="cho phep ghi de ket qua da do voi nhieu anh/phien hon")
+                    help="cho phép ghi đè kết quả đã đo với nhiều ảnh/phiên hơn")
     a = ap.parse_args()
 
     root = repo_root()
@@ -201,31 +201,31 @@ def main() -> int:
     models = a.models or cfg["models"]
     backends = a.backends or cfg["backends"]
 
-    dev = device_info.collect("truoc khi benchmark")
+    dev = device_info.collect("trước khi benchmark")
     if not dev["is_jetson"] and not a.allow_non_jetson:
-        print("[loi] Rang buoc C1: moi phep do hieu nang phai chay TREN JETSON.\n"
-              "      Them --allow-non-jetson neu chi muon thu cho chay duoc.", file=sys.stderr)
+        print("[lỗi] Ràng buộc C1: mọi phép đo hiệu năng phải chạy TRÊN JETSON.\n"
+              "      Thêm --allow-non-jetson nếu chỉ muốn thử cho chạy được.", file=sys.stderr)
         return 1
 
     data = root / a.data
     if not data.exists():
-        print(f"[loi] khong thay {data} — chay 'make data' truoc", file=sys.stderr)
+        print(f"[lỗi] không thấy {data} — chạy 'make data' trước", file=sys.stderr)
         return 1
     images = test_images(data, cfg["split"], cfg.get("max_images"))
     if not images:
-        print("[loi] tap test rong", file=sys.stderr)
+        print("[lỗi] tập test rong", file=sys.stderr)
         return 1
 
     print(f"[bench] thiet bi : {dev.get('board_model') or dev['hostname']} ({dev['arch']})")
     pm = dev["power_mode"]
-    print(f"[bench] che do nguon: {pm['current_name']} (id={pm['current_id']}) "
-          f"trong so {list(pm['available'].values())}")
+    print(f"[bench] chế độ nguồn: {pm['current_name']} (id={pm['current_id']}) "
+          f"trọng số {list(pm['available'].values())}")
     print(f"[bench] nhiet do : {dev['temperature_mean_c']} C")
-    print(f"[bench] anh      : {len(images)} ({cfg['split']}), cung thu tu cho moi dinh dang")
+    print(f"[bench] ảnh      : {len(images)} ({cfg['split']}), cùng thứ tự cho mọi định dạng")
     print(f"[bench] phien    : {cfg['sessions']} x (warm-up {cfg['warmup']})")
 
     if cfg.get("settle_seconds"):
-        print(f"[bench] cho on dinh nhiet {cfg['settle_seconds']}s (SRS §7.1 buoc 1)...")
+        print(f"[bench] chờ ổn định nhiệt {cfg['settle_seconds']}s (SRS §7.1 buoc 1)...")
         time.sleep(float(cfg["settle_seconds"]))
         dev["temperatures_after_settle_c"] = device_info.temperatures()
 
@@ -255,9 +255,9 @@ def main() -> int:
                 old_s = len(old.get("sessions", []))
                 new_n, new_s = len(images), int(cfg["sessions"])
                 if (old_n, old_s) > (new_n, new_s):
-                    print(f"    BO QUA: da co phep do day du hon ({old_n} anh x {old_s} phien) "
-                          f"— lan nay chi {new_n} anh x {new_s} phien.")
-                    print("            Dung --force de ghi de, hoac --out de ghi ra file khac.")
+                    print(f"    BỎ QUA: đã có phép đo đầy đủ hơn ({old_n} ảnh x {old_s} phien) "
+                          f"— lần này chỉ {new_n} ảnh x {new_s} phien.")
+                    print("            Dùng --force để ghi đè, hoặc --out để ghi ra file khác.")
                     continue
 
             res = benchmark_backend(model, backend, images, cfg, root)
@@ -271,8 +271,8 @@ def main() -> int:
                 print(f"       pre {ms['preprocess']['p50']} + infer {ms['inference']['p50']} "
                       f"+ post {ms['postprocess']['p50']} ms")
                 if res["session_p50_spread_percent"] > 10:
-                    print(f"    [canh bao] p50 lech {res['session_p50_spread_percent']}% giua cac phien "
-                          f"(> 10%, NFR-02 khong dat) — kiem tra throttling nhiet")
+                    print(f"    [cảnh báo] p50 lệch {res['session_p50_spread_percent']}% giữa các phiên "
+                          f"(> 10%, NFR-02 không đạt) — kiểm tra throttling nhiệt")
             write_json(out_path, payload)
 
     payload["device_after"] = device_info.collect("sau khi benchmark")

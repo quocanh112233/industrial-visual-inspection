@@ -21,7 +21,7 @@ def score_with_ultralytics(dets: list[np.ndarray], gts: list[np.ndarray]) -> dic
         from ultralytics.engine.validator import BaseValidator
         from ultralytics.utils.metrics import ap_per_class, box_iou
     except Exception as e:                                   # noqa: BLE001
-        print(f"    (bo qua doi chieu: khong nap duoc ultralytics — {e})")
+        print(f"    (bỏ qua đối chiếu: không nạp được ultralytics — {e})")
         return None
 
     holder = type("_V", (), {})()
@@ -48,7 +48,7 @@ def score_with_ultralytics(dets: list[np.ndarray], gts: list[np.ndarray]) -> dic
     ap = next((x for x in res if isinstance(x, np.ndarray) and x.ndim == 2
                and x.shape[1] == len(IOU_THRESHOLDS)), None)
     if ap is None:
-        print("    (bo qua doi chieu: khong tim thay mang AP trong ket qua ap_per_class)")
+        print("    (bỏ qua đối chiếu: không tìm thấy mảng AP trong kết quả ap_per_class)")
         return None
     return {"mAP50": round(float(ap[:, 0].mean()), 4),
             "mAP50_95": round(float(ap.mean()), 4)}
@@ -65,7 +65,7 @@ def main() -> int:
     p.add_argument("--iou", type=float, default=0.7)
     p.add_argument("--max-images", type=int, default=None)
     p.add_argument("--muc-tieu", type=float, default=0.7621,
-                   help="con so ultralytics.val() bao cho ban .pt")
+                   help="con số ultralytics.val() báo cho bản .pt")
     a = p.parse_args()
 
     root = repo_root()
@@ -74,13 +74,13 @@ def main() -> int:
     images, label_dir = test_set(root / a.data, "test", a.max_images)
     gts = load_ground_truth(images, label_dir)
     imgs_bgr = [read_image(q) for q in images]
-    print(f"[diag] {len(images)} anh, {sum(len(g) for g in gts)} bbox ground truth, {nc} lop")
+    print(f"[diag] {len(images)} ảnh, {sum(len(g) for g in gts)} bbox ground truth, {nc} lớp")
     print(f"[diag] model {a.model}/{a.backend}, conf={a.conf} iou={a.iou}")
-    print(f"[diag] moc doi chieu: ultralytics.val() = {a.muc_tieu:.4f}\n")
+    print(f"[diag] mốc đối chiếu: ultralytics.val() = {a.muc_tieu:.4f}\n")
 
     w = weights_for(root / "models" / a.model, a.backend)
     if not w.exists():
-        print(f"[loi] khong thay {w}", file=sys.stderr)
+        print(f"[lỗi] không thấy {w}", file=sys.stderr)
         return 1
 
     ket_qua = []
@@ -99,18 +99,18 @@ def main() -> int:
                   f"mAP@0.5:0.95 {m['mAP50_95']:.4f}  ({m['n_detections']} detection)")
             ket_qua.append((scaleup, multi_label, m, dets))
 
-    print("\n[A] Doi chieu PHEP TINH mAP tren cung mot tap detection:")
+    print("\n[A] Đối chiếu PHÉP TÍNH mAP trên cùng một tập detection:")
     for scaleup, multi_label, m, dets in ket_qua:
         ul = score_with_ultralytics(dets, gts)
         if ul is None:
             break
         d50 = m["mAP50"] - ul["mAP50"]
         print(f"    scaleup={str(scaleup):<5} multi_label={str(multi_label):<5} "
-              f"| cua ta {m['mAP50']:.4f} | ma ultralytics {ul['mAP50']:.4f} "
-              f"| lech {d50:+.4f} -> {'KHOP' if abs(d50) <= 0.005 else 'LECH'}")
+              f"| của ta {m['mAP50']:.4f} | mã ultralytics {ul['mAP50']:.4f} "
+              f"| lệch {d50:+.4f} -> {'KHỚP' if abs(d50) <= 0.005 else 'LỆCH'}")
 
     tot = min(ket_qua, key=lambda k: abs(k[2]["mAP50"] - a.muc_tieu))
-    print(f"\n[diag] gan moc doi chieu nhat: scaleup={tot[0]} multi_label={tot[1]} "
+    print(f"\n[diag] gần mốc đối chiếu nhất: scaleup={tot[0]} multi_label={tot[1]} "
           f"-> {tot[2]['mAP50']:.4f}")
     return 0
 

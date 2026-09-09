@@ -76,19 +76,19 @@ def evaluate(weights: Path, data: Path, split: str, imgsz: int, batch: int,
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     g = ap.add_mutually_exclusive_group(required=True)
-    g.add_argument("--name", help="ten run, se dung models/<name>/best.pt")
-    g.add_argument("--weights", help="duong dan trong so bat ky (.pt/.onnx/.engine)")
-    ap.add_argument("--config", default=None, help="config train, de lay imgsz cho khop")
+    g.add_argument("--name", help="tên run, sẽ dùng models/<name>/best.pt")
+    g.add_argument("--weights", help="đường dẫn trọng số bất kỳ (.pt/.onnx/.engine)")
+    ap.add_argument("--config", default=None, help="config train, để lấy imgsz cho khớp")
     ap.add_argument("--data", default="data/processed/data.yaml")
     ap.add_argument("--split", default="test", choices=["train", "val", "test"])
     ap.add_argument("--imgsz", type=int, default=None)
     ap.add_argument("--batch", type=int, default=16)
     ap.add_argument("--device", default=None)
-    ap.add_argument("--conf", type=float, default=0.001, help="thap de mAP khong bi cat ngon")
-    ap.add_argument("--iou", type=float, default=0.7, help="nguong IoU cua NMS")
+    ap.add_argument("--conf", type=float, default=0.001, help="thấp để mAP không bị cắt ngọn")
+    ap.add_argument("--iou", type=float, default=0.7, help="ngưỡng IoU của NMS")
     ap.add_argument("--rect", default=None, choices=["true", "false"],
-                    help="ep che do rect. Bo trong = de ultralytics tu quyet "
-                         "(True cho .pt, False cho dinh dang xuat) — xem docstring evaluate()")
+                    help="ep chế độ rect. Bỏ trống = để ultralytics tự quyết "
+                         "(True cho .pt, False cho định dạng xuất) — xem docs/input-framing.md")
     ap.add_argument("--out", default=None)
     a = ap.parse_args()
 
@@ -97,14 +97,14 @@ def main() -> int:
     if not weights.is_absolute():
         weights = root / weights
     if not weights.exists():
-        print(f"[loi] khong thay trong so: {weights}", file=sys.stderr)
+        print(f"[lỗi] không thấy trọng số: {weights}", file=sys.stderr)
         return 1
 
     data = Path(a.data)
     if not data.is_absolute():
         data = root / data
     if not data.exists():
-        print(f"[loi] khong thay {data} — chay 'make data' truoc", file=sys.stderr)
+        print(f"[lỗi] không thấy {data} — chạy 'make data' trước", file=sys.stderr)
         return 1
 
     imgsz = a.imgsz
@@ -117,8 +117,8 @@ def main() -> int:
             imgsz = json.loads(mf.read_text(encoding="utf-8"))["config"]["train"]["imgsz"]
     imgsz = imgsz or 640
 
-    print(f"[eval] trong so : {weights}")
-    print(f"[eval] tap      : {a.split}  imgsz={imgsz}  conf={a.conf}  iou={a.iou}")
+    print(f"[eval] trọng số : {weights}")
+    print(f"[eval] tập      : {a.split}  imgsz={imgsz}  conf={a.conf}  iou={a.iou}")
 
     rect = None if a.rect is None else (a.rect == "true")
     res = evaluate(weights, data, a.split, imgsz, a.batch, a.device, a.conf, a.iou, rect)
@@ -144,7 +144,7 @@ def main() -> int:
     print(f"[eval] mAP@0.5:0.95 {o['mAP50_95']:.4f}")
     print(f"[eval] precision    {o['precision']:.4f}")
     print(f"[eval] recall       {o['recall']:.4f}")
-    print(f"\n[eval] {'lop':<18}{'mAP50':>9}{'mAP50-95':>11}{'P':>9}{'R':>9}")
+    print(f"\n[eval] {'lớp':<18}{'mAP50':>9}{'mAP50-95':>11}{'P':>9}{'R':>9}")
     for c, v in res["per_class"].items():
         print(f"       {c:<18}{v.get('mAP50', 0):>9.4f}{v.get('mAP50_95', 0):>11.4f}"
               f"{v.get('precision', 0):>9.4f}{v.get('recall', 0):>9.4f}")
@@ -152,9 +152,9 @@ def main() -> int:
     print(f"\n[eval] ghi -> {out.relative_to(root) if out.is_relative_to(root) else out}")
 
     if res["format"] == "pt" and o["mAP50"] < MAP50_TARGET:
-        print(f"\n[canh bao] mAP@0.5 = {o['mAP50']:.4f} < nguong FR-05 la {MAP50_TARGET}.")
-        print("           Xem mAP theo lop o tren: neu chi mot lop keo xuong thi do la")
-        print("           dac tinh dataset (rui ro R4), khong phai loi pipeline.")
+        print(f"\n[cảnh báo] mAP@0.5 = {o['mAP50']:.4f} < ngưỡng FR-05 là {MAP50_TARGET}.")
+        print("           Xem mAP theo lớp o trên: nếu chỉ một lớp kéo xuống thì đó là")
+        print("           đặc tính dataset (rủi ro R4), không phải lỗi pipeline.")
         return 3
     return 0
 

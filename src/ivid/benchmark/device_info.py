@@ -85,7 +85,7 @@ def library_versions() -> dict[str, str]:
             m = __import__(mod)
             out[mod] = getattr(m, "__version__", "?")
         except Exception:
-            out[mod] = "khong cai"
+            out[mod] = "không cài"
     try:
         import torch
 

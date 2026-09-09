@@ -29,7 +29,7 @@ def average_precision(recall: np.ndarray, precision: np.ndarray) -> float:
 
 def compute_map(detections: list[np.ndarray], ground_truth: list[np.ndarray],
                 nc: int, iou_thresholds: np.ndarray = IOU_THRESHOLDS) -> dict:
-    assert len(detections) == len(ground_truth), "so anh khong khop"
+    assert len(detections) == len(ground_truth), "số ảnh không khớp"
     n_thr = len(iou_thresholds)
 
     stats: dict[int, list] = {c: [] for c in range(nc)}

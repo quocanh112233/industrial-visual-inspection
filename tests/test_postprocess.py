@@ -69,7 +69,7 @@ def test_decode_can_biet_nc_khi_so_anchor_qua_nho():
 
 def test_decode_bao_loi_khi_nc_khong_khop():
     raw = np.zeros((1, 4 + NC, 20), dtype=np.float32)
-    with pytest.raises(ValueError, match="khong khop nc"):
+    with pytest.raises(ValueError, match="không khớp nc"):
         decode(raw, nc=99)
 
 

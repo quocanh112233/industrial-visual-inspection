@@ -61,7 +61,7 @@ def main() -> int:
     names = class_names(cfg)
     out_dir = cfg["out_dir"]
     if not out_dir.exists():
-        print(f"[loi] khong thay {out_dir} — chay ivid.data.prepare truoc", file=sys.stderr)
+        print(f"[lỗi] không thấy {out_dir} — chạy ivid.data.prepare trước", file=sys.stderr)
         return 1
 
     st = gather(out_dir, names)
@@ -144,11 +144,11 @@ def main() -> int:
                {"splits": st, "total_boxes_by_class": tot_box,
                 "total_images_by_class": tot_img, "imbalance_ratio": round(imbalance, 3)})
 
-    print(f"[stats] mat can bang lop : {imbalance:.2f}x "
+    print(f"[stats] mất cân bằng lớp : {imbalance:.2f}x "
           f"({max(tot_box, key=tot_box.get)}={hi} / {min(tot_box, key=tot_box.get)}={lo})")
     for n in names:
-        print(f"[stats]   {n:<18} {tot_box[n]:5d} bbox  trong {tot_img[n]:5d} anh")
-    print(f"[stats] ghi -> {a.out} va results/data_stats.json")
+        print(f"[stats]   {n:<18} {tot_box[n]:5d} bbox  trong {tot_img[n]:5d} ảnh")
+    print(f"[stats] ghi -> {a.out} và results/data_stats.json")
     return 0
 
 

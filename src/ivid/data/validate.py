@@ -44,7 +44,7 @@ def check_split(split_dir: Path, names: list[str]) -> dict:
             except Exception as e:
                 issues["anh_hong"].append(f"{p.name}: {type(e).__name__}")
     except ImportError:
-        issues["_canh_bao"].append("chua cai Pillow -> bo qua kiem tra anh hong")
+        issues["_canh_bao"].append("chưa cài Pillow -> bỏ qua kiểm tra ảnh hỏng")
 
     n_boxes = 0
     n_duplicate = 0
@@ -123,7 +123,7 @@ def main() -> int:
     out_dir = cfg["out_dir"]
 
     if not out_dir.exists():
-        print(f"[loi] khong thay {out_dir}\n      chay truoc: python -m ivid.data.prepare", file=sys.stderr)
+        print(f"[lỗi] không thấy {out_dir}\n      chạy trước: python -m ivid.data.prepare", file=sys.stderr)
         return 1
 
     report = {s: check_split(out_dir / s, names) for s in SPLITS}
@@ -221,10 +221,10 @@ def main() -> int:
 
     for s in SPLITS:
         r = report[s]
-        print(f"[validate] {s:<6}: {r['n_images']:5d} anh  {r['n_boxes']:5d} bbox  "
-              f"{r['anh_nhieu_loai_loi']:3d} anh nhieu loai loi")
-    print(f"[validate] loi chan duong: {n_fatal}   canh bao: {n_warn}")
-    print(f"[validate] bao cao -> {a.out}")
+        print(f"[validate] {s:<6}: {r['n_images']:5d} ảnh  {r['n_boxes']:5d} bbox  "
+              f"{r['anh_nhieu_loai_loi']:3d} ảnh nhieu loai lỗi")
+    print(f"[validate] lỗi chặn đường: {n_fatal}   cảnh báo: {n_warn}")
+    print(f"[validate] báo cáo -> {a.out}")
     return 0 if n_fatal == 0 else 2
 
 

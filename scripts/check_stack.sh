@@ -16,7 +16,7 @@ def check(name, fn):
         print(f"  [LOI]  {name}: {type(e).__name__}: {e}")
 
 import numpy as np
-print(f"\n=== phien ban ===")
+print(f"\n=== phiên bản ===")
 print(f"  numpy        {np.__version__}  ({np.__file__})")
 for m in ("torch", "torchvision", "cv2", "onnxruntime", "tensorrt", "ultralytics",
           "onnx", "matplotlib", "scipy", "pandas"):
@@ -27,12 +27,12 @@ for m in ("torch", "torchvision", "cv2", "onnxruntime", "tensorrt", "ultralytics
         ok = False
         print(f"  {m:<12} KHONG IMPORT DUOC: {e}")
 
-print(f"\n=== phep thu that (day la phan hay hong) ===")
+print(f"\n=== phép thử thật (đây là phần hay hỏng) ===")
 import torch
 check("torch.from_numpy", lambda: tuple(torch.from_numpy(np.zeros((2,3), np.float32)).shape))
 check("torch -> numpy",   lambda: torch.zeros(3).numpy().shape)
 check("torch cuda",       lambda: (torch.cuda.is_available(), torch.cuda.get_device_name(0)))
-check("torch cuda tinh",  lambda: float((torch.ones(1000, device='cuda')*2).sum().item()))
+check("torch cuda tính",  lambda: float((torch.ones(1000, device='cuda')*2).sum().item()))
 
 import cv2
 check("cv2 resize",   lambda: cv2.resize(np.zeros((10,10,3), np.uint8), (20,20)).shape)
@@ -54,7 +54,7 @@ def _mpl():
     ax.plot(np.arange(5), np.arange(5) ** 2)
     import io
     buf = io.BytesIO(); fig.savefig(buf, format="png"); plt.close(fig)
-    return f"ve duoc bieu do ({buf.tell()} bytes)"
+    return f"vẽ được biểu đồ ({buf.tell()} bytes)"
 check("matplotlib ve hinh", _mpl)
 
 check("scipy", lambda: __import__("scipy.ndimage", fromlist=["x"]).maximum_filter(
@@ -63,8 +63,8 @@ check("pandas", lambda: __import__("pandas").DataFrame({"a": np.arange(3)}).sum(
 
 print()
 if ok:
-    print("=> Toan bo stack lam viec voi nhau duoc.")
+    print("=> Toàn bộ stack làm việc với nhau được.")
 else:
-    print("=> CO VAN DE. Xem cac dong [LOI] o tren.")
+    print("=> CÓ VẤN ĐỀ. Xem các dòng [LỖI] ở trên.")
 sys.exit(0 if ok else 1)
 PY

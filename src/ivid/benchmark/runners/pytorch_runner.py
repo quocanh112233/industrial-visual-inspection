@@ -15,7 +15,7 @@ class PyTorchRunner(BaseRunner):
         self.torch = torch
         wanted = self.device
         if wanted.startswith("cuda") and not torch.cuda.is_available():
-            raise RuntimeError("yeu cau CUDA nhung torch khong thay GPU")
+            raise RuntimeError("yêu cầu CUDA nhưng torch không thấy GPU")
         self._dev = torch.device(wanted)
 
         y = YOLO(str(self.weights))

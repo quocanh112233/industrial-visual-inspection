@@ -55,8 +55,8 @@ def test_bang_chinh_co_du_cot():
                 "RAM tiến trình", "Nạp (s)"):
         assert col in header
     assert "GPU mem" not in header, (
-        "Cot bo nho chinh khong duoc lay so cua torch: no bao 0 MB cho ONNX "
-        "Runtime va bo qua bo nho engine cua TensorRT")
+        "Cột bộ nhớ chính không được lấy số của torch: nó báo 0 MB cho ONNX "
+        "Runtime và bỏ qua bộ nhớ engine của TensorRT")
     assert len(lines) == 2 + 2
 
 
@@ -69,7 +69,7 @@ def test_ket_luan_tinh_dung_ty_le_tang_toc():
 def test_khuyen_nghi_khong_chon_cau_hinh_cham_chi_vi_hon_ti_mAP():
     text = "\n".join(conclusions(rows_from(BASE), 200.0))
     reco = [line for line in text.splitlines() if "Khuyến nghị" in line]
-    assert reco, "khong sinh ra dong khuyen nghi"
+    assert reco, "không sinh ra dòng khuyến nghị"
     assert "TensorRT" in reco[0]
     assert "PyTorch" not in reco[0]
 
@@ -90,10 +90,10 @@ def test_bao_cao_noi_ro_khi_khong_cau_hinh_nao_dap_ung_nhip():
 
 
 def test_thieu_du_lieu_thi_bao_thieu_chu_khong_no():
-    partial = {"runs": {"yolov8n|onnx": {"skipped": True, "reason": "khong thay best.onnx"}},
+    partial = {"runs": {"yolov8n|onnx": {"skipped": True, "reason": "không thấy best.onnx"}},
                "accuracy": {}}
     rows = rows_from(partial)
-    assert rows[0]["latency_missing"] == "khong thay best.onnx"
+    assert rows[0]["latency_missing"] == "không thấy best.onnx"
     text = "\n".join(conclusions(rows, 200.0))
     assert "chưa đủ dữ liệu" in text or "chưa có dữ liệu" in text
 
@@ -115,8 +115,8 @@ def test_sinh_bao_cao_hai_lan_cho_ra_noi_dung_giong_het():
     rows = rows_from(payload)
     a = build_report(payload, rows, [], 200.0)
     b = build_report(payload, rows, [], 200.0)
-    assert a == b, "sinh hai lan tu cung mot du lieu ra hai noi dung khac nhau"
-    assert "2026-09-09T10:05:00" in a, "bao cao phai ghi thoi diem DO"
+    assert a == b, "sinh hai lần từ cùng một dữ liệu ra hai nội dung khác nhau"
+    assert "2026-09-09T10:05:00" in a, "báo cáo phải ghi thời điểm ĐO"
 
 
 def test_ma_sinh_bao_cao_khong_dong_dau_thoi_gian_chay():
@@ -126,7 +126,7 @@ def test_ma_sinh_bao_cao_khong_dong_dau_thoi_gian_chay():
     for rel in ("src/ivid/data/validate.py", "src/ivid/data/stats.py"):
         text = (root / rel).read_text(encoding="utf-8")
         assert "datetime.now" not in text, (
-            f"{rel} dong dau thoi gian chay vao bao cao duoc commit -> gay diff gia")
+            f"{rel} đóng dấu thời gian chạy vào báo cáo được commit -> gây diff giả")
 
 
 def test_cot_ram_lay_tu_memprobe_chu_khong_lay_so_do_kem_benchmark():
@@ -151,7 +151,7 @@ def test_chua_do_ram_thi_bao_ro_chu_khong_bia_so():
 
 def test_cau_hinh_bi_bo_qua_khi_do_ram_khong_lam_hong_bang():
     payload = dict(BASE)
-    payload["memory"] = {"yolov8n|pytorch": {"skipped": True, "reason": "khong thay best.pt"}}
+    payload["memory"] = {"yolov8n|pytorch": {"skipped": True, "reason": "không thấy best.pt"}}
     bang = main_table(rows_from(payload))
     assert "make mem" in next(x for x in bang if "PyTorch" in x)
 

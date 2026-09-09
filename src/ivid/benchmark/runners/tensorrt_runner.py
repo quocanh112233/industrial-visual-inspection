@@ -18,7 +18,7 @@ def kiem_tra(ret):
         ret = (ret,)
     err, gia_tri = ret[0], ret[1:]
     if int(err) != 0:
-        raise RuntimeError(f"CUDA loi {int(err)} ({getattr(err, 'name', err)})")
+        raise RuntimeError(f"CUDA lỗi {int(err)} ({getattr(err, 'name', err)})")
     if not gia_tri:
         return None
     return gia_tri[0] if len(gia_tri) == 1 else gia_tri
@@ -38,21 +38,21 @@ class TensorRTRunner(BaseRunner):
         if int(err) == 35:
             raise RuntimeError(
                 f"cuda-python mang runtime CUDA {ver // 1000}.{ver % 1000 // 10} nhung "
-                "driver tren may cu hon, nen khong loi goi CUDA nao chay duoc.\n"
-                'Cai ban khop voi driver:  pip install "cuda-python<13"'
+                "driver trên may cũ hơn, nên không lời gọi CUDA nào chạy được.\n"
+                'Cài bản khớp với driver:  pip install "cuda-python<13"'
             )
         kiem_tra((err, so_gpu))
         if not so_gpu:
-            raise RuntimeError("CUDA khong thay GPU nao — khong chay duoc TensorRT")
+            raise RuntimeError("CUDA không thấy GPU nào — không chạy được TensorRT")
 
         logger = trt.Logger(trt.Logger.ERROR)
         runtime = trt.Runtime(logger)
         self.engine = runtime.deserialize_cuda_engine(self.weights.read_bytes())
         if self.engine is None:
             raise RuntimeError(
-                f"khong nap duoc engine {self.weights}.\n"
-                "Engine TensorRT gan voi phan cung + phien ban thu vien: neu no duoc "
-                "build o may khac hoac o ban TensorRT khac thi phai build lai tai cho."
+                f"không nạp được engine {self.weights}.\n"
+                "Engine TensorRT gan với phần cứng + phiên bản thư viện: nếu nó được "
+                "build ở máy khác hoặc ở bản TensorRT khác thì phải build lại tại chỗ."
             )
         self.ctx = self.engine.create_execution_context()
 
@@ -85,14 +85,14 @@ class TensorRTRunner(BaseRunner):
                                  "shape": list(shape), "dtype": np_dtype.name})
 
         if len(self.inputs) != 1 or len(self.outputs) != 1:
-            raise RuntimeError(f"mong doi 1 input / 1 output, engine co {self.io_spec}")
+            raise RuntimeError(f"mong đợi 1 input / 1 output, engine có {self.io_spec}")
 
         self._in, self._out = self.inputs[0], self.outputs[0]
         exp = self.host[self._in].shape
         if tuple(exp)[-2:] != (self.imgsz, self.imgsz):
             raise ValueError(
-                f"engine nhan {tuple(exp)} nhung benchmark dang dung imgsz={self.imgsz}. "
-                "Export lai ONNX voi dung imgsz roi build lai engine."
+                f"engine nhan {tuple(exp)} nhưng benchmark đang dùng imgsz={self.imgsz}. "
+                "Export lại ONNX với đúng imgsz rồi build lại engine."
             )
 
         self.stream = int(kiem_tra(cudart.cudaStreamCreate()))
@@ -121,7 +121,7 @@ class TensorRTRunner(BaseRunner):
         info.update(
             framework=f"tensorrt {self.trt.__version__}",
             gpu=ten.decode(errors="replace").strip("\x00") if isinstance(ten, bytes) else str(ten),
-            cap_phat="cuda-python (cudart), khong dung torch",
+            cap_phat="cuda-python (cudart), không dùng torch",
             io=self.io_spec,
             precision="fp16 (theo configs/export.yaml)",
             io_dtypes=sorted(dtypes),

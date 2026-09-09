@@ -78,7 +78,7 @@ def add_caption(tile: np.ndarray, text: str, height: int = 30) -> np.ndarray:
 
 def build_grid(tiles: list[np.ndarray], cols: int = 3, gap: int = 6) -> np.ndarray:
     if not tiles:
-        raise ValueError("khong co o nao de ghep")
+        raise ValueError("không có o nao để ghep")
     h, w = tiles[0].shape[:2]
     rows = (len(tiles) + cols - 1) // cols
     canvas = np.full((rows * h + (rows - 1) * gap,
@@ -124,13 +124,13 @@ def main() -> int:
     ap.add_argument("--backend", default="tensorrt", choices=["pytorch", "onnx", "tensorrt"])
     ap.add_argument("--data", default="data/processed/data.yaml")
     ap.add_argument("--config", default="configs/benchmark.yaml",
-                    help="lay imgsz va resize_to tu day, de hinh minh hoa dung che do "
-                         "khung anh voi so lieu trong bao cao")
+                    help="lấy imgsz và resize_to từ đây, để hình minh hoạ đúng chế độ "
+                         "khung ảnh với số liệu trong báo cáo")
     ap.add_argument("--imgsz", type=int, default=None)
     ap.add_argument("--resize-to", type=int, default=None)
     ap.add_argument("--conf", type=float, default=0.25)
     ap.add_argument("--iou", type=float, default=0.7)
-    ap.add_argument("--tile", type=int, default=320, help="canh moi o anh, pixel")
+    ap.add_argument("--tile", type=int, default=320, help="canh mọi o ảnh, pixel")
     ap.add_argument("--cols", type=int, default=3)
     ap.add_argument("--out", default="docs/images/sample_detections.png")
     a = ap.parse_args()
@@ -150,12 +150,12 @@ def main() -> int:
     gts = load_ground_truth(images, label_dir)
     idx = chon_anh_moi_lop(images, gts, nc)
     if not idx:
-        print("[loi] khong chon duoc anh nao", file=sys.stderr)
+        print("[lỗi] không chon được ảnh nao", file=sys.stderr)
         return 1
 
     w = weights_for(root / "models" / a.model, a.backend)
     if not w.exists():
-        print(f"[loi] khong thay {w}", file=sys.stderr)
+        print(f"[lỗi] không thấy {w}", file=sys.stderr)
         return 1
     runner = build_runner(a.backend, w, imgsz=imgsz, conf=a.conf, iou=a.iou, nc=nc,
                           resize_to=resize_to)
@@ -183,8 +183,8 @@ def main() -> int:
     out.parent.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(out), grid)
     khung = f"{imgsz}" + (f"/{resize_to}" if resize_to else "")
-    print(f"[demo] {len(tiles)} anh, backend {a.backend}, conf {a.conf}, khung {khung}")
-    print("[demo] hop trang = ground truth, hop mau = du doan")
+    print(f"[demo] {len(tiles)} ảnh, backend {a.backend}, conf {a.conf}, khung {khung}")
+    print("[demo] hộp trang = ground truth, hộp mau = du doan")
     print(f"[demo] ghi -> {rel_to_root(out)}  ({grid.shape[1]}x{grid.shape[0]})")
     return 0
 

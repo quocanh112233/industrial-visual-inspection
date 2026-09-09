@@ -17,7 +17,7 @@ def load_engine(path: Path):
     runtime = trt.Runtime(logger)
     engine = runtime.deserialize_cuda_engine(path.read_bytes())
     if engine is None:
-        raise RuntimeError(f"Khong deserialize duoc engine: {path}")
+        raise RuntimeError(f"Không deserialize được engine: {path}")
     return engine
 
 
@@ -27,7 +27,7 @@ def run(engine_path: Path, iters: int = 100, warmup: int = 20) -> dict:
     import torch
 
     if not torch.cuda.is_available():
-        raise RuntimeError("torch khong thay CUDA — khong the chay TensorRT qua torch buffer")
+        raise RuntimeError("torch không thấy CUDA — không thể chạy TensorRT qua torch buffer")
 
     engine = load_engine(engine_path)
     ctx = engine.create_execution_context()
@@ -94,11 +94,11 @@ def main() -> int:
     ap.add_argument("engine", type=Path)
     ap.add_argument("--iters", type=int, default=100)
     ap.add_argument("--warmup", type=int, default=20)
-    ap.add_argument("--json", type=Path, help="ghi ket qua ra file JSON")
+    ap.add_argument("--json", type=Path, help="ghi kết quả ra file JSON")
     a = ap.parse_args()
 
     if not a.engine.exists():
-        print(f"[loi] khong thay engine: {a.engine}", file=sys.stderr)
+        print(f"[lỗi] không thấy engine: {a.engine}", file=sys.stderr)
         return 1
 
     res = run(a.engine, a.iters, a.warmup)
@@ -106,7 +106,7 @@ def main() -> int:
     if a.json:
         a.json.parent.mkdir(parents=True, exist_ok=True)
         a.json.write_text(json.dumps(res, indent=2), encoding="utf-8")
-        print(f"\n-> da ghi {a.json}")
+        print(f"\n-> đã ghi {a.json}")
     return 0
 
 

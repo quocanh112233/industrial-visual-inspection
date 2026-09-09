@@ -12,7 +12,7 @@ def letterbox(img: np.ndarray, new_shape: int = 640,
     h, w = img.shape[:2]
     dich = resize_to or new_shape
     if dich > new_shape:
-        raise ValueError(f"resize_to={dich} lon hon khung new_shape={new_shape}")
+        raise ValueError(f"resize_to={dich} lớn hơn khung new_shape={new_shape}")
     r = min(dich / h, dich / w)
     if not scaleup:
         r = min(r, 1.0)
@@ -40,5 +40,5 @@ def read_image(path) -> np.ndarray:
 
     img = cv2.imread(str(path), cv2.IMREAD_COLOR)
     if img is None:
-        raise ValueError(f"khong doc duoc anh: {path}")
+        raise ValueError(f"không doc được ảnh: {path}")
     return img

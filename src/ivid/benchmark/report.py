@@ -39,7 +39,7 @@ def rows_from(payload: dict) -> list[dict]:
                 warn=r["backend_info"].get("CANH_BAO"),
             )
         else:
-            row["latency_missing"] = (r or {}).get("reason", "chua do")
+            row["latency_missing"] = (r or {}).get("reason", "chưa do")
         if mem and not mem.get("skipped"):
             row["mem_delta_mb"] = mem.get("rss_delta_mb")
             row["load_s"] = mem.get("nap_giay")
@@ -52,7 +52,7 @@ def rows_from(payload: dict) -> list[dict]:
             row.update(map50=an["mAP50"], map5095=an["mAP50_95"],
                        precision=an["precision"], recall=an["recall"], per_class=pc)
         else:
-            row["accuracy_missing"] = (an or {}).get("reason", "chua do")
+            row["accuracy_missing"] = (an or {}).get("reason", "chưa do")
         out.append(row)
     return out
 
@@ -73,7 +73,7 @@ def make_charts(rows: list[dict], out_dir: Path) -> list[str]:
         matplotlib.use("Agg")
         import matplotlib.pyplot as plt
     except ImportError:
-        print("[report] chua cai matplotlib -> bo qua bieu do")
+        print("[report] chưa cài matplotlib -> bỏ qua biểu đồ")
         return []
 
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -413,20 +413,20 @@ def main() -> int:
     ap.add_argument("--out", default="docs/benchmark-report.md")
     ap.add_argument("--images", default="docs/images")
     ap.add_argument("--cycle-ms", type=float, default=200.0,
-                    help="nhip day chuyen de danh gia (SRS §7.3 cau 2)")
+                    help="nhịp dây chuyền để đánh giá (SRS §7.3 câu 2)")
     ap.add_argument("--update-readme", action="store_true",
-                    help="chen bang ket qua vao README giua hai moc IVID_TABLE")
+                    help="chèn bảng kết quả vào README giữa hai mốc IVID_TABLE")
     a = ap.parse_args()
 
     root = repo_root()
     src = root / a.input
     if not src.exists():
-        print(f"[loi] khong thay {src} — chay ivid.benchmark.latency truoc", file=sys.stderr)
+        print(f"[lỗi] không thấy {src} — chạy ivid.benchmark.latency trước", file=sys.stderr)
         return 1
     payload = json.loads(src.read_text(encoding="utf-8"))
     rows = rows_from(payload)
     if not rows:
-        print("[loi] file benchmark khong co ket qua nao", file=sys.stderr)
+        print("[lỗi] file benchmark không có kết quả nao", file=sys.stderr)
         return 1
 
     charts = make_charts(rows, root / a.images)
@@ -436,9 +436,9 @@ def main() -> int:
     out.write_text(md, encoding="utf-8")
 
     print("\n".join(main_table(rows)))
-    print(f"\n[report] bao cao -> {a.out}")
+    print(f"\n[report] báo cáo -> {a.out}")
     for c in charts:
-        print(f"[report] bieu do -> {a.images}/{c}")
+        print(f"[report] biểu đồ -> {a.images}/{c}")
 
     if a.update_readme:
         readme = root / "README.md"
@@ -450,9 +450,9 @@ def main() -> int:
             head, rest = text.split("<!-- IVID_TABLE_START -->", 1)
             _, tail = rest.split("<!-- IVID_TABLE_END -->", 1)
             readme.write_text(head + block + tail, encoding="utf-8")
-            print("[report] da cap nhat bang trong README.md")
+            print("[report] đã cập nhật bảng trong README.md")
         else:
-            print("[report] README chua co moc <!-- IVID_TABLE_START --> — bo qua")
+            print("[report] README chưa có mốc <!-- IVID_TABLE_START --> — bỏ qua")
     return 0
 
 

@@ -35,13 +35,13 @@ def voc_to_yolo(xml_path: Path, names: list[str]) -> list[str]:
     size = root.find("size")
     w, h = float(size.find("width").text), float(size.find("height").text)
     if w <= 0 or h <= 0:
-        raise ValueError(f"{xml_path.name}: kich thuoc anh khong hop le ({w}x{h})")
+        raise ValueError(f"{xml_path.name}: kích thước ảnh không hợp lệ ({w}x{h})")
 
     lines: list[str] = []
     for obj in root.findall("object"):
         name = obj.find("name").text.strip()
         if name not in names:
-            raise ValueError(f"{xml_path.name}: lop la '{name}' (khong co trong configs/data.yaml)")
+            raise ValueError(f"{xml_path.name}: lớp là '{name}' (không có trong configs/data.yaml)")
         b = obj.find("bndbox")
         x1, y1 = float(b.find("xmin").text), float(b.find("ymin").text)
         x2, y2 = float(b.find("xmax").text), float(b.find("ymax").text)
@@ -120,26 +120,26 @@ def main() -> int:
     raw_dir, out_dir = cfg["raw_dir"], cfg["out_dir"]
 
     if not raw_dir.exists():
-        print(f"[loi] khong thay {raw_dir}\n      chay truoc: bash scripts/download_dataset.sh", file=sys.stderr)
+        print(f"[lỗi] không thấy {raw_dir}\n      chạy trước: bash scripts/download_dataset.sh", file=sys.stderr)
         return 1
 
     images = find_images(raw_dir)
     if not images:
-        print(f"[loi] khong co anh nao trong {raw_dir}", file=sys.stderr)
+        print(f"[lỗi] không có ảnh nao trong {raw_dir}", file=sys.stderr)
         return 1
 
     dup = {p.name for p in images if [q.name for q in images].count(p.name) > 1}
     if dup:
-        print(f"[loi] ten anh bi trung giua cac thu muc con: {sorted(dup)[:5]}", file=sys.stderr)
+        print(f"[lỗi] tên ảnh bị trùng giữa các thư mục con: {sorted(dup)[:5]}", file=sys.stderr)
         return 1
 
-    print(f"[prepare] nguon    : {raw_dir}")
-    print(f"[prepare] tim thay : {len(images)} anh")
+    print(f"[prepare] nguồn    : {raw_dir}")
+    print(f"[prepare] tìm thấy : {len(images)} ảnh")
 
     ratios = {k: float(cfg["split"][k]) for k in SPLITS}
     total = sum(ratios.values())
     if abs(total - 1.0) > 1e-6:
-        print(f"[loi] ti le chia cong lai bang {total}, phai bang 1.0", file=sys.stderr)
+        print(f"[lỗi] tỉ lệ chia cộng lại bằng {total}, phải bằng 1.0", file=sys.stderr)
         return 1
 
     splits = stratified_split(images, ratios, int(cfg["split"]["seed"]), bool(cfg["split"]["stratify"]))
@@ -207,11 +207,11 @@ def main() -> int:
     }
     write_json(root / "results" / "dataset_manifest.json", manifest)
 
-    print(f"[prepare] nguon nhan: {dict(src_kinds)}")
+    print(f"[prepare] nguồn nhãn: {dict(src_kinds)}")
     for s in SPLITS:
-        print(f"[prepare] {s:<6}: {len(splits[s]):5d} anh  {n_boxes[s]:5d} bbox  "
-              f"{n_empty[s]:3d} anh khong co bbox  {n_dupes[s]:2d} bbox trung lap da bo")
-    print(f"[prepare] tong     : {sum(len(v) for v in splits.values())} anh (goc {len(images)})")
+        print(f"[prepare] {s:<6}: {len(splits[s]):5d} ảnh  {n_boxes[s]:5d} bbox  "
+              f"{n_empty[s]:3d} ảnh không có bbox  {n_dupes[s]:2d} bbox trùng lặp đã bỏ")
+    print(f"[prepare] tong     : {sum(len(v) for v in splits.values())} ảnh (goc {len(images)})")
     print(f"[prepare] ghi      : {ds_yaml}")
     print(f"[prepare] manifest : results/dataset_manifest.json")
     print(f"[prepare] hash     : {manifest['dataset_sha256'][:16]}...")

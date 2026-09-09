@@ -4,11 +4,11 @@ from pydantic import BaseModel, Field
 
 
 class Detection(BaseModel):
-    cls: str = Field(..., alias="class", description="Ten loai loi be mat")
-    class_id: int = Field(..., description="Chi so lop, khop thu tu trong configs/data.yaml")
+    cls: str = Field(..., alias="class", description="Tên loại lỗi bề mặt")
+    class_id: int = Field(..., description="Chỉ số lớp, khớp thứ tự trong configs/data.yaml")
     confidence: float = Field(..., ge=0.0, le=1.0)
     bbox: list[float] = Field(..., min_length=4, max_length=4,
-                              description="[x1, y1, x2, y2] theo pixel cua ANH GOC")
+                              description="[x1, y1, x2, y2] theo pixel của ANH GOC")
 
     model_config = {"populate_by_name": True}
 

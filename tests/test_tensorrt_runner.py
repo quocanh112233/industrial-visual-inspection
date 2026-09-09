@@ -34,7 +34,7 @@ def test_ma_thanh_cong_nhieu_gia_tri_tra_ve_tuple():
 
 
 def test_ma_loi_thi_nem_ngoai_le():
-    with pytest.raises(RuntimeError, match="CUDA loi 2"):
+    with pytest.raises(RuntimeError, match="CUDA lỗi 2"):
         kiem_tra((HET_BO_NHO, 0))
 
 

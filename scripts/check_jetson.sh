@@ -3,17 +3,17 @@
 sec() { printf '\n===== %s =====\n' "$1"; }
 
 sec "1. THIET BI / L4T"
-cat /etc/nv_tegra_release 2>/dev/null || echo "(khong co /etc/nv_tegra_release)"
+cat /etc/nv_tegra_release 2>/dev/null || echo "(không có /etc/nv_tegra_release)"
 cat /proc/device-tree/model 2>/dev/null; echo
 uname -a
 
 sec "2. JETPACK"
 apt-cache show nvidia-jetpack 2>/dev/null | grep -E '^(Package|Version)' | head -4 \
-  || echo "(khong tim thay goi nvidia-jetpack)"
+  || echo "(không tìm thấy gói nvidia-jetpack)"
 dpkg-query --show nvidia-l4t-core 2>/dev/null
 
 sec "3. CUDA"
-nvcc --version 2>/dev/null || echo "(nvcc khong co trong PATH - thu /usr/local/cuda/bin/nvcc)"
+nvcc --version 2>/dev/null || echo "(nvcc không có trong PATH - thử /usr/local/cuda/bin/nvcc)"
 /usr/local/cuda/bin/nvcc --version 2>/dev/null
 ls -d /usr/local/cuda* 2>/dev/null
 cat /usr/local/cuda/version.json 2>/dev/null | head -12
@@ -24,13 +24,13 @@ dpkg -l 2>/dev/null | grep -i cudnn | awk '{print $2, $3}'
 sec "5. TENSORRT"
 dpkg -l 2>/dev/null | grep -iE 'tensorrt|libnvinfer' | awk '{print $2, $3}'
 python3 -c "import tensorrt; print('python tensorrt:', tensorrt.__version__)" 2>&1 | tail -1
-/usr/src/tensorrt/bin/trtexec --version 2>&1 | head -3 || echo "(khong co trtexec)"
+/usr/src/tensorrt/bin/trtexec --version 2>&1 | head -3 || echo "(không có trtexec)"
 
 sec "6. PYTHON / PIP"
 python3 --version
 python3 -c "import sys; print(sys.executable)"
 pip3 --version 2>/dev/null
-pip3 list 2>/dev/null | grep -iE '^(torch|torchvision|onnx|onnxruntime|numpy|opencv|ultralytics|pycuda)' || echo "(chua cai package nao lien quan)"
+pip3 list 2>/dev/null | grep -iE '^(torch|torchvision|onnx|onnxruntime|numpy|opencv|ultralytics|pycuda)' || echo "(chưa cài package nào liên quan)"
 
 sec "7. PYTORCH + CUDA"
 python3 - <<'PY' 2>&1 | tail -8
@@ -42,7 +42,7 @@ try:
     if torch.cuda.is_available():
         print("device:", torch.cuda.get_device_name(0))
 except Exception as e:
-    print("torch chua cai hoac loi:", e)
+    print("torch chưa cài hoặc lỗi:", e)
 PY
 
 sec "8. ONNXRUNTIME"
@@ -52,12 +52,12 @@ try:
     print("onnxruntime:", ort.__version__)
     print("providers:", ort.get_available_providers())
 except Exception as e:
-    print("onnxruntime chua cai:", e)
+    print("onnxruntime chưa cài:", e)
 PY
 
 sec "9. CHE DO NGUON / XUNG NHIP  (FR-14)"
-sudo nvpmodel -q 2>/dev/null || nvpmodel -q 2>/dev/null || echo "(can sudo)"
-sudo jetson_clocks --show 2>/dev/null | head -20 || echo "(can sudo hoac khong co jetson_clocks)"
+sudo nvpmodel -q 2>/dev/null || nvpmodel -q 2>/dev/null || echo "(cần sudo)"
+sudo jetson_clocks --show 2>/dev/null | head -20 || echo "(cần sudo hoặc không có jetson_clocks)"
 
 sec "10. NHIET DO"
 for z in /sys/devices/virtual/thermal/thermal_zone*; do
@@ -70,14 +70,14 @@ df -h / /home 2>/dev/null | sort -u
 swapon --show 2>/dev/null
 
 sec "12. DOCKER"
-docker --version 2>/dev/null || echo "(chua co docker)"
+docker --version 2>/dev/null || echo "(chưa có docker)"
 docker info 2>/dev/null | grep -iE 'runtime|default runtime'
 cat /etc/docker/daemon.json 2>/dev/null
 
-sec "13. jetson-stats (khuyen nghi cai: sudo pip3 install -U jetson-stats)"
-jetson_release 2>/dev/null || echo "(chua cai jetson-stats)"
+sec "13. jetson-stats (khuyến nghị cài: sudo pip3 install -U jetson-stats)"
+jetson_release 2>/dev/null || echo "(chưa cài jetson-stats)"
 
-sec "14. MANG (de setup ssh tu may dev)"
+sec "14. MẠNG (để setup ssh từ máy dev)"
 hostname
 ip -4 addr show 2>/dev/null | grep -oP '(?<=inet\s)\d+(\.\d+){3}' | grep -v 127.0.0.1
 

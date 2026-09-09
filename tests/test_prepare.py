@@ -55,7 +55,7 @@ def test_chia_deu_tung_lop_khi_bat_stratify():
     for split, expect in (("train", 70), ("val", 15), ("test", 15)):
         for c in CLASSES:
             n = sum(1 for p in s[split] if primary_class(p) == c)
-            assert n == expect, f"{split}/{c}: mong {expect}, duoc {n}"
+            assert n == expect, f"{split}/{c}: mong {expect}, được {n}"
 
 
 def test_thu_tu_dau_vao_khong_anh_huong_ket_qua():

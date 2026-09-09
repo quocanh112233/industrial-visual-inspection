@@ -69,7 +69,7 @@ def test_khong_truyen_resize_to_thi_anh_phu_kin_khung():
 
 
 def test_resize_to_lon_hon_khung_thi_bao_loi():
-    with pytest.raises(ValueError, match="lon hon khung"):
+    with pytest.raises(ValueError, match="lớn hơn khung"):
         letterbox(anh(200, 200), 640, resize_to=672)
 
 

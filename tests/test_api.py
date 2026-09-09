@@ -76,7 +76,7 @@ def test_predict_bbox_nam_trong_anh(client):
 def test_tu_choi_file_khong_phai_anh(client):
     r = client.post("/predict", files={"file": ("note.txt", b"khong phai anh", "text/plain")})
     assert r.status_code == 400
-    assert "không được hỗ trợ" in r.json()["detail"].lower() or "hỗ trợ" in r.json()["detail"]
+    assert "hỗ trợ" in r.json()["detail"]
 
 
 def test_tu_choi_anh_hong(client):

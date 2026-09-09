@@ -30,16 +30,16 @@ class OnnxRunner(BaseRunner):
             chosen = ["CPUExecutionProvider"]
 
         if not chosen:
-            raise RuntimeError(f"khong provider nao dung duoc. Co san: {available}")
+            raise RuntimeError(f"không provider nào dùng được. Có sẵn: {available}")
 
         gpu_eps = {"TensorrtExecutionProvider", "CUDAExecutionProvider"}
         self.gpu_available = bool(gpu_eps & set(chosen))
         if not self.gpu_available and self.device.startswith("cuda") and not self._allow_cpu:
             raise RuntimeError(
-                f"ONNX Runtime khong co GPU provider (chi co {available}).\n"
-                "Tren Jetson phai cai wheel cua jetson-ai-lab:\n"
+                f"ONNX Runtime không có GPU provider (chỉ có {available}).\n"
+                "Trên Jetson phải cài wheel của jetson-ai-lab:\n"
                 "  pip install --index-url https://pypi.jetson-ai-lab.io/jp6/cu126 onnxruntime-gpu\n"
-                "Chay voi allow_cpu_fallback=True neu that su muon do tren CPU."
+                "Chạy với allow_cpu_fallback=True nếu thật sự muốn đo trên CPU."
             )
 
         so = ort.SessionOptions()
@@ -66,8 +66,8 @@ class OnnxRunner(BaseRunner):
         )
         if not self.gpu_active:
             info["CANH_BAO"] = (
-                "ONNX Runtime dang chay tren CPU. So lieu latency cua dinh dang nay "
-                "KHONG so sanh duoc voi PyTorch/TensorRT chay tren GPU — phai ghi ro "
-                "trong bao ao thay vi de nguoi doc tuong la ONNX cham."
+                "ONNX Runtime đang chạy trên CPU. Số liệu latency của định dạng này "
+                "KHÔNG so sánh được với PyTorch/TensorRT chạy trên GPU — phải ghi rõ "
+                "trong báo cáo thay vì để người đọc tưởng là ONNX chậm."
             )
         return info

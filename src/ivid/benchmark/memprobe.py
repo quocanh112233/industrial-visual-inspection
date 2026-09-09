@@ -25,7 +25,7 @@ def do_mot_cau_hinh(model: str, backend: str, imgsz: int, conf: float, iou: floa
 
     w = weights_for(root / "models" / model, backend)
     if not w.exists():
-        return {"skipped": True, "reason": f"khong thay {w.name}"}
+        return {"skipped": True, "reason": f"không thấy {w.name}"}
 
     t0 = time.perf_counter()
     runner = build_runner(backend, w, imgsz=imgsz, conf=conf, iou=iou, resize_to=resize_to)
@@ -58,7 +58,7 @@ def do_mot_cau_hinh(model: str, backend: str, imgsz: int, conf: float, iou: floa
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--con", action="store_true", help="che do tien trinh con (noi bo)")
+    ap.add_argument("--con", action="store_true", help="chế độ tiến trình con (nội bộ)")
     ap.add_argument("--model")
     ap.add_argument("--backend")
     ap.add_argument("--config", default="configs/benchmark.yaml")
@@ -76,7 +76,7 @@ def main() -> int:
         print(json.dumps(r))
         return 0
 
-    print(f"[mem] moi cau hinh mot tien trinh rieng, {a.n_anh} anh moi lan")
+    print(f"[mem] mỗi cấu hình một tiến trình riêng, {a.n_anh} ảnh mỗi lần")
     ket_qua: dict[str, dict] = {}
     for model in cfg["models"]:
         for backend in cfg["backends"]:
@@ -90,7 +90,7 @@ def main() -> int:
             dong = [x for x in p.stdout.splitlines() if x.startswith("{")]
             if p.returncode != 0 or not dong:
                 ket_qua[key] = {"skipped": True,
-                                "reason": (p.stderr.strip().splitlines() or ["loi khong ro"])[-1]}
+                                "reason": (p.stderr.strip().splitlines() or ["lỗi không rõ"])[-1]}
                 print(f"    {key:<26} BO QUA: {ket_qua[key]['reason']}")
                 continue
             r = json.loads(dong[-1])
@@ -99,16 +99,16 @@ def main() -> int:
                 print(f"    {key:<26} BO QUA: {r['reason']}")
             else:
                 print(f"    {key:<26} +{r['rss_delta_mb']:>7.1f} MB  "
-                      f"(nap {r['nap_giay']}s, nen {r['rss_khoi_dong_mb']} MB)")
+                      f"(nạp {r['nap_giay']}s, nên {r['rss_khoi_dong_mb']} MB)")
 
     out = root / a.out
     payload = json.loads(out.read_text(encoding="utf-8")) if out.exists() else {}
     payload["memory"] = ket_qua
     payload["memory_method"] = (
-        "Moi cau hinh chay trong mot tien trinh rieng; con so la RSS dinh diem tru "
-        "RSS luc tien trinh vua khoi dong, nen bao gom ca chi phi nap thu vien. "
-        "Do chung mot tien trinh cho ca sau cau hinh se cho so cong don, khong so "
-        "sanh duoc — xem docstring ivid/benchmark/memprobe.py.")
+        "Mỗi cấu hình chạy trong một tiến trình riêng; con số là RSS đỉnh điểm trừ "
+        "RSS lúc tiến trình vừa khởi động, nên nó bao gồm cả chi phí nạp thư viện. "
+        "Đo chung một tiến trình cho cả sáu cấu hình sẽ cho số cộng dồn, không so "
+        "sánh được — xem docs/benchmark-report.md.")
     write_json(out, payload)
     print(f"[mem] ghi -> {a.out}")
     return 0

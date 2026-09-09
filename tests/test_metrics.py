@@ -102,7 +102,7 @@ def test_trung_binh_tren_cac_lop_co_mat_khong_tinh_lop_vang_mat():
     d = [det([0, 0, 10, 10, 0.9, 0])]
     g = [gt([0, 0, 10, 10, 0])]
     m5 = compute_map(d, g, nc=5)
-    assert m5["mAP50"] == pytest.approx(AP_MAX, abs=1e-3), "lop vang mat khong duoc keo mAP xuong"
+    assert m5["mAP50"] == pytest.approx(AP_MAX, abs=1e-3), "lớp vắng mặt không được kéo mAP xuống"
     assert set(m5["per_class"]) == {0}
 
 
@@ -129,4 +129,4 @@ def test_cong_thuc_khop_voi_ultralytics_khong_phai_pycocotools():
     g = [gt([0, 0, 10, 10, 0], [100, 100, 110, 110, 0])]
     ap = compute_map(d, g, nc=1)["mAP50"]
     assert ap == pytest.approx(0.75, abs=0.01)
-    assert ap > 0.6, "neu ra ~0.5 nghia la da doi sang cong thuc pycocotools"
+    assert ap > 0.6, "nếu ra ~0.5 nghĩa là đã đổi sang công thức pycocotools"

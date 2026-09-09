@@ -13,19 +13,19 @@ while [[ $# -gt 0 ]]; do
     --opsets) OPSETS="$2"; shift 2 ;;
     --imgsz)  IMGSZ="$2";  shift 2 ;;
     -h|--help) sed -n '2,16p' "$0"; exit 0 ;;
-    *) echo "Tham so la: $1" >&2; exit 2 ;;
+    *) echo "Tham số lạ: $1" >&2; exit 2 ;;
   esac
 done
 
 log()  { printf '\033[1;34m[ivid]\033[0m %s\n' "$*"; }
 ok()   { printf '\033[1;32m  [ok]\033[0m %s\n' "$*"; }
-bad()  { printf '\033[1;31m  [that bai]\033[0m %s\n' "$*"; }
+bad()  { printf '\033[1;31m  [thất bại]\033[0m %s\n' "$*"; }
 
 mkdir -p "$OUT" "$RES"
 [[ -d "$ROOT/.venv" ]] && source "$ROOT/.venv/bin/activate"
 export PYTHONUTF8=1 PYTHONIOENCODING=utf-8
 
-log "Phien ban moi truong"
+log "Phiên bản môi trường"
 python - "$RES/r1_env.json" <<'PY'
 import json, platform, subprocess, sys
 from pathlib import Path
@@ -76,11 +76,11 @@ Path(sys.argv[1]).write_text(json.dumps(info, indent=2))
 PY
 
 command -v "$TRTEXEC" >/dev/null 2>&1 || [[ -x "$TRTEXEC" ]] || {
-  bad "khong thay trtexec tai $TRTEXEC — dat bien TRTEXEC=/duong/dan/trtexec"; exit 1; }
+  bad "không thấy trtexec tại $TRTEXEC — đặt biến TRTEXEC=/duong/dẫn/trtexec"; exit 1; }
 
 cd "$OUT"
 if [[ ! -f yolov8n.pt ]]; then
-  log "Tai trong so pretrained yolov8n.pt"
+  log "Tải trọng số pretrained yolov8n.pt"
   python -c "from ultralytics import YOLO; YOLO('yolov8n.pt')" >/dev/null 2>&1 \
     || curl -fL -o yolov8n.pt https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8n.pt
   [[ -f "$ROOT/yolov8n.pt" ]] && mv "$ROOT/yolov8n.pt" .
@@ -120,22 +120,22 @@ onnx.checker.check_model(str(dst))
 print(f"  onnx.checker PASS -> {dst} ({dst.stat().st_size/1e6:.1f} MB)")
 PY
   then ok "ONNX opset $OP"; record "$OP" onnx ok "$(du -h "$ONNX" | cut -f1)"
-  else bad "ONNX opset $OP"; record "$OP" onnx fail "export hoac onnx.checker loi"; continue
+  else bad "ONNX opset $OP"; record "$OP" onnx fail "export hoặc onnx.checker lỗi"; continue
   fi
 
-  log "Build TensorRT engine FP16 (co the mat 2-5 phut)"
+  log "Build TensorRT engine FP16 (có the mat 2-5 phút)"
   LOG="$OUT/trtexec_op${OP}.log"
   if "$TRTEXEC" --onnx="$ONNX" --saveEngine="$ENG" --fp16 \
         --memPoolSize=workspace:2048MiB --skipInference > "$LOG" 2>&1
   then ok "engine opset $OP -> $(du -h "$ENG" | cut -f1)"; record "$OP" engine ok "$(du -h "$ENG" | cut -f1)"
-  else bad "trtexec that bai — xem $LOG"; tail -15 "$LOG"; record "$OP" engine fail "xem $LOG"; continue
+  else bad "trtexec thất bại — xem $LOG"; tail -15 "$LOG"; record "$OP" engine fail "xem $LOG"; continue
   fi
 
-  log "Nap engine va chay 100 lan inference"
+  log "Nạp engine và chạy 100 lan inference"
   if PYTHONPATH="$ROOT/src" python -m ivid.export.trt_infer_check "$ENG" \
         --json "$RES/r1_trt_op${OP}.json"
   then ok "inference opset $OP"; record "$OP" infer ok "results/r1_trt_op${OP}.json"
-  else bad "inference opset $OP"; record "$OP" infer fail "xem log tren"
+  else bad "inference opset $OP"; record "$OP" infer fail "xem log trên"
   fi
 done
 
@@ -146,7 +146,7 @@ import json, sys
 d = json.load(open(sys.argv[1]))
 rows = d["runs"]
 if not rows:
-    print("  khong co ket qua"); raise SystemExit(1)
+    print("  không có kết quả"); raise SystemExit(1)
 print(f"  {'opset':<8}{'stage':<10}{'status':<8}detail")
 for r in rows:
     mark = "OK " if r["status"] == "ok" else "FAIL"
@@ -154,8 +154,8 @@ for r in rows:
 good = {r["opset"] for r in rows if r["stage"] == "infer" and r["status"] == "ok"}
 print()
 if good:
-    print(f"  >>> OPSET DUNG DUOC: {sorted(good)}  -> chot vao configs/export.yaml")
+    print(f"  >>> OPSET DUNG DUOC: {sorted(good)}  -> chot vào configs/export.yaml")
 else:
-    print("  >>> KHONG opset nao qua duoc. R1 da xay ra — bao Claude kem log truoc khi train.")
+    print("  >>> KHONG opset nào quả được. R1 da xay ra — bao Claude kem log trước khi train.")
 PY
-log "Chi tiet: $RESULTS_JSON  va  $RES/r1_env.json"
+log "Chỉ tiết: $RESULTS_JSON  và  $RES/r1_env.json"

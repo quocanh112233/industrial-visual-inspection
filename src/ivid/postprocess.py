@@ -51,7 +51,7 @@ def decode(raw: np.ndarray, conf_thres: float = 0.25, iou_thres: float = 0.7,
         if raw.shape[0] == 4 + nc:
             raw = raw.T
         elif raw.shape[1] != 4 + nc:
-            raise ValueError(f"tensor {raw.shape} khong khop nc={nc} (mong doi mot truc = {4 + nc})")
+            raise ValueError(f"tensor {raw.shape} không khớp nc={nc} (mong đợi một trục = {4 + nc})")
     elif raw.shape[0] < raw.shape[1]:
         raw = raw.T
 

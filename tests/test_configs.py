@@ -24,7 +24,7 @@ def test_ten_run_khop_voi_ten_file(cfg_path: Path):
     cfg = yaml.safe_load(cfg_path.read_text(encoding="utf-8"))
     expected = cfg_path.stem.removeprefix("train_")
     assert cfg["name"] == expected, (
-        f"{cfg_path.name}: name='{cfg['name']}' nhung ten file noi la '{expected}'")
+        f"{cfg_path.name}: name='{cfg['name']}' nhưng tên file nói là '{expected}'")
 
 
 @pytest.mark.parametrize("cfg_path", TRAIN_CONFIGS, ids=lambda p: p.name)
@@ -32,10 +32,10 @@ def test_trong_so_pretrained_khop_voi_kien_truc_trong_ten_file(cfg_path: Path):
     cfg = yaml.safe_load(cfg_path.read_text(encoding="utf-8"))
     want = arch_of(cfg_path.stem)
     got = arch_of(str(cfg["model"]))
-    assert want and got, f"{cfg_path.name}: khong doc duoc kien truc"
+    assert want and got, f"{cfg_path.name}: không doc được kien truc"
     assert got == want, (
-        f"{cfg_path.name}: ten file noi '{want}' nhung model='{cfg['model']}'. "
-        "Day la loi da xay ra that va lam mat 37 phut train.")
+        f"{cfg_path.name}: tên file nói '{want}' nhưng model='{cfg['model']}'. "
+        "Đây là lỗi đã xảy ra thật và làm mất 37 phút train.")
 
 
 @pytest.mark.parametrize("cfg_path", TRAIN_CONFIGS, ids=lambda p: p.name)
@@ -50,18 +50,18 @@ def test_config_train_co_du_khoa_bat_buoc(cfg_path: Path):
 @pytest.mark.parametrize("cfg_path", TRAIN_CONFIGS, ids=lambda p: p.name)
 def test_moi_config_dung_cung_seed(cfg_path: Path):
     cfg = yaml.safe_load(cfg_path.read_text(encoding="utf-8"))
-    assert cfg["seed"] == 1337, f"{cfg_path.name}: seed={cfg['seed']}, mong doi 1337"
+    assert cfg["seed"] == 1337, f"{cfg_path.name}: seed={cfg['seed']}, mong đợi 1337"
 
 
 @pytest.mark.parametrize("cfg_path", TRAIN_CONFIGS, ids=lambda p: p.name)
 def test_cache_khong_dung_ram(cfg_path: Path):
     cache = yaml.safe_load(cfg_path.read_text(encoding="utf-8"))["train"].get("cache")
-    assert cache != "ram", f"{cfg_path.name}: cache='ram' pha tinh tai lap"
+    assert cache != "ram", f"{cfg_path.name}: cache='ram' pha tinh tái lập"
 
 
 def test_co_du_ca_hai_model_theo_SRS():
     names = {yaml.safe_load(p.read_text(encoding="utf-8"))["name"] for p in TRAIN_CONFIGS}
-    assert {"yolov8n", "yolov8s"} <= names, f"thieu config, hien co: {sorted(names)}"
+    assert {"yolov8n", "yolov8s"} <= names, f"thiếu config, hiện có: {sorted(names)}"
 
 
 def test_config_data_va_export_co_thu_tu_lop_giong_nhau():
@@ -75,8 +75,8 @@ def test_imgsz_export_khop_imgsz_benchmark():
     ex = yaml.safe_load((ROOT / "configs/export.yaml").read_text(encoding="utf-8"))
     bm = yaml.safe_load((ROOT / "configs/benchmark.yaml").read_text(encoding="utf-8"))
     assert int(ex["onnx"]["imgsz"]) == int(bm["imgsz"]), (
-        f"export.yaml imgsz={ex['onnx']['imgsz']} nhung benchmark.yaml imgsz={bm['imgsz']}. "
-        "Export lai ONNX va dung lai engine sau khi sua.")
+        f"export.yaml imgsz={ex['onnx']['imgsz']} nhưng benchmark.yaml imgsz={bm['imgsz']}. "
+        "Export lại ONNX và dựng lại engine sau khi sửa.")
 
 
 def test_resize_to_khong_lon_hon_khung():
@@ -101,5 +101,5 @@ def test_cong_thuc_khung_rect_khop_voi_cau_hinh_dang_dung():
     bm = yaml.safe_load((ROOT / "configs/benchmark.yaml").read_text(encoding="utf-8"))
     if bm.get("resize_to"):
         assert khung_rect(int(bm["resize_to"])) == int(bm["imgsz"]), (
-            "imgsz trong benchmark.yaml khong bang khung rect cua resize_to — "
-            "cross-check se khong co moc doi chieu tuong duong.")
+            "imgsz trong benchmark.yaml không bằng khung rect của resize_to — "
+            "cross-check sẽ không có mốc đối chiếu tương đương.")

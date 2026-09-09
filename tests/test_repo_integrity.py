@@ -20,31 +20,31 @@ def in_git_repo() -> bool:
     return (ROOT / ".git").exists()
 
 
-@pytest.mark.skipif(not in_git_repo(), reason="khong phai git repo")
+@pytest.mark.skipif(not in_git_repo(), reason="không phải git repo")
 def test_moi_file_nguon_deu_duoc_git_theo_doi():
     tracked = set(git("ls-files").splitlines())
     on_disk = {str(p.relative_to(ROOT)) for p in (ROOT / "src").rglob("*.py")}
     missing = sorted(on_disk - tracked)
     assert not missing, (
-        "Cac file nguon sau ton tai tren dia nhung git KHONG theo doi — "
-        "rat co the bi .gitignore chan nham:\n  " + "\n  ".join(missing)
-        + "\n\nKiem tra bang: git check-ignore -v <file>"
+        "Các file nguồn sau tồn tại trên đĩa nhưng git KHÔNG theo dõi — "
+        "rất có thể bị .gitignore chặn nhầm:\n  " + "\n  ".join(missing)
+        + "\n\nKiểm tra bằng: git check-ignore -v <file>"
     )
 
 
-@pytest.mark.skipif(not in_git_repo(), reason="khong phai git repo")
+@pytest.mark.skipif(not in_git_repo(), reason="không phải git repo")
 def test_gitignore_khong_chan_nham_thu_muc_ma_nguon():
     for name in ("src/ivid/data", "src/ivid/train", "src/ivid/export",
                  "src/ivid/benchmark", "src/ivid/serve", "tests", "configs", "scripts"):
         out = git("check-ignore", "-v", f"{name}/x.py")
-        assert not out.strip(), f"'{name}' bi .gitignore chan: {out.strip()}"
+        assert not out.strip(), f"'{name}' bị .gitignore chặn: {out.strip()}"
 
 
-@pytest.mark.skipif(not in_git_repo(), reason="khong phai git repo")
+@pytest.mark.skipif(not in_git_repo(), reason="không phải git repo")
 def test_gitignore_van_chan_du_lieu_va_trong_so():
     for path in ("data/raw/x.jpg", "data/processed/data.yaml",
                  "models/yolov8n/best.pt", "models/yolov8n/best.engine"):
-        assert git("check-ignore", "-v", path).strip(), f"'{path}' PHAI bi chan"
+        assert git("check-ignore", "-v", path).strip(), f"'{path}' PHẢI bị chặn"
 
 
 def test_moi_thu_muc_con_cua_ivid_deu_la_package():
@@ -102,7 +102,7 @@ def test_warmup_chay_ca_duong_ong_khong_chi_inference():
     from ivid.benchmark.runners.base import BaseRunner
 
     src = inspect.getsource(BaseRunner.warmup)
-    assert "run_array" in src, "warmup phai goi run_array, khong duoc chi goi infer"
+    assert "run_array" in src, "warmup phải gọi run_array, không được chỉ gọi infer"
 
 
 def _doc_files() -> list[Path]:
@@ -126,13 +126,13 @@ def test_tai_lieu_khong_tro_toi_module_da_bien_mat():
     mods, _ = _commands_in_docs()
     missing = [m for m in mods
                if not (ROOT / "src" / (m.replace(".", "/") + ".py")).exists()]
-    assert not missing, "tai lieu goi module khong ton tai: " + ", ".join(sorted(missing))
+    assert not missing, "tài liệu gọi module không tồn tại: " + ", ".join(sorted(missing))
 
 
 def test_tai_lieu_khong_tro_toi_script_da_bien_mat():
     _, scripts = _commands_in_docs()
     missing = [s for s in scripts if not (ROOT / s).exists()]
-    assert not missing, "tai lieu goi script khong ton tai: " + ", ".join(sorted(missing))
+    assert not missing, "tài liệu gọi script không tồn tại: " + ", ".join(sorted(missing))
 
 
 def test_moi_config_duoc_nhac_trong_tai_lieu_deu_ton_tai():
@@ -143,7 +143,7 @@ def test_moi_config_duoc_nhac_trong_tai_lieu_deu_ton_tai():
         refs |= set(re.findall(r"(configs/[a-zA-Z0-9_]+\.yaml)",
                                md.read_text(encoding="utf-8")))
     missing = [r for r in refs if not (ROOT / r).exists()]
-    assert not missing, "tai lieu nhac config khong ton tai: " + ", ".join(sorted(missing))
+    assert not missing, "tài liệu nhắc config không tồn tại: " + ", ".join(sorted(missing))
 
 
 def test_makefile_target_duoc_nhac_trong_tai_lieu_deu_ton_tai():
@@ -155,7 +155,7 @@ def test_makefile_target_duoc_nhac_trong_tai_lieu_deu_ton_tai():
     for md in _doc_files():
         refs |= set(re.findall(r"\bmake ([a-z][a-z-]*)", md.read_text(encoding="utf-8")))
     missing = sorted(refs - targets)
-    assert not missing, "tai lieu goi 'make' target khong co: " + ", ".join(missing)
+    assert not missing, "tài liệu gọi 'make' target không có: " + ", ".join(missing)
 
 
 def test_notebook_colab_hop_le_va_bat_gpu():
@@ -165,18 +165,18 @@ def test_notebook_colab_hop_le_va_bat_gpu():
     assert p.exists(), "thieu notebooks/ivid_colab.ipynb"
     nb = json.loads(p.read_text(encoding="utf-8"))
     assert nb["nbformat"] == 4
-    assert nb["metadata"].get("accelerator") == "GPU", "notebook phai khai bao accelerator GPU"
+    assert nb["metadata"].get("accelerator") == "GPU", "notebook phải khai báo accelerator GPU"
     assert any(c["cell_type"] == "code" for c in nb["cells"])
     text = p.read_text(encoding="utf-8")
     for leak in ("ghp_", "github_pat_", "AIza", "-----BEGIN"):
-        assert leak not in text, f"notebook chua chuoi giong secret: {leak}"
+        assert leak not in text, f"notebook chưa chuoi giong secret: {leak}"
 
 
 def test_khong_co_duong_dan_tuyet_doi_trong_file_duoc_commit():
     import re
 
     if not in_git_repo():
-        pytest.skip("khong phai git repo")
+        pytest.skip("không phải git repo")
 
     tracked = set(git("ls-files").splitlines())
     suspicious = re.compile(r"(/home/|/Users/|C:\\\\)")
@@ -191,8 +191,8 @@ def test_khong_co_duong_dan_tuyet_doi_trong_file_duoc_commit():
             line = text[:m.start()].count("\n") + 1
             bad.append(f"{rel}:{line}")
             break
-    assert not bad, ("duong dan tuyet doi trong file duoc commit:\n  " + "\n  ".join(bad)
-                     + "\n\nDung ivid.data.common.rel_to_root() khi ghi duong dan.")
+    assert not bad, ("đường dẫn tuyệt đối trong file được commit:\n  " + "\n  ".join(bad)
+                     + "\n\nDùng ivid.data.common.rel_to_root() khi ghi đường dẫn.")
 
 
 def test_rel_to_root_tra_ve_duong_dan_tuong_doi():

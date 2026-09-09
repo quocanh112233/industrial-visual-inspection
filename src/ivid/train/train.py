@@ -21,7 +21,7 @@ def lib_versions() -> dict[str, str]:
         try:
             out[mod] = getattr(__import__(mod), "__version__", "?")
         except Exception:
-            out[mod] = "khong cai"
+            out[mod] = "không cài"
     try:
         import torch
 
@@ -53,11 +53,11 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--config", required=True, help="vi du configs/train_yolov8n.yaml")
     ap.add_argument("--project", default=None,
-                    help="thu muc chua cac run (Colab: /content/drive/MyDrive/ivid/runs)")
-    ap.add_argument("--name", default=None, help="ghi de ten run trong config")
-    ap.add_argument("--device", default=None, help="0 | cpu | 0,1 (mac dinh: ultralytics tu chon)")
-    ap.add_argument("--resume", action="store_true", help="chay tiep tu last.pt cua run cung ten")
-    ap.add_argument("--dry-run", action="store_true", help="chi in cau hinh, khong train")
+                    help="thư mục chứa các run (Colab: /content/drive/MyDrive/ivid/runs)")
+    ap.add_argument("--name", default=None, help="ghi đè tên run trong config")
+    ap.add_argument("--device", default=None, help="0 | cpu | 0,1 (mặc định: ultralytics từ chon)")
+    ap.add_argument("--resume", action="store_true", help="chạy tiếp từ last.pt của run cùng tên")
+    ap.add_argument("--dry-run", action="store_true", help="chỉ in cấu hình, không train")
     a = ap.parse_args()
 
     root = repo_root()
@@ -65,7 +65,7 @@ def main() -> int:
     if not cfg_path.is_absolute():
         cfg_path = root / cfg_path
     if not cfg_path.exists():
-        print(f"[loi] khong thay config: {cfg_path}", file=sys.stderr)
+        print(f"[lỗi] không thấy config: {cfg_path}", file=sys.stderr)
         return 1
     cfg = yaml.safe_load(cfg_path.read_text(encoding="utf-8"))
 
@@ -75,8 +75,8 @@ def main() -> int:
     if not data_path.is_absolute():
         data_path = root / data_path
     if not data_path.exists():
-        print(f"[loi] khong thay {data_path}\n"
-              f"      chay truoc: make data", file=sys.stderr)
+        print(f"[lỗi] không thấy {data_path}\n"
+              f"      chạy trước: make data", file=sys.stderr)
         return 1
 
     targs = dict(cfg.get("train", {}))
@@ -98,7 +98,7 @@ def main() -> int:
     print(f"[train] model   : {cfg['model']}")
     print(f"[train] data    : {data_path}")
     print(f"[train] run     : {project / name}")
-    print("[train] tham so : " + " ".join(f"{k}={v}" for k, v in sorted(targs.items())
+    print("[train] tham số : " + " ".join(f"{k}={v}" for k, v in sorted(targs.items())
                                            if k in ("epochs", "imgsz", "batch", "seed", "amp", "cache")))
     if a.dry_run:
         print(json.dumps(targs, indent=2, default=str))
@@ -114,7 +114,7 @@ def main() -> int:
     except Exception:
         n_params = None
     if n_params:
-        print(f"[train] tham so : {n_params:,}")
+        print(f"[train] tham số : {n_params:,}")
 
     model.train(**targs)
     finished = datetime.now(timezone.utc)
@@ -122,7 +122,7 @@ def main() -> int:
     run_dir = project / name
     best = run_dir / "weights" / "best.pt"
     if not best.exists():
-        print(f"[loi] khong sinh ra {best}", file=sys.stderr)
+        print(f"[lỗi] không sinh ra {best}", file=sys.stderr)
         return 1
 
     dest = root / "models" / name

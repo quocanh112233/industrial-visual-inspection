@@ -13,7 +13,7 @@ while [[ $# -gt 0 ]]; do
     --source) SOURCE="$2"; shift 2 ;;
     --force)  FORCE=1; shift ;;
     -h|--help) sed -n '2,14p' "$0"; exit 0 ;;
-    *) echo "Tham so la: $1" >&2; exit 2 ;;
+    *) echo "Tham số lạ: $1" >&2; exit 2 ;;
   esac
 done
 
@@ -21,11 +21,11 @@ GH_TARBALL="https://codeload.github.com/Marfbin/NEU-DET-with-yolov8/tar.gz/refs/
 KAGGLE_SLUG="ousmanesangary/neu-det"
 
 log()  { printf '\033[1;34m[ivid]\033[0m %s\n' "$*"; }
-warn() { printf '\033[1;33m[canh bao]\033[0m %s\n' "$*"; }
-die()  { printf '\033[1;31m[loi]\033[0m %s\n' "$*" >&2; exit 1; }
+warn() { printf '\033[1;33m[cảnh báo]\033[0m %s\n' "$*"; }
+die()  { printf '\033[1;31m[lỗi]\033[0m %s\n' "$*" >&2; exit 1; }
 
 if [[ -d "$DEST" && $FORCE -eq 0 ]]; then
-  log "Da co $DEST — bo qua buoc tai. Dung --force de tai lai."
+  log "Đã có $DEST — bỏ qua bước tải. Dùng --force để tải lại."
 else
   [[ $FORCE -eq 1 ]] && rm -rf "$DEST"
   mkdir -p "$CACHE"
@@ -34,48 +34,48 @@ else
   github)
     TARBALL="$CACHE/neu-det-github.tar.gz"
     if [[ ! -s "$TARBALL" ]]; then
-      log "Tai tu GitHub mirror (~73 MB, khong can dang nhap)..."
+      log "Tải từ GitHub mirror (~73 MB, không cần đăng nhập)..."
       curl -fL --retry 3 --retry-delay 2 -o "$TARBALL.part" "$GH_TARBALL" \
-        || die "Tai that bai. Kiem tra mang, hoac dung --source kaggle."
+        || die "Tải thất bại. Kiểm tra mạng, hoặc dùng --source kaggle."
       mv "$TARBALL.part" "$TARBALL"
     else
-      log "Dung tarball da cache: $TARBALL"
+      log "Dùng tarball đã cache: $TARBALL"
     fi
 
-    log "Giai nen (chi lay thu muc dataset)..."
+    log "Giải nén (chỉ lấy thư mục dataset)..."
     TMP="$(mktemp -d)"; trap 'rm -rf "$TMP"' EXIT
     tar -xzf "$TARBALL" -C "$TMP" --wildcards '*/data/NEU-DET/*'
     SRCDIR="$(find "$TMP" -type d -name 'NEU-DET' | head -1)"
-    [[ -n "$SRCDIR" ]] || die "Khong tim thay thu muc NEU-DET trong tarball."
+    [[ -n "$SRCDIR" ]] || die "Không tìm thấy thư mục NEU-DET trong tarball."
     mkdir -p "$DEST"
     cp -r "$SRCDIR"/. "$DEST"/
-    echo "github:Marfbin/NEU-DET-with-yolov8@main (YOLO txt, da chia san train/test)" > "$RAW/SOURCE.txt"
+    echo "github:Marfbin/NEU-DET-with-yolov8@main (YOLO txt, đã chia sẵn train/test)" > "$RAW/SOURCE.txt"
     ;;
 
   kaggle)
     command -v kaggle >/dev/null 2>&1 || die \
-"Chua co lenh 'kaggle'. Cai va lay token:
+"Chưa có lệnh 'kaggle'. Cài và lấy token:
   pip install kaggle
   mkdir -p ~/.kaggle && mv ~/Downloads/kaggle.json ~/.kaggle/
   chmod 600 ~/.kaggle/kaggle.json"
 
     ZIP="$CACHE/neu-det-kaggle.zip"
     if [[ ! -s "$ZIP" ]]; then
-      log "Tai tu Kaggle: $KAGGLE_SLUG (~30 MB, license CC0)..."
+      log "Tải từ Kaggle: $KAGGLE_SLUG (~30 MB, license CC0)..."
       kaggle datasets download -d "$KAGGLE_SLUG" -p "$CACHE" --force \
-        || die "Kaggle tai that bai (kiem tra token trong ~/.kaggle/kaggle.json)."
+        || die "Kaggle tải thất bại (kiểm tra token trong ~/.kaggle/kaggle.json)."
       mv "$CACHE"/*.zip "$ZIP" 2>/dev/null || true
     fi
     mkdir -p "$DEST"
     unzip -q -o "$ZIP" -d "$DEST"
-    echo "kaggle:$KAGGLE_SLUG (ban goc, annotation VOC XML)" > "$RAW/SOURCE.txt"
+    echo "kaggle:$KAGGLE_SLUG (bản gốc, annotation VOC XML)" > "$RAW/SOURCE.txt"
     ;;
 
-  *) die "Nguon khong hop le: '$SOURCE' (chi nhan: github | kaggle)" ;;
+  *) die "Nguồn không hợp lệ: '$SOURCE' (chỉ nhận: github | kaggle)" ;;
   esac
 fi
 
-log "Kiem tra dataset vua tai..."
+log "Kiểm tra dataset vừa tải..."
 python3 - "$DEST" <<'PY'
 import sys, collections
 from pathlib import Path
@@ -87,23 +87,23 @@ imgs = [p for p in root.rglob("*") if p.suffix.lower() in IMG_EXT]
 txts = [p for p in root.rglob("*.txt")]
 xmls = [p for p in root.rglob("*.xml")]
 
-print(f"  thu muc goc : {root}")
-print(f"  anh         : {len(imgs)}")
-print(f"  nhan YOLO   : {len(txts)}")
-print(f"  nhan VOC XML: {len(xmls)}")
+print(f"  thư mục gốc : {root}")
+print(f"  ảnh         : {len(imgs)}")
+print(f"  nhãn YOLO   : {len(txts)}")
+print(f"  nhãn VOC XML: {len(xmls)}")
 
 if not imgs:
-    sys.exit("  [loi] khong tim thay anh nao -> dataset hong")
+    sys.exit("  [lỗi] không tìm thấy ảnh nào -> dataset hỏng")
 
 try:
     from PIL import Image
     sizes = collections.Counter(Image.open(p).size for p in imgs[:300])
-    print(f"  kich thuoc  : {dict(sizes)}")
+    print(f"  kích thước  : {dict(sizes)}")
 except ImportError:
-    print("  kich thuoc  : (bo qua - chua cai Pillow)")
+    print("  kích thước  : (bỏ qua - chưa cài Pillow)")
 
 prefix = collections.Counter(p.stem.rsplit("_", 1)[0] for p in imgs)
-print(f"  lop theo ten file ({len(prefix)}):")
+print(f"  lớp theo tên file ({len(prefix)}):")
 for k, v in sorted(prefix.items()):
     print(f"      {k:18s} {v}")
 
@@ -120,16 +120,16 @@ if txts:
             if not (0 <= x <= 1 and 0 <= y <= 1 and 0 < w <= 1 and 0 < h <= 1):
                 oob += 1
     print(f"  tong bbox   : {boxes}")
-    print(f"  bbox loi bien: {oob}")
-    print(f"  nhan rong   : {empty}")
+    print(f"  bbox lọt biên: {oob}")
+    print(f"  nhãn rỗng   : {empty}")
     print(f"  class id    : {dict(sorted(ids.items()))}")
 
 expected = 1800
 if len(imgs) != expected:
-    print(f"  [canh bao] mong doi {expected} anh, thay {len(imgs)}")
+    print(f"  [cảnh báo] mong đợi {expected} ảnh, thấy {len(imgs)}")
 else:
-    print(f"  [ok] du {expected} anh")
+    print(f"  [ok] đủ {expected} ảnh")
 PY
 
-log "Xong. Dataset o: $DEST"
+log "Xong. Dataset ở: $DEST"
 log "Nguon: $(cat "$RAW/SOURCE.txt")"

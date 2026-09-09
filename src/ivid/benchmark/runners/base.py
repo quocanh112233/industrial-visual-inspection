@@ -68,7 +68,7 @@ class BaseRunner(abc.ABC):
         self.resize_to = resize_to
         self.nc = nc if nc is not None else _num_classes()
         if not self.weights.exists():
-            raise FileNotFoundError(f"khong thay trong so: {self.weights}")
+            raise FileNotFoundError(f"không thấy trọng số: {self.weights}")
         self._load()
 
     @abc.abstractmethod
@@ -138,7 +138,7 @@ def build_runner(backend: str, weights: Path, **kw) -> BaseRunner:
         from .tensorrt_runner import TensorRTRunner
 
         return TensorRTRunner(weights, **kw)
-    raise ValueError(f"backend khong ho tro: {backend} (nhan: pytorch|onnx|tensorrt)")
+    raise ValueError(f"backend không hỗ trợ: {backend} (nhận: pytorch|onnx|tensorrt)")
 
 
 def weights_for(model_dir: Path, backend: str) -> Path:

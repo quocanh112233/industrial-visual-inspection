@@ -22,11 +22,11 @@ def main() -> int:
     ap.add_argument("--backends", nargs="*", default=["pytorch", "onnx", "tensorrt"])
     ap.add_argument("--n", type=int, default=None)
     ap.add_argument("--iou-match", type=float, default=0.5,
-                    help="IoU toi thieu de coi hai box la cung mot detection")
+                    help="IoU tối thiểu để coi hai box là cùng một detection")
     ap.add_argument("--conf", type=float, default=None,
-                    help="ghi de nguong tin cay. Dung 0.001 de doi chieu voi phep do mAP, "
-                         "vi mAP quet toan bo duong PR chu khong dung mot nguong co dinh")
-    ap.add_argument("--iou", type=float, default=None, help="ghi de nguong IoU cua NMS")
+                    help="ghi đè ngưỡng tin cậy. Dùng 0.001 để đối chiếu với phép đo mAP, "
+                         "vì mAP quét toàn bộ đường PR chứ không dùng một ngưỡng cố định")
+    ap.add_argument("--iou", type=float, default=None, help="ghi đè ngưỡng IoU của NMS")
     ap.add_argument("--out", default="results/parity_check.json")
     a = ap.parse_args()
 
@@ -46,27 +46,27 @@ def main() -> int:
     images = sorted((p for p in img_dir.iterdir() if p.suffix.lower() in IMG_EXT),
                     key=lambda p: p.name)[:n]
     if not images:
-        print("[loi] khong co anh test", file=sys.stderr)
+        print("[lỗi] không có ảnh test", file=sys.stderr)
         return 1
 
     runners = {}
     for b in a.backends:
         w = weights_for(root / "models" / a.name, b)
         if not w.exists():
-            print(f"[parity] bo qua {b}: khong thay {w.name}")
+            print(f"[parity] bỏ qua {b}: không thấy {w.name}")
             continue
         try:
             runners[b] = build_runner(b, w, imgsz=imgsz, conf=conf, iou=iou,
                                       resize_to=resize_to)
-            print(f"[parity] nap {b}: {w.name}")
+            print(f"[parity] nạp {b}: {w.name}")
         except Exception as e:
-            print(f"[parity] bo qua {b}: {type(e).__name__}: {e}")
+            print(f"[parity] bỏ qua {b}: {type(e).__name__}: {e}")
 
     if len(runners) < 2:
-        print("[loi] can it nhat 2 dinh dang de so sanh", file=sys.stderr)
+        print("[lỗi] cần ít nhất 2 định dạng để so sánh", file=sys.stderr)
         return 1
 
-    print(f"[parity] chay {len(images)} anh qua {len(runners)} dinh dang...")
+    print(f"[parity] chạy {len(images)} ảnh qua {len(runners)} định dạng...")
     dets: dict[str, list] = {b: [] for b in runners}
     for p in images:
         img = read_image(p)
@@ -106,8 +106,8 @@ def main() -> int:
     out_path = Path(a.out)
     write_json(out_path if out_path.is_absolute() else root / out_path, report)
 
-    print(f"\n[parity] {'cap so sanh':<26}{'khop':>7}{'chi A':>7}{'chi B':>7}"
-          f"{'ti le khop':>12}{'IoU tb':>9}{'lech conf':>11}")
+    print(f"\n[parity] {'cặp so sánh':<26}{'khớp':>7}{'chỉ A':>7}{'chỉ B':>7}"
+          f"{'ti le khớp':>12}{'IoU tb':>9}{'lệch conf':>11}")
     for k, v in pairs.items():
         b1, b2 = k.split("_vs_")
         print(f"         {k:<26}{v['matched']:>7}{v[f'only_{b1}']:>7}{v[f'only_{b2}']:>7}"
@@ -120,8 +120,8 @@ def main() -> int:
     print(f"[parity] ghi -> {a.out}")
     worst = min((v["match_rate"] for v in pairs.values()), default=1.0)
     if worst < 0.95:
-        print(f"[parity] Ti le khop thap nhat {worst*100:.1f}%. Day la SO LIEU CAN BAO CAO, "
-              "khong phai loi can giau — ghi vao docs/benchmark-report.md.")
+        print(f"[parity] Ti le khớp thấp nhat {worst*100:.1f}%. Đây là SỐ LIỆU CẦN BÁO CÁO, "
+              "không phải lỗi cần giấu — ghi vào docs/benchmark-report.md.")
     return 0
 
 

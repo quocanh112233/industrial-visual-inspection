@@ -85,8 +85,8 @@ class ResourceMonitor:
             "torch_gpu_allocated_mb": alloc,
             "torch_gpu_peak_mb": peak,
             "n_samples": len(self.samples_rss),
-            "ghi_chu": "Tren Jetson, CPU va GPU dung chung DRAM — 'gpu_peak' nam trong "
-                       "cung tong bo nho he thong, khong phai VRAM roi.",
+            "ghi_chu": "Trên Jetson, CPU và GPU dùng chung DRAM — 'gpu_peak' nằm trong "
+                       "cùng tong bộ nhớ he thong, không phải VRAM rồi.",
         }
 
 

@@ -47,28 +47,28 @@ def main() -> int:
     root = repo_root()
     w = root / "models" / a.model / "best.pt"
     if not w.exists():
-        print(f"[loi] khong thay {w}", file=sys.stderr)
+        print(f"[lỗi] không thấy {w}", file=sys.stderr)
         return 1
     data = root / a.data
 
     print(f"[rect] {a.model}/best.pt  conf={a.conf} iou={a.iou} batch={a.batch}")
-    print("[rect] moc: duong ong cua du an (640x640) = 0.7317\n")
+    print("[rect] mốc: đường ống của dự án (640x640) = 0.7317\n")
 
     thu_nghiem = [
-        ("rect=True  imgsz=640  (mac dinh cua ultralytics cho .pt)", 640, True),
-        ("rect=False imgsz=640  (ultralytics ep cho ONNX/TensorRT)", 640, False),
-        ("rect=False imgsz=672  (do phan giai cao hon, khong vien)", 672, False),
+        ("rect=True  imgsz=640  (mặc định của ultralytics cho .pt)", 640, True),
+        ("rect=False imgsz=640  (ultralytics ép cho ONNX/TensorRT)", 640, False),
+        ("rect=False imgsz=672  (độ phân giải cao hơn, không viền)", 672, False),
     ]
     for nhan, imgsz, rect in thu_nghiem:
         m50, m95, shape = chay(w, data, imgsz, rect, a.conf, a.iou, a.batch)
         print(f"    {nhan}")
         print(f"        -> mAP@0.5 {m50:.4f}   mAP@0.5:0.95 {m95:.4f}   "
-              f"tensor vao model: {shape}\n")
+              f"tensor vào model: {shape}\n")
 
-    print("[rect] Doc ket qua:")
-    print("    Neu dong 2 ra ~0.731 thi toan bo chenh lech la do vien xam cua che do")
-    print("    rect, va con so 0.7621 trong log huan luyen KHONG phai con so ma")
-    print("    engine 640x640 tren day chuyen dat duoc.")
+    print("[rect] Đọc kết quả:")
+    print("    Nếu dòng 2 ra ~0.731 thì toàn bộ chênh lệch là do viền xám của chế độ")
+    print("    rect, và con số 0.7621 trong log huấn luyện KHÔNG phải con số mà")
+    print("    engine 640x640 trên dây chuyền đạt được.")
     return 0
 
 

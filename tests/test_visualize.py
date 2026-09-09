@@ -20,7 +20,7 @@ def test_ve_khong_sua_anh_goc():
     goc = anh()
     truoc = goc.copy()
     draw_detections(goc, np.array([[10, 10, 60, 60, 0.9, 1]], np.float32), NAMES)
-    assert np.array_equal(goc, truoc), "ham phai ve len ban sao"
+    assert np.array_equal(goc, truoc), "hàm phải vẽ lên bản sao"
 
 
 def test_ve_thay_doi_diem_anh_o_vien_hop():
@@ -85,7 +85,7 @@ def test_nhan_o_chi_dung_ascii():
     from ivid.visualize import nhan_o
 
     t = nhan_o("rolled-in_scale", 2, 3)
-    assert t.isascii(), f"tieu de co ky tu ngoai ASCII: {t!r}"
+    assert t.isascii(), f"tiêu đề có ký tự ngoài ASCII: {t!r}"
     assert "2" in t and "3" in t
 
 
@@ -113,7 +113,7 @@ def test_co_chu_tu_thu_nho_de_chu_dai_van_vua():
         t = nhan_o(lop, 5, 4)
         co = co_chu_vua(t, 320)
         (tw, _), _ = cv2.getTextSize(t, cv2.FONT_HERSHEY_SIMPLEX, co, 1)
-        assert tw <= 320 - 16, f"{lop}: chu rong {tw}px, khong vua o 320px"
+        assert tw <= 320 - 16, f"{lop}: chu rong {tw}px, không vừa ô 320px"
 
 
 def test_chu_ngan_van_duoc_co_lon_nhat():

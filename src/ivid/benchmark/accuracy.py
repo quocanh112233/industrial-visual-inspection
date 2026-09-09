@@ -33,7 +33,7 @@ def evaluate_backend(model: str, backend: str, images: list[Path], gts: list,
                      resize_to: int | None = None) -> dict:
     w = weights_for(root / "models" / model, backend)
     if not w.exists():
-        return {"skipped": True, "reason": f"khong thay {w.name}"}
+        return {"skipped": True, "reason": f"không thấy {w.name}"}
     try:
         runner = build_runner(backend, w, imgsz=imgsz, conf=conf, iou=iou, nc=nc,
                               resize_to=resize_to)
@@ -68,7 +68,7 @@ def cross_check_pt(model: str, data: Path, imgsz: int, conf: float, iou: float,
 
     w = root / "models" / model / "best.pt"
     if not w.exists():
-        return {"skipped": True, "reason": "khong thay best.pt"}
+        return {"skipped": True, "reason": "không thấy best.pt"}
     try:
         if resize_to is None:
             ul_imgsz, rect = imgsz, False
@@ -76,9 +76,9 @@ def cross_check_pt(model: str, data: Path, imgsz: int, conf: float, iou: float,
             ul_imgsz, rect = resize_to, True
         else:
             return {"skipped": True,
-                    "reason": f"ultralytics khong co che do tuong duong voi "
+                    "reason": f"ultralytics không có chế độ tương đương với "
                               f"imgsz={imgsz} + resize_to={resize_to} "
-                              f"(rect cua no cho khung {khung_rect(resize_to)})"}
+                              f"(rect của nó cho khung {khung_rect(resize_to)})"}
         r = ul_evaluate(w, data, "test", ul_imgsz, batch=1, device=None, conf=conf,
                         iou=iou, rect=rect)
         return {"skipped": False, "mAP50": r["overall"]["mAP50"],
@@ -96,16 +96,16 @@ def main() -> int:
     ap.add_argument("--models", nargs="*", default=None)
     ap.add_argument("--backends", nargs="*", default=None)
     ap.add_argument("--conf", type=float, default=0.001,
-                    help="thap de duong PR day du — mAP quet moi nguong, khong dung 1 nguong")
-    ap.add_argument("--iou", type=float, default=0.7, help="nguong IoU cua NMS")
+                    help="thấp để đường PR đầy đủ — mAP quét mọi ngưỡng, không dùng một ngưỡng")
+    ap.add_argument("--iou", type=float, default=0.7, help="ngưỡng IoU của NMS")
     ap.add_argument("--max-images", type=int, default=None)
     ap.add_argument("--imgsz", type=int, default=None,
-                    help="ghi de imgsz trong config (kich thuoc dau vao model)")
+                    help="ghi đè imgsz trong config (kích thước đầu vào model)")
     ap.add_argument("--resize-to", type=int, default=None,
-                    help="thu anh ve kich thuoc nay roi dem xam ra imgsz. "
-                         "imgsz=672 --resize-to 640 tai lap che do rect cua ultralytics")
+                    help="thu ảnh về kích thước này rồi đệm xám ra imgsz. "
+                         "imgsz=672 --resize-to 640 tái lập chế độ rect của ultralytics")
     ap.add_argument("--cross-check", action="store_true",
-                    help="doi chieu ban .pt voi ultralytics.val() de xac nhan phep tinh mAP")
+                    help="đối chiếu bản .pt với ultralytics.val() để xác nhận phép tính mAP")
     ap.add_argument("--out", default="results/benchmark.json")
     a = ap.parse_args()
 
@@ -122,13 +122,13 @@ def main() -> int:
 
     data = root / a.data
     if not data.exists():
-        print(f"[loi] khong thay {data}", file=sys.stderr)
+        print(f"[lỗi] không thấy {data}", file=sys.stderr)
         return 1
 
     images, label_dir = test_set(data, cfg["split"], a.max_images)
-    print(f"[acc] tap test : {len(images)} anh, {nc} lop")
-    print(f"[acc] tham so  : imgsz={imgsz} conf={a.conf} iou={a.iou}")
-    print("[acc] doc ground truth...")
+    print(f"[acc] tập test : {len(images)} ảnh, {nc} lớp")
+    print(f"[acc] tham số  : imgsz={imgsz} conf={a.conf} iou={a.iou}")
+    print("[acc] đọc ground truth...")
     gts = load_ground_truth(images, label_dir)
     print(f"[acc] ground truth: {sum(len(g) for g in gts)} bbox")
 
@@ -141,14 +141,14 @@ def main() -> int:
             payload = {}
     payload.setdefault("accuracy", {})
     payload["accuracy_method"] = {
-        "cach_do": "runner cua du an (ivid.preprocess + ivid.postprocess dung chung) "
+        "cach_do": "runner của dự án (ivid.preprocess + ivid.postprocess dùng chung) "
                    "+ ivid.benchmark.metrics.compute_map",
         "vi_sao_khong_dung_ultralytics_val": (
-            "ultralytics.val() doi pipeline danh gia tuy theo dinh dang model, nen no do "
-            "ca su khac biet cua pipeline lan cua runtime. Xem docstring "
-            "ivid/benchmark/accuracy.py va results/parity_conf001.json."),
+            "ultralytics.val() đổi pipeline đánh giá tuỳ theo định dạng model, nên nó đo "
+            "cả sự khác biệt của pipeline lẫn của runtime. Xem docs/input-framing.md "
+            "và results/parity_conf001.json."),
         "conf": a.conf, "iou_nms": a.iou, "imgsz": imgsz, "resize_to": a.resize_to,
-        "cong_thuc_AP": "noi suy 101 diem, khop voi ultralytics compute_ap(method='interp')",
+        "cong_thuc_AP": "nội suy 101 điểm, khớp với ultralytics compute_ap(method='interp')",
     }
 
     for model in models:
@@ -159,7 +159,7 @@ def main() -> int:
                                  root, a.resize_to)
             payload["accuracy"][key] = r
             if r.get("skipped"):
-                print(f"    BO QUA: {r['reason']}")
+                print(f"    BỎ QUA: {r['reason']}")
             else:
                 print(f"    mAP@0.5 {r['mAP50']:.4f}   mAP@0.5:0.95 {r['mAP50_95']:.4f}   "
                       f"P {r['precision']:.4f}  R {r['recall']:.4f}   "
@@ -168,15 +168,15 @@ def main() -> int:
 
     if a.cross_check:
         payload["accuracy_cross_check"] = {
-            "ghi_chu": "Che do khung anh cua ultralytics duoc chon cho KHOP voi duong "
-                       "ong: khong dem vien -> rect=False; anh 640 trong khung 672 -> "
-                       "imgsz=640 rect=True. So sanh nham che do se lech ~0.031 mAP@0.5 "
-                       "vi cau hinh chu khong vi loi — xem scripts/diag_rect.py.",
+            "ghi_chu": "Chế độ khung ảnh của ultralytics được chọn cho KHỚP với đường "
+                       "ống: không đệm viền -> rect=False; ảnh 640 trong khung 672 -> "
+                       "imgsz=640 rect=True. So sánh nhầm chế độ sẽ lệch ~0.031 mAP@0.5 "
+                       "vì cấu hình chứ không vì lỗi — xem scripts/diag_rect.py.",
         }
         for model in models:
             che_do = (f"rect=True imgsz={a.resize_to}" if a.resize_to
                       else f"rect=False imgsz={imgsz}")
-            print(f"\n[acc] === doi chieu {model}/.pt voi ultralytics.val({che_do}) ===")
+            print(f"\n[acc] === đối chiếu {model}/.pt với ultralytics.val({che_do}) ===")
             ul = cross_check_pt(model, data, imgsz, a.conf, a.iou, root, a.resize_to)
             ours = payload["accuracy"].get(f"{model}|pytorch", {})
             if not ul.get("skipped") and not ours.get("skipped"):
@@ -184,12 +184,12 @@ def main() -> int:
                 d95 = round(ours["mAP50_95"] - ul["mAP50_95"], 4)
                 ul.update(ours_mAP50=ours["mAP50"], ours_mAP50_95=ours["mAP50_95"],
                           delta_mAP50=d50, delta_mAP50_95=d95, khop=abs(d50) <= 0.02)
-                print(f"    ultralytics {ul['mAP50']:.4f} | cua ta {ours['mAP50']:.4f} "
-                      f"| lech {d50:+.4f}  -> {'KHOP' if ul['khop'] else 'LECH LON'}")
+                print(f"    ultralytics {ul['mAP50']:.4f} | của ta {ours['mAP50']:.4f} "
+                      f"| lệch {d50:+.4f}  -> {'KHỚP' if ul['khớp'] else 'LỆCH LỚN'}")
             payload["accuracy_cross_check"][model] = ul
         write_json(out_path, payload)
 
-    print("\n[acc] Chenh lech so voi PyTorch (moc goc):")
+    print("\n[acc] Chênh lệch so với PyTorch (mốc gốc):")
     for model in models:
         base = payload["accuracy"].get(f"{model}|pytorch")
         if not base or base.get("skipped"):
