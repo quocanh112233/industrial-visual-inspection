@@ -112,3 +112,18 @@ def test_docker_dung_cung_khung_voi_benchmark():
     assert f"IVID_IMGSZ:-{bm['imgsz']}" in dc
     if bm.get("resize_to"):
         assert f"IVID_RESIZE_TO:-{bm['resize_to']}" in dc
+
+
+def test_cong_thuc_khung_rect_khop_voi_cau_hinh_dang_dung():
+    """Cross-check chi hop le khi khung cua ta trung voi khung ultralytics tu
+    tinh o che do rect. Neu ai do doi imgsz ma quen doi resize_to (hoac nguoc
+    lai) thi moc doi chieu lech va cross-check bao dong gia."""
+    sys.path.insert(0, str(ROOT / "src"))
+    from ivid.benchmark.accuracy import khung_rect
+
+    assert khung_rect(640) == 672            # ceil(640/32 + 0.5) * 32
+    bm = yaml.safe_load((ROOT / "configs/benchmark.yaml").read_text(encoding="utf-8"))
+    if bm.get("resize_to"):
+        assert khung_rect(int(bm["resize_to"])) == int(bm["imgsz"]), (
+            "imgsz trong benchmark.yaml khong bang khung rect cua resize_to — "
+            "cross-check se khong co moc doi chieu tuong duong.")

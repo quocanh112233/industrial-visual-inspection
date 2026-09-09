@@ -102,14 +102,31 @@ def evaluate_backend(model: str, backend: str, images: list[Path], gts: list,
     return m
 
 
+def khung_rect(resize_to: int, stride: int = 32, pad: float = 0.5) -> int:
+    """Khung anh ma ultralytics dung o che do rect, voi anh vuong.
+
+    ceil(640/32 + 0.5) * 32 = 672. Cong thuc nam trong
+    ultralytics/data/base.py, set_rectangle().
+    """
+    import math
+
+    return math.ceil(resize_to / stride + pad) * stride
+
+
 def cross_check_pt(model: str, data: Path, imgsz: int, conf: float, iou: float,
-                   root: Path) -> dict:
+                   root: Path, resize_to: int | None = None) -> dict:
     """Chay ultralytics.val(rect=False) tren ban .pt de doi chieu phep tinh mAP.
 
-    PHAI ep rect=False. Mac dinh ultralytics dung rect=True cho .pt, tuc cham
-    diem o khung 672x672 co vien xam — mot che do ma engine 640x640 khong tai
-    lap duoc. So sanh voi che do ay la so sanh nham moc: no tung lam cross-check
-    bao "LECH LON 0.0304" trong khi phep tinh mAP hoan toan dung.
+    Moc doi chieu PHAI cung che do khung anh voi duong ong cua ta, neu khong
+    thi con so lech vi cau hinh chu khong vi loi:
+
+      * resize_to = None  -> anh phu kin khung  -> ultralytics rect=False
+      * resize_to = 640, imgsz = 672            -> ultralytics imgsz=640 rect=True
+        (che do rect cua ultralytics tu tinh khung = ceil(640/32+0.5)*32 = 672,
+        dung bang khung cua ta)
+
+    Chon nham moc tung lam cross-check bao "LECH LON 0.0304" trong khi phep tinh
+    mAP hoan toan dung — mat mot vong lam viec de truy ra.
     """
     from ..train.evaluate import evaluate as ul_evaluate
 
@@ -117,10 +134,20 @@ def cross_check_pt(model: str, data: Path, imgsz: int, conf: float, iou: float,
     if not w.exists():
         return {"skipped": True, "reason": "khong thay best.pt"}
     try:
-        r = ul_evaluate(w, data, "test", imgsz, batch=1, device=None, conf=conf,
-                        iou=iou, rect=False)
+        if resize_to is None:
+            ul_imgsz, rect = imgsz, False
+        elif khung_rect(resize_to) == imgsz:
+            ul_imgsz, rect = resize_to, True
+        else:
+            return {"skipped": True,
+                    "reason": f"ultralytics khong co che do tuong duong voi "
+                              f"imgsz={imgsz} + resize_to={resize_to} "
+                              f"(rect cua no cho khung {khung_rect(resize_to)})"}
+        r = ul_evaluate(w, data, "test", ul_imgsz, batch=1, device=None, conf=conf,
+                        iou=iou, rect=rect)
         return {"skipped": False, "mAP50": r["overall"]["mAP50"],
-                "mAP50_95": r["overall"]["mAP50_95"]}
+                "mAP50_95": r["overall"]["mAP50_95"],
+                "ultralytics_imgsz": ul_imgsz, "ultralytics_rect": rect}
     except Exception as e:
         return {"skipped": True, "reason": f"{type(e).__name__}: {e}"}
 
@@ -206,14 +233,16 @@ def main() -> int:
     # --- doi chieu phep tinh mAP tu viet voi ultralytics, tren ban .pt ---
     if a.cross_check:
         payload["accuracy_cross_check"] = {
-            "ghi_chu": "ultralytics.val() duoc ep rect=False de cung che do khung anh "
-                       "640x640 voi engine trien khai. Mac dinh rect=True cua no cham o "
-                       "khung 672x672 co vien xam va cho mAP cao hon ~0.031 — xem "
-                       "scripts/diag_rect.py va docstring ivid/train/evaluate.py.",
+            "ghi_chu": "Che do khung anh cua ultralytics duoc chon cho KHOP voi duong "
+                       "ong: khong dem vien -> rect=False; anh 640 trong khung 672 -> "
+                       "imgsz=640 rect=True. So sanh nham che do se lech ~0.031 mAP@0.5 "
+                       "vi cau hinh chu khong vi loi — xem scripts/diag_rect.py.",
         }
         for model in models:
-            print(f"\n[acc] === doi chieu {model}/.pt voi ultralytics.val(rect=False) ===")
-            ul = cross_check_pt(model, data, imgsz, a.conf, a.iou, root)
+            che_do = (f"rect=True imgsz={a.resize_to}" if a.resize_to
+                      else f"rect=False imgsz={imgsz}")
+            print(f"\n[acc] === doi chieu {model}/.pt voi ultralytics.val({che_do}) ===")
+            ul = cross_check_pt(model, data, imgsz, a.conf, a.iou, root, a.resize_to)
             ours = payload["accuracy"].get(f"{model}|pytorch", {})
             if not ul.get("skipped") and not ours.get("skipped"):
                 d50 = round(ours["mAP50"] - ul["mAP50"], 4)
