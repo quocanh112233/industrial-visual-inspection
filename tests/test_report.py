@@ -11,7 +11,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from ivid.benchmark.report import conclusions, main_table, rows_from  # noqa: E402
+from ivid.benchmark.report import (  # noqa: E402
+    NGUONG_NHIEU_MAP,
+    conclusions,
+    main_table,
+    rows_from,
+)
 
 
 def make_run(p50: float, size: float = 6.2, gpu: float = 400) -> dict:
@@ -209,3 +214,43 @@ def test_thieu_so_lieu_nap_thi_khong_ket_luan():
     d = _payload_co_thoi_gian_nap(100.5)
     d["memory"]["yolov8n|onnx"].pop("nap_giay")
     assert "Chi phí khởi động" not in "\n".join(conclusions(rows_from(d), cycle_ms=1000.0))
+
+
+# ------------------------------------ nguong nhieu khi so hai model (SRS 7.3 cau 3)
+def _hai_model(map_n: float, map_s: float, p50_s: float = 18.4) -> dict:
+    return {
+        "runs": {"yolov8n|tensorrt": make_run(14.2, 9.0, 180),
+                 "yolov8s|tensorrt": make_run(p50_s, 25.6, 200)},
+        "accuracy": {"yolov8n|tensorrt": make_acc(map_n),
+                     "yolov8s|tensorrt": make_acc(map_s)},
+    }
+
+
+def test_chenh_lech_duoi_nguong_nhieu_thi_ket_luan_la_khong_phan_biet_duoc():
+    """Khong duoc noi 'YOLOv8s kem hon' khi chenh lech nho hon muc ma chinh
+    quy trinh train tai lap lai duoc."""
+    van_ban = "\n".join(conclusions(rows_from(_hai_model(0.7357, 0.7270)), cycle_ms=200.0))
+    assert "không phân biệt được" in van_ban
+    assert "reproducibility.md" in van_ban
+
+
+def test_chenh_lech_tren_nguong_nhieu_thi_moi_ket_luan_la_dang():
+    van_ban = "\n".join(
+        conclusions(rows_from(_hai_model(0.70, 0.75)), cycle_ms=200.0))
+    assert "**Đáng.**" in van_ban
+    assert "không phân biệt được" not in van_ban
+
+
+def test_vuot_nhip_day_chuyen_thi_khong_dang_du_mAP_cao_hon():
+    van_ban = "\n".join(
+        conclusions(rows_from(_hai_model(0.70, 0.75, p50_s=400.0)), cycle_ms=200.0))
+    assert "vượt ngân sách thời gian" in van_ban
+
+
+def test_nguong_nhieu_khop_voi_so_do_duoc_trong_tai_lieu():
+    """0.0115 = |0.7749 - 0.7634|, hai lan train cung seed. Neu ai do sua hang so
+    nay ma khong sua tai lieu thi test do."""
+    assert round(abs(0.7749 - 0.7634), 4) == NGUONG_NHIEU_MAP
+    tl = (Path(__file__).resolve().parents[1] / "docs/reproducibility.md")
+    if tl.exists():
+        assert "0.7749" in tl.read_text(encoding="utf-8")

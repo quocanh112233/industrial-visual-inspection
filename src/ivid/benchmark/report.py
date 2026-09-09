@@ -175,6 +175,14 @@ def main_table(rows: list[dict]) -> list[str]:
     return L
 
 
+# Nguong duoi day thi chenh lech mAP khong con y nghia. KHONG phai so chon bua:
+# do that tu hai lan train YOLOv8n cung seed 1337, cung dataset, chi khac
+# cache ram/disk -> 0.7749 va 0.7634 (docs/reproducibility.md). Neu chinh mot
+# quy trinh train tai lap lai con lech ngan ay, thi moi chenh lech nho hon
+# giua HAI MODEL KHAC NHAU deu khong the quy cho model.
+NGUONG_NHIEU_MAP = 0.0115
+
+
 def conclusions(rows: list[dict], cycle_ms: float) -> list[str]:
     L: list[str] = []
     by = {(r["model"], r["backend"]): r for r in rows}
@@ -278,10 +286,18 @@ def conclusions(rows: list[dict], cycle_ms: float) -> list[str]:
                  f"({dl / n['p50'] * 100:+.0f}%) và cho mAP@0.5 **{dm:+.4f}**.")
         if dm > 0:
             L.append(f"- Đổi lại: mỗi **+0.001 mAP** tốn thêm **{dl / (dm * 1000):.2f} ms**.")
-        if s.get("p95", 1e9) <= cycle_ms and dm > 0.01:
-            L.append("- **Đáng.** YOLOv8s vẫn nằm trong nhịp dây chuyền và mAP cao hơn rõ rệt.")
-        elif dm <= 0.01:
-            L.append("- **Không đáng.** Chênh lệch mAP quá nhỏ so với chi phí độ trễ.")
+        trong_nhieu = abs(dm) <= NGUONG_NHIEU_MAP
+        if s.get("p95", 1e9) <= cycle_ms and dm > NGUONG_NHIEU_MAP:
+            L.append("- **Đáng.** YOLOv8s vẫn nằm trong nhịp dây chuyền và mAP cao hơn "
+                     "ngưỡng nhiễu, tức chênh lệch này đo được thật.")
+        elif trong_nhieu:
+            L.append(
+                f"- **Không đáng — và chặt hơn thế: hai model không phân biệt được.** "
+                f"|{dm:+.4f}| nhỏ hơn ngưỡng nhiễu **{NGUONG_NHIEU_MAP:.4f}** đo được từ hai "
+                f"lần train YOLOv8n *cùng seed* (`docs/reproducibility.md`). Chênh lệch nằm "
+                f"dưới mức mà chính quy trình train tái lập được, nên không thể quy cho model "
+                f"lớn hơn. YOLOv8s có **3.7× tham số** nhưng không mua được độ chính xác nào "
+                f"đo được — 1260 ảnh train là quá ít để 11.1M tham số phát huy.")
         else:
             L.append("- **Không đáng** nếu phải giữ nhịp hiện tại — YOLOv8s vượt ngân sách thời gian.")
     else:
@@ -350,24 +366,34 @@ def build_report(payload: dict, rows: list[dict], charts: list[str], cycle_ms: f
              "chỉ đến từ bước inference — đúng mục đích của bảng này.\n")
 
     L.append("## Tài nguyên (FR-12)\n")
-    L.append("| Model | Runtime | Model size | RSS đỉnh | RAM hệ thống tăng thêm | "
-             "Bộ cấp phát của torch |")
-    L.append("|---|---|---:|---:|---:|---:|")
+    co_mem = any(r.get("mem_delta_mb") is not None for r in rows)
+    L.append("| Model | Runtime | Model size | RAM tiến trình | Thời gian nạp |")
+    L.append("|---|---|---:|---:|---:|")
     for r in rows:
         if "p50" not in r:
             continue
+        ram = (f"{fmt(r.get('mem_delta_mb'), 0)} MB" if r.get("mem_delta_mb") is not None
+               else "— *(`make mem`)*")
+        nap = (f"{fmt(r.get('load_s'), 1)} s" if r.get("load_s") is not None else "—")
         L.append(f"| {r['model']} | {r['backend_label']} | {fmt(r.get('size_mb'), 1)} MB | "
-                 f"{fmt(r.get('rss_mb'), 0)} MB | {fmt(r.get('sys_delta_mb'), 0)} MB | "
-                 f"{fmt(r.get('gpu_mb'), 0)} MB |")
+                 f"{ram} | {nap} |")
     L.append("")
-    L.append("> **Đọc hai cột cuối thế nào.** Jetson dùng *bộ nhớ hợp nhất*: CPU và GPU chia "
-             "nhau cùng 8 GB DRAM, không có VRAM rời. Vì vậy **RAM hệ thống tăng thêm** mới là "
-             "con số phản ánh chi phí bộ nhớ thật của mỗi runtime.")
-    L.append(">")
-    L.append("> Cột cuối chỉ đếm phần do **chính PyTorch** cấp phát. Với ONNX Runtime nó gần "
-             "bằng 0 vì ORT tự quản lý bộ nhớ GPU; với TensorRT nó chỉ đếm buffer vào/ra chứ "
-             "không đếm bộ nhớ của engine. Cột này để chẩn đoán, **không dùng để so sánh "
-             "giữa các runtime**.\n")
+    L.append("> **Con số này đo thế nào.** Mỗi runtime chạy trong một **tiến trình riêng** "
+             "(`ivid.benchmark.memprobe`); giá trị là RSS đỉnh trừ RSS lúc tiến trình vừa khởi "
+             "động, nên nó **bao gồm cả chi phí nạp thư viện**. Đó là chủ ý: câu hỏi triển khai "
+             "là *chạy runtime này trên Jetson 8 GB tốn bao nhiêu RAM*, chứ không phải *engine "
+             "chiếm bao nhiêu byte*. Jetson dùng bộ nhớ hợp nhất — CPU và GPU chia nhau cùng "
+             "8 GB DRAM, không có VRAM rời — nên đây là toàn bộ chi phí, không phải một nửa.")
+    if co_mem:
+        L.append(">")
+        L.append("> **Hai cách đo trước đã bị loại bỏ, vì cả hai đều sai theo một kiểu riêng.** "
+                 "`torch.cuda.max_memory_allocated()` báo 0 MB cho ONNX Runtime (ORT tự cấp "
+                 "phát) và chỉ đếm buffer vào/ra cho TensorRT — ai đọc cũng sẽ kết luận *ONNX "
+                 "không tốn bộ nhớ GPU*, sai hoàn toàn. Cách thứ hai, đo mức tăng bộ nhớ của "
+                 "cả hệ thống, thì đếm luôn mọi tiến trình khác và cả bộ đệm trang: hai lần "
+                 "chạy cùng cấu hình cho **31.2 MB** và **0.0 MB**. Đó là nhiễu, không phải "
+                 "phép đo. Cả hai vẫn nằm trong `results/benchmark.json` để đối chiếu.")
+    L.append("")
 
     L.append("## Tính lặp lại (NFR-02)\n")
     L.append("| Model | Runtime | Độ lệch p50 giữa các phiên | Đạt ≤ 10%? |")
