@@ -1,0 +1,35 @@
+# --- data & models (khong bao gio commit) ---
+data/
+datasets/
+models/**/*.pt
+models/**/*.onnx
+models/**/*.engine
+models/**/*.plan
+*.pt
+*.onnx
+*.engine
+!models/.gitkeep
+
+# --- ket qua chay (giu json, bo log nang) ---
+runs/
+*.log
+results/**/*.csv
+
+# --- SRS (theo yeu cau: khong dua vao repo) ---
+docs/SRS*.md
+
+# --- python ---
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# --- he thong ---
+.DS_Store
+.idea/
+.vscode/

@@ -1,0 +1,20 @@
+# Phu thuoc cho MAY DEV (x86_64) — dung de doc/sua code, chay test, xem dataset.
+# TREN JETSON DUNG FILE NAY: se ghi de torch ban CUDA cua NVIDIA.
+#   -> tren Jetson chay:  bash scripts/setup_jetson.sh
+ultralytics>=8.3.0
+torch>=2.2
+torchvision
+onnx>=1.16
+onnxruntime>=1.18
+numpy<2.3
+opencv-python-headless
+pillow
+pyyaml
+fastapi
+uvicorn[standard]
+python-multipart
+pydantic>=2
+matplotlib
+pandas
+pytest
+ruff
