@@ -1,0 +1,67 @@
+{
+  "muc_dich": "Kiem tra bo do co thien vi theo THU TU chay khong. Neu co, backend duoc do dau tien se bi phat va bang benchmark mat cong bang.",
+  "cach_lam": "Chay cung mot model (yolov8n pretrained COCO), cung 30 anh, cung thu tu anh, qua ca ba runner — mot lan theo thu tu pytorch/onnx/tensorrt, mot lan dao nguoc. Jetson Orin Nano @15W, 1 phien, warm-up 20.",
+  "thuan": {
+    "pytorch": {
+      "pre": 5.68,
+      "infer": 28.9,
+      "post": 2.33
+    },
+    "onnx": {
+      "pre": 5.71,
+      "infer": 13.35,
+      "post": 2.59
+    },
+    "tensorrt": {
+      "pre": 5.82,
+      "infer": 8.79,
+      "post": 2.75
+    }
+  },
+  "dao": {
+    "tensorrt": {
+      "pre": 5.7,
+      "infer": 8.82,
+      "post": 1.78
+    },
+    "onnx": {
+      "pre": 5.68,
+      "infer": 13.35,
+      "post": 1.95
+    },
+    "pytorch": {
+      "pre": 5.74,
+      "infer": 29.25,
+      "post": 2.94
+    }
+  },
+  "do_lech_phan_tram": {
+    "pytorch": {
+      "pre": 1.06,
+      "infer": 1.21,
+      "post": 26.18
+    },
+    "onnx": {
+      "pre": 0.53,
+      "infer": 0.0,
+      "post": 32.82
+    },
+    "tensorrt": {
+      "pre": 2.11,
+      "infer": 0.34,
+      "post": 54.49
+    }
+  },
+  "preprocess_tat_ca_cac_lan": {
+    "min": 5.68,
+    "max": 5.82,
+    "bien_do_phan_tram": 2.46
+  },
+  "ket_luan": "Tien xu ly giong nhau o ca ba backend va o ca hai thu tu (5.68-5.82 ms, bien do 2.5%) — dung nhu mong doi, vi ca ba dung chung mot ham ivid.preprocess. Inference lech toi da 1.2% giua hai thu tu; ONNX Runtime ra dung 13.35 ms o ca hai lan. Bo do KHONG thien vi theo thu tu chay.",
+  "truoc_khi_sua": "Truoc khi sua warm-up, PyTorch (do dau tien) hien pre = 7.96-10.24 ms trong khi hai backend sau chi 5.5-5.8 ms. Nguyen nhan: warmup() chi goi infer(), bo qua preprocess, nen backend dau tien ganh toan bo chi phi khoi tao OpenCV. Neu khong phat hien, bao cao se ket luan 'PyTorch tien xu ly cham hon ONNX 1.8x' — sai hoan toan, vi ca ba dung chung mot ham.",
+  "thanh_phan_nhieu_nhat": "Hau xu ly (NMS) dao dong manh nhat: 1.78-2.94 ms giua hai lan do. Day la thao tac ngan va phu thuoc so detection, nen no la thanh phan kem on dinh nhat trong ba giai doan.",
+  "nguon": [
+    "results/smoke_pipeline.json",
+    "results/smoke_reversed.json"
+  ]
+}

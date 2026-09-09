@@ -48,3 +48,48 @@ Nhập nhằng hai loại so sánh này sẽ dẫn tới kết luận sai theo c
 Lần 2 được giữ làm bản chính thức, vì nó là bản mà `configs/train_yolov8n.yaml` hiện tại tái tạo được. Lần 1 giữ lại làm bằng chứng đối chứng.
 
 Số liệu gốc: `results/fr06_reproducibility.json`, `results/train_yolov8n_manifest.json`.
+
+---
+
+# Bộ đo có thiên vị theo thứ tự chạy không?
+
+Một bảng so sánh ba runtime chỉ có giá trị nếu **thứ tự đo không ảnh hưởng kết quả**.
+Đây là phép thử.
+
+## Cách làm
+
+Cùng một model (YOLOv8n pretrained COCO), cùng 30 ảnh, cùng thứ tự ảnh, chạy qua cả
+ba runner — một lần theo thứ tự `pytorch → onnx → tensorrt`, một lần đảo ngược.
+Jetson Orin Nano @15W.
+
+## Kết quả (ms, p50)
+
+| Backend | pre thuận | pre đảo | infer thuận | infer đảo | Lệch infer |
+|---|---:|---:|---:|---:|---:|
+| PyTorch | 5.68 | 5.74 | 28.90 | 29.25 | 1.2% |
+| ONNX Runtime | 5.71 | 5.68 | 13.35 | 13.35 | 0.0% |
+| TensorRT FP16 | 5.82 | 5.70 | 8.79 | 8.82 | 0.3% |
+
+**Tiền xử lý giống nhau ở cả ba backend và cả hai thứ tự** — 5.68 đến 5.82 ms, biên độ
+2.5%. Đúng như mong đợi, vì cả ba gọi chung `ivid.preprocess`. Nếu con số này lệch nhau
+thì hoặc bộ đo sai, hoặc chúng không thật sự dùng chung hàm.
+
+## Vì sao phép thử này cần thiết
+
+Trước khi sửa, PyTorch — backend được đo đầu tiên — hiện `pre` = **7.96–10.24 ms** trong
+khi hai backend sau chỉ 5.5–5.8 ms. Nguyên nhân: `warmup()` chỉ gọi `infer()`, bỏ qua
+`preprocess`, nên backend đầu tiên gánh toàn bộ chi phí khởi tạo OpenCV (lần `cv2.resize`
+đầu tiên chậm gấp ~5 lần lúc ổn định).
+
+Nếu không phát hiện, báo cáo sẽ kết luận *"PyTorch tiền xử lý chậm hơn ONNX 1.8×"* —
+sai hoàn toàn, vì cả ba dùng đúng một hàm NumPy. Đó là loại sai số nhìn rất hợp lý và
+không ai chất vấn.
+
+## Thành phần kém ổn định nhất
+
+Hậu xử lý (NMS) dao động 1.78–2.94 ms giữa hai lần đo — mạnh hơn hẳn hai giai đoạn kia.
+Nó là thao tác ngắn và phụ thuộc số detection, nên khi đọc bảng benchmark cần nhớ rằng
+cột này nhiễu hơn cột inference.
+
+Số liệu gốc: `results/harness_validation.json`, `results/smoke_pipeline.json`,
+`results/smoke_reversed.json`.
