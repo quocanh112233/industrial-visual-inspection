@@ -44,7 +44,9 @@ make export-onnx && make export-trt
 make bench && make accuracy && make report
 ```
 
-`make help` liệt kê toàn bộ lệnh. Train xem [docs/colab-training.md](docs/colab-training.md).
+`make help` liệt kê toàn bộ lệnh.
+
+Train: mở [`notebooks/ivid_colab.ipynb`](https://colab.research.google.com/github/quocanh112233/industrial-visual-inspection/blob/main/notebooks/ivid_colab.ipynb) trong Google Colab (cần repo public, hoặc dùng token — notebook có hướng dẫn cả hai). Giải thích chi tiết ở [docs/colab-training.md](docs/colab-training.md).
 
 ## Dữ liệu
 
@@ -112,7 +114,8 @@ curl -F "file=@data/processed/test/images/scratches_10.jpg" localhost:8000/predi
 
 - [docs/dataset.md](docs/dataset.md) — phân bố lớp, hình dạng bbox, nhận xét
 - [docs/deployment.md](docs/deployment.md) — dựng trên Jetson, Docker, sự cố thường gặp
-- [docs/colab-training.md](docs/colab-training.md) — train trên Colab cho người chưa dùng
+- [notebooks/ivid_colab.ipynb](notebooks/ivid_colab.ipynb) — notebook train sẵn, mở thẳng bằng Colab
+- [docs/colab-training.md](docs/colab-training.md) — giải thích chi tiết từng bước Colab
 - `docs/benchmark-report.md` — ★ báo cáo so sánh ba runtime *(sinh bởi `make report`)*
 
 ## Trạng thái

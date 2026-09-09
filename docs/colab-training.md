@@ -1,5 +1,16 @@
 # Hướng dẫn train trên Google Colab — cho người chưa dùng bao giờ
 
+> ## 🚀 Đường tắt
+> Có sẵn notebook chạy được ngay, không phải copy từng ô:
+> **[Mở `ivid_colab.ipynb` trong Colab](https://colab.research.google.com/github/quocanh112233/industrial-visual-inspection/blob/main/notebooks/ivid_colab.ipynb)**
+>
+> Tài liệu này giải thích *vì sao* từng bước tồn tại. Nếu chỉ muốn train thì
+> dùng notebook; quay lại đây khi có gì không hiểu hoặc bị lỗi.
+>
+> Repo đang **private**, nên notebook sẽ hỏi token GitHub ở Phần 3. Muốn bỏ qua
+> bước đó thì đổi repo sang public — dự án này rồi cũng sẽ public vì bạn dùng nó
+> để ứng tuyển.
+
 > **Tại sao không train thẳng trên Jetson?**
 > Train được, nhưng chậm ~20 lần. Ước lượng trên Orin Nano 8GB ở chế độ 15W:
 > YOLOv8n ≈ **4–6 giờ**, YOLOv8s ≈ **12–16 giờ** cho 100 epoch.
@@ -104,6 +115,10 @@ Cài thư viện (Colab đã có sẵn torch với CUDA, nên chỉ cần ultral
 import ultralytics; ultralytics.checks()
 ```
 
+> Trên Colab **không** cần ghim numpy như trên Jetson. Ràng buộc numpy 1.26.4 chỉ
+> áp dụng cho Jetson, nơi JetPack cài sẵn một bộ thư viện build khớp quanh phiên
+> bản đó. Colab tự lo phần này.
+
 Tải dataset bằng đúng script mà bạn cũng sẽ chạy trên Jetson:
 
 ```python
@@ -135,6 +150,43 @@ Ghi thẳng vào Drive (`--project`) để mất kết nối cũng không mất 
 
 Trong lúc chạy bạn sẽ thấy bảng tiến độ từng epoch với `box_loss`, `cls_loss`, `mAP50`.
 **Đừng đóng tab.** Thỉnh thoảng bấm vào trang để Colab biết bạn còn đó.
+
+---
+
+## Phần 5b — Đánh giá và **sao lưu ngay** (đừng bỏ qua)
+
+Train xong, `best.pt` đã nằm trong Drive nhờ `--project`. Nhưng `results/` và
+`models/` thì **vẫn nằm trong máy ảo** và sẽ mất khi ngắt kết nối. Đó là nơi chứa
+`train_<name>_manifest.json` — file ghi seed, phiên bản thư viện, siêu tham số và
+hash dataset, tức là toàn bộ bằng chứng cho FR-06. Mất nó thì con số mAP trong
+báo cáo không truy nguyên được nữa.
+
+```python
+# đánh giá trên tập test (FR-05)
+!PYTHONPATH=src python -m ivid.train.evaluate --name yolov8n
+
+# sao lưu MỌI thứ cần giữ
+!mkdir -p /content/drive/MyDrive/ivid/artifacts
+!cp -r results /content/drive/MyDrive/ivid/artifacts/
+!cp -r models  /content/drive/MyDrive/ivid/artifacts/
+!ls -R /content/drive/MyDrive/ivid/artifacts | head -30
+```
+
+Kiểm tra nhanh kết quả:
+
+```python
+import json
+d = json.load(open('results/train_eval.json'))
+for k, v in d.items():
+    o = v['overall']
+    print(f"{k}: mAP@0.5={o['mAP50']:.4f}  mAP@0.5:0.95={o['mAP50_95']:.4f}")
+    for c, m in v['per_class'].items():
+        print(f"    {c:18s} mAP50={m.get('mAP50', 0):.4f}")
+```
+
+Ngưỡng FR-05 là **mAP@0.5 ≥ 0.65** cho YOLOv8n. Nếu thấp hơn, xem cột theo lớp
+trước khi kết luận là hỏng: `pitted_surface` và `crazing` vốn khó (xem
+[dataset.md](dataset.md)), một mình chúng kéo xuống là chuyện bình thường.
 
 ---
 
@@ -171,7 +223,13 @@ chuột phải `best.pt` → Tải xuống. Cách này chắc chắn hơn khi fi
 **Đưa lên Jetson** (chạy trên máy dev, sau khi đã tải file về `~/Downloads`):
 
 ```bash
-scp ~/Downloads/best.pt jetson@<IP-JETSON>:~/industrial-visual-inspection/models/yolov8n/best.pt
+ssh jetson@<IP> "mkdir -p ~/quoc_anh/industrial-visual-inspection/models/yolov8n"
+scp ~/Downloads/best.pt \
+    jetson@<IP>:~/quoc_anh/industrial-visual-inspection/models/yolov8n/best.pt
+
+# nhớ mang theo cả manifest — nếu không, số mAP mất đường truy nguyên (FR-06)
+scp ~/Downloads/train_yolov8n_manifest.json \
+    jetson@<IP>:~/quoc_anh/industrial-visual-inspection/results/
 ```
 
 Từ đây trở đi mọi thứ (export ONNX, build engine, benchmark, serve) chạy **trên Jetson**.
@@ -180,10 +238,11 @@ Từ đây trở đi mọi thứ (export ONNX, build engine, benchmark, serve) c
 
 ## Phần 8 — Checklist trước khi rời Colab
 
-- [ ] `results/train_eval.json` đã có và đã copy vào Drive
+- [ ] `results/train_eval.json` đã copy vào Drive
+- [ ] `results/train_<name>_manifest.json` đã copy vào Drive ← **quan trọng nhất cho FR-06**
 - [ ] `best.pt` của **cả** yolov8n và yolov8s đã nằm trong Drive
-- [ ] Đã ghi lại: phiên bản ultralytics, torch, seed, số epoch (FR-06)
-- [ ] Đã lưu file log train (`results.csv` trong thư mục run) — cần cho báo cáo
+- [ ] `results/train_<name>_curve.csv` (đường cong loss) đã lưu — cần cho báo cáo
+- [ ] Đã chạy `ivid.train.evaluate` và xem mAP theo từng lớp
 
 ---
 

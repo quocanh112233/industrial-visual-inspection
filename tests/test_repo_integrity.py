@@ -125,3 +125,80 @@ def test_warmup_chay_ca_duong_ong_khong_chi_inference():
 
     src = inspect.getsource(BaseRunner.warmup)
     assert "run_array" in src, "warmup phai goi run_array, khong duoc chi goi infer"
+
+
+# ------------------------------------------------------- tai lieu khong lac hau
+def _doc_files() -> list[Path]:
+    """Tai lieu + notebook. Notebook quan trong hon ca: nguoi dung dang o Colab,
+    khong co cach nao doan ra lenh dung khi mot lenh trong do bi lac hau."""
+    files = list((ROOT / "docs").glob("*.md")) + [ROOT / "README.md"]
+    files += list((ROOT / "notebooks").glob("*.ipynb"))
+    return [f for f in files if f.exists()]
+
+
+def _commands_in_docs() -> tuple[set[str], set[str]]:
+    """Rut cac lenh 'python -m ivid.x' va 'bash scripts/y.sh' tu tai lieu."""
+    import re
+
+    mods, scripts = set(), set()
+    for md in _doc_files():
+        t = md.read_text(encoding="utf-8")
+        mods |= set(re.findall(r"python3? -m (ivid\.[a-zA-Z0-9_.]+)", t))
+        scripts |= set(re.findall(r"bash (scripts/[a-zA-Z0-9_]+\.sh)", t))
+    return mods, scripts
+
+
+def test_tai_lieu_khong_tro_toi_module_da_bien_mat():
+    """Doi ten mot module ma quen sua docs/ thi nguoi doc go lenh se gap loi.
+    Voi docs/colab-training.md thi con te hon: nguoi dung dang o Colab, khong
+    co cach nao doan ra lenh dung."""
+    mods, _ = _commands_in_docs()
+    missing = [m for m in mods
+               if not (ROOT / "src" / (m.replace(".", "/") + ".py")).exists()]
+    assert not missing, "tai lieu goi module khong ton tai: " + ", ".join(sorted(missing))
+
+
+def test_tai_lieu_khong_tro_toi_script_da_bien_mat():
+    _, scripts = _commands_in_docs()
+    missing = [s for s in scripts if not (ROOT / s).exists()]
+    assert not missing, "tai lieu goi script khong ton tai: " + ", ".join(sorted(missing))
+
+
+def test_moi_config_duoc_nhac_trong_tai_lieu_deu_ton_tai():
+    import re
+
+    refs = set()
+    for md in _doc_files():
+        refs |= set(re.findall(r"(configs/[a-zA-Z0-9_]+\.yaml)",
+                               md.read_text(encoding="utf-8")))
+    missing = [r for r in refs if not (ROOT / r).exists()]
+    assert not missing, "tai lieu nhac config khong ton tai: " + ", ".join(sorted(missing))
+
+
+def test_makefile_target_duoc_nhac_trong_tai_lieu_deu_ton_tai():
+    import re
+
+    mk = (ROOT / "Makefile").read_text(encoding="utf-8")
+    targets = set(re.findall(r"^([a-z][a-z-]*):", mk, re.M))
+    refs = set()
+    for md in _doc_files():
+        refs |= set(re.findall(r"\bmake ([a-z][a-z-]*)", md.read_text(encoding="utf-8")))
+    missing = sorted(refs - targets)
+    assert not missing, "tai lieu goi 'make' target khong co: " + ", ".join(missing)
+
+
+def test_notebook_colab_hop_le_va_bat_gpu():
+    """Notebook hong hoac quen bat GPU la loi im lang: Colab van chay, chi la
+    train bang CPU cham gap ~50 lan."""
+    import json
+
+    p = ROOT / "notebooks" / "ivid_colab.ipynb"
+    assert p.exists(), "thieu notebooks/ivid_colab.ipynb"
+    nb = json.loads(p.read_text(encoding="utf-8"))
+    assert nb["nbformat"] == 4
+    assert nb["metadata"].get("accelerator") == "GPU", "notebook phai khai bao accelerator GPU"
+    assert any(c["cell_type"] == "code" for c in nb["cells"])
+    # khong duoc lo token/secret trong notebook
+    text = p.read_text(encoding="utf-8")
+    for leak in ("ghp_", "github_pat_", "AIza", "-----BEGIN"):
+        assert leak not in text, f"notebook chua chuoi giong secret: {leak}"
