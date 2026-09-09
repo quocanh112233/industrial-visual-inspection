@@ -67,12 +67,18 @@ class BaseRunner(abc.ABC):
     name: str = "base"
 
     def __init__(self, weights: Path, imgsz: int = 640, conf: float = 0.25,
-                 iou: float = 0.7, device: str = "cuda", nc: int | None = None):
+                 iou: float = 0.7, device: str = "cuda", nc: int | None = None,
+                 scaleup: bool = True, multi_label: bool = False):
         self.weights = Path(weights)
         self.imgsz = imgsz
         self.conf = conf
         self.iou = iou
         self.device = device
+        # Che do tien/hau xu ly. Dat o day chu khong hard-code trong run_array de
+        # ba runner luon dung CHUNG mot che do — neu moi runner mot khac thi bang
+        # benchmark do lan ca khac biet duong ong vao khac biet runtime.
+        self.scaleup = scaleup
+        self.multi_label = multi_label
         # So lop: truyen tuong minh cho decode() thay vi de no doan truc tensor
         self.nc = nc if nc is not None else _num_classes()
         if not self.weights.exists():
@@ -97,6 +103,8 @@ class BaseRunner(abc.ABC):
             "imgsz": self.imgsz,
             "conf": self.conf,
             "iou": self.iou,
+            "scaleup": self.scaleup,
+            "multi_label": self.multi_label,
         }
 
     def warmup(self, n: int = 20, img_bgr: np.ndarray | None = None) -> None:
@@ -119,7 +127,7 @@ class BaseRunner(abc.ABC):
         t = Timing()
 
         t0 = time.perf_counter()
-        x, ratio, pad = preprocess(img_bgr, self.imgsz)
+        x, ratio, pad = preprocess(img_bgr, self.imgsz, scaleup=self.scaleup)
         t.preprocess_ms = (time.perf_counter() - t0) * 1000
 
         t0 = time.perf_counter()
@@ -127,7 +135,7 @@ class BaseRunner(abc.ABC):
         t.inference_ms = (time.perf_counter() - t0) * 1000
 
         t0 = time.perf_counter()
-        det = decode(raw, self.conf, self.iou, nc=self.nc)
+        det = decode(raw, self.conf, self.iou, nc=self.nc, multi_label=self.multi_label)
         det = scale_boxes(det, ratio, pad, img_bgr.shape[:2])
         t.postprocess_ms = (time.perf_counter() - t0) * 1000
 

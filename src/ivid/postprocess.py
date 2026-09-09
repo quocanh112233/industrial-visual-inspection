@@ -51,11 +51,20 @@ def nms(boxes: np.ndarray, scores: np.ndarray, iou_thres: float) -> list[int]:
     return keep
 
 
+MAX_NMS = 30000  # tran ung vien truoc NMS, giong ultralytics
+
+
 def decode(raw: np.ndarray, conf_thres: float = 0.25, iou_thres: float = 0.7,
-           max_det: int = 300, nc: int | None = None) -> np.ndarray:
+           max_det: int = 300, nc: int | None = None,
+           multi_label: bool = False) -> np.ndarray:
     """(1, 4+nc, N) -> (M, 6) gom [x1, y1, x2, y2, conf, class_id].
 
     Toa do van o he anh da letterbox; goi scale_boxes() de doi ve anh goc.
+
+    `multi_label=True` cho phep MOT anchor sinh nhieu detection — mot cho moi lop
+    co diem vuot nguong, thay vi chi lay lop argmax. Ultralytics bat co nay o
+    duong val (models/yolo/detect/val.py, non_max_suppression(multi_label=True))
+    nhung tat o duong predict. Co nghia khi conf rat thap (0.001) de ve duong PR.
 
     `nc` (so lop) la tuy chon nhung NEN truyen vao khi biet. Khong co no, ham
     phai doan truc nao la truc kenh bang gia thiet "so anchor > 4+nc" — dung
@@ -74,14 +83,25 @@ def decode(raw: np.ndarray, conf_thres: float = 0.25, iou_thres: float = 0.7,
         raw = raw.T
 
     boxes_xywh, scores_all = raw[:, :4], raw[:, 4:]
-    class_ids = scores_all.argmax(axis=1)
-    confs = scores_all[np.arange(len(scores_all)), class_ids]
 
-    m = confs >= conf_thres
-    if not m.any():
-        return np.zeros((0, 6), dtype=np.float32)
-    boxes = xywh2xyxy(boxes_xywh[m].astype(np.float32))
-    confs, class_ids = confs[m], class_ids[m]
+    if multi_label:
+        rows, cols = np.nonzero(scores_all >= conf_thres)
+        if len(rows) == 0:
+            return np.zeros((0, 6), dtype=np.float32)
+        boxes = xywh2xyxy(boxes_xywh[rows].astype(np.float32))
+        confs, class_ids = scores_all[rows, cols], cols
+    else:
+        class_ids = scores_all.argmax(axis=1)
+        confs = scores_all[np.arange(len(scores_all)), class_ids]
+        m = confs >= conf_thres
+        if not m.any():
+            return np.zeros((0, 6), dtype=np.float32)
+        boxes = xywh2xyxy(boxes_xywh[m].astype(np.float32))
+        confs, class_ids = confs[m], class_ids[m]
+
+    if len(confs) > MAX_NMS:
+        top = np.argsort(-confs)[:MAX_NMS]
+        boxes, confs, class_ids = boxes[top], confs[top], class_ids[top]
 
     # NMS theo tung lop: hai loi khac loai chong len nhau la binh thuong
     # tren be mat thep, khong duoc trie tieu nhau

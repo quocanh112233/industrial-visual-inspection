@@ -11,7 +11,7 @@ PORT    ?= 8000
 
 .PHONY: help data prepare validate stats train train-jetson eval check-stack smoke-pipeline \
         export-onnx export-trt parity bench accuracy report all \
-        serve docker-build docker-up docker-down smoke test lint clean
+        serve docker-build docker-up docker-down smoke test lint clean diag-map
 
 help:
 	@grep -E '^[a-z-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-14s\033[0m %s\n", $$1, $$2}'
@@ -60,6 +60,9 @@ bench-quick: ## Chay thu nhanh: 1 phien, 20 anh -> results/benchmark_quick.json
 
 accuracy: ## FR-13 do mAP cho tung dinh dang
 	$(PY) -m ivid.benchmark.accuracy
+
+diag-map: ## Truy tim chenh lech mAP giua duong ong cua ta va ultralytics.val()
+	$(PY) scripts/diag_map.py
 
 device-info: ## FR-14 in dieu kien do hien tai
 	$(PY) -m ivid.benchmark.device_info

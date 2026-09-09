@@ -11,16 +11,23 @@ import numpy as np
 
 
 def letterbox(img: np.ndarray, new_shape: int = 640,
-              color: tuple[int, int, int] = (114, 114, 114)) -> tuple[np.ndarray, float, tuple[int, int]]:
+              color: tuple[int, int, int] = (114, 114, 114),
+              scaleup: bool = True) -> tuple[np.ndarray, float, tuple[int, int]]:
     """Resize giu ti le roi dem vien. Tra ve (anh, ti_le, (pad_x, pad_y)).
 
-    NEU-DET la anh vuong 200x200 nen thuc te khong phai dem gi, nhung ham van
-    xu ly truong hop tong quat de con dung lai cho anh camera that sau nay.
+    `scaleup=False` thi anh NHO HON khung KHONG duoc phong to, chi duoc dem xam
+    cho du 640x640. Nghe nhu chi tiet vun, nhung voi NEU-DET (anh 200x200) day
+    la khac biet lon: scaleup=True phong anh len 3.2 lan, tuc dua cho model mot
+    thang do no chua tung thay luc huan luyen. Ultralytics dat scaleup=False cho
+    duong val (ultralytics/data/dataset.py, build_transforms) — nen so mAP no
+    bao la do o che do khong phong to.
     """
     import cv2
 
     h, w = img.shape[:2]
     r = min(new_shape / h, new_shape / w)
+    if not scaleup:
+        r = min(r, 1.0)
     nh, nw = int(round(h * r)), int(round(w * r))
     if (nh, nw) != (h, w):
         interp = cv2.INTER_LINEAR if r > 1 else cv2.INTER_AREA
@@ -32,9 +39,10 @@ def letterbox(img: np.ndarray, new_shape: int = 640,
     return img, r, (left, top)
 
 
-def preprocess(img_bgr: np.ndarray, imgsz: int = 640) -> tuple[np.ndarray, float, tuple[int, int]]:
+def preprocess(img_bgr: np.ndarray, imgsz: int = 640,
+               scaleup: bool = True) -> tuple[np.ndarray, float, tuple[int, int]]:
     """BGR uint8 HWC  ->  RGB float32 NCHW da chuan hoa 0..1, batch 1."""
-    lb, r, pad = letterbox(img_bgr, imgsz)
+    lb, r, pad = letterbox(img_bgr, imgsz, scaleup=scaleup)
     x = lb[:, :, ::-1].transpose(2, 0, 1)          # BGR->RGB, HWC->CHW
     x = np.ascontiguousarray(x, dtype=np.float32) / 255.0
     return x[None], r, pad

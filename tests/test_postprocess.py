@@ -193,3 +193,29 @@ def test_match_hai_tap_deu_rong_la_khop_hoan_toan():
     z = np.zeros((0, 6), np.float32)
     r = match_detections(z, z)
     assert r["matched"] == 0 and r["mean_iou"] == 1.0
+
+
+# ------------------------------------------- multi_label (che do val cua ultralytics)
+def test_multi_label_sinh_mot_detection_cho_moi_lop_vuot_nguong():
+    """Mot anchor co hai lop cung vuot nguong -> hai detection, khong phai mot.
+
+    Ultralytics bat co nay o duong val (multi_label=True) nhung tat o duong
+    predict. Chenh lech ay tung lam so mAP cua ta khong khop voi so cua ho.
+    """
+    raw = np.zeros((1, 4 + NC, 20), dtype=np.float32)
+    raw[0, :4, 0] = (100, 100, 40, 20)
+    raw[0, 4 + 1, 0] = 0.8
+    raw[0, 4 + 4, 0] = 0.6
+
+    assert decode(raw, conf_thres=0.25, nc=NC).shape == (1, 6)           # chi lop argmax
+    det = decode(raw, conf_thres=0.25, nc=NC, multi_label=True)
+    assert det.shape == (2, 6)
+    assert sorted(det[:, 5].tolist()) == [1.0, 4.0]
+    assert det[0, 4] == pytest.approx(0.8)   # van sap theo diem giam dan
+
+
+def test_multi_label_khong_doi_ket_qua_khi_chi_mot_lop_vuot_nguong():
+    raw = raw_with([(100, 100, 40, 20, 3, 0.9), (300, 300, 20, 20, 1, 0.5)])
+    a = decode(raw, conf_thres=0.25, nc=NC)
+    b = decode(raw, conf_thres=0.25, nc=NC, multi_label=True)
+    assert np.allclose(a, b)
