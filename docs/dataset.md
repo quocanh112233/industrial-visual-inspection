@@ -1,6 +1,6 @@
 # Dataset — NEU-DET
 
-*Sinh tự động bởi `ivid.data.stats` lúc 2026-09-09T05:58:06+00:00*
+*Sinh tự động bởi `ivid.data.stats` — chạy lại cho ra file giống hệt.*
 
 Ảnh xám bề mặt thép cán nóng, kích thước gốc **200×200**, 6 loại lỗi. Chia train/val/test 70/15/15 phân tầng theo lớp, seed cố định (`1337`) — xem `results/dataset_manifest.json`.
 

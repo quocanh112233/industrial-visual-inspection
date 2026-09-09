@@ -29,7 +29,6 @@ from __future__ import annotations
 import argparse
 import sys
 from collections import defaultdict
-from datetime import datetime, timezone
 from pathlib import Path
 
 from .common import IMG_EXT, SPLITS, class_names, load_config, primary_class, repo_root, write_json
@@ -175,8 +174,11 @@ def main() -> int:
     # ---------------------------------------------------------------- bao cao
     L: list[str] = []
     L.append("# Báo cáo kiểm tra dữ liệu (FR-02)\n")
-    L.append(f"*Sinh tự động lúc {datetime.now(timezone.utc).isoformat(timespec='seconds')} "
-             f"bởi `ivid.data.validate`*\n")
+    # KHONG dong dau thoi gian chay: file nay duoc commit, va mot dau thoi gian
+    # moi khien no hien ra nhu "da sua" moi lan bat ky may nao chay lai — gay
+    # xung dot git giua may dev, Jetson va Colab du noi dung y het nhau.
+    # Thoi diem chay da nam trong lich su git va trong results/*.json.
+    L.append("*Sinh tự động bởi `ivid.data.validate` — chạy lại cho ra file giống hệt.*\n")
     L.append(f"Thư mục kiểm tra: `{out_dir}`\n")
 
     L.append("## Tổng quan\n")

@@ -1,6 +1,6 @@
 # Báo cáo kiểm tra dữ liệu (FR-02)
 
-*Sinh tự động lúc 2026-09-09T05:57:29+00:00 bởi `ivid.data.validate`*
+*Sinh tự động bởi `ivid.data.validate` — chạy lại cho ra file giống hệt.*
 
 Thư mục kiểm tra: `/home/quocanh/quoc_anh/industrial-visual-inspection/data/processed`
 

@@ -10,7 +10,6 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from datetime import datetime, timezone
 from pathlib import Path
 
 from ..data.common import repo_root
@@ -255,9 +254,12 @@ def build_report(payload: dict, rows: list[dict], charts: list[str], cycle_ms: f
     L: list[str] = []
 
     L.append("# Báo cáo benchmark — ba định dạng runtime trên Jetson Orin Nano\n")
-    L.append(f"*Sinh tự động bởi `ivid.benchmark.report` lúc "
-             f"{datetime.now(timezone.utc).isoformat(timespec='seconds')}. "
-             "Mọi con số đọc từ `results/benchmark.json`.*\n")
+    # Dung thoi diem DO (nam trong benchmark.json) chu khong phai thoi diem sinh
+    # bao cao: sinh lai bao cao tu cung mot file JSON phai cho ra file giong het,
+    # neu khong thi moi lan chay 'make report' lai tao mot diff gia.
+    measured = payload.get("benchmarked_utc") or dev.get("collected_utc") or "?"
+    L.append(f"*Sinh tự động bởi `ivid.benchmark.report` từ `results/benchmark.json`. "
+             f"Số liệu đo lúc {measured}. Mọi con số đều truy được về file JSON đó.*\n")
 
     L.append("## Điều kiện đo (FR-14)\n")
     L.append("| Hạng mục | Giá trị |")

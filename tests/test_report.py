@@ -98,3 +98,40 @@ def test_thieu_du_lieu_thi_bao_thieu_chu_khong_no():
     assert rows[0]["latency_missing"] == "khong thay best.onnx"
     text = "\n".join(conclusions(rows, 200.0))
     assert "chưa đủ dữ liệu" in text or "chưa có dữ liệu" in text
+
+
+# ------------------------------------------------- bao cao phai tat dinh
+def test_sinh_bao_cao_hai_lan_cho_ra_noi_dung_giong_het():
+    """Bao cao duoc commit vao repo. Neu no dong dau thoi gian CHAY, thi may dev,
+    Jetson va Colab moi may lai tao mot diff khac nhau du noi dung y het —
+    va 'git pull' tren Jetson bao xung dot. Da xay ra that.
+    """
+    from ivid.benchmark.report import build_report
+
+    payload = {
+        "device": {"board_model": "Jetson", "l4t_release": "R36", "jetpack": "6.2",
+                   "power_mode": {"current_name": "15W", "current_id": 0,
+                                  "available": {"0": "15W"}},
+                   "libraries": {"tensorrt": "10.3.0"}, "temperature_mean_c": 48.0,
+                   "collected_utc": "2026-09-09T10:00:00+00:00"},
+        "config": {"warmup": 20, "sessions": 3},
+        "images": {"count": 270, "split": "test"},
+        "benchmarked_utc": "2026-09-09T10:05:00+00:00",
+        **BASE,
+    }
+    rows = rows_from(payload)
+    a = build_report(payload, rows, [], 200.0)
+    b = build_report(payload, rows, [], 200.0)
+    assert a == b, "sinh hai lan tu cung mot du lieu ra hai noi dung khac nhau"
+    assert "2026-09-09T10:05:00" in a, "bao cao phai ghi thoi diem DO"
+
+
+def test_ma_sinh_bao_cao_khong_dong_dau_thoi_gian_chay():
+    """Chan viec vo tinh dua datetime.now() tro lai phan tieu de bao cao."""
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[1]
+    for rel in ("src/ivid/data/validate.py", "src/ivid/data/stats.py"):
+        text = (root / rel).read_text(encoding="utf-8")
+        assert "datetime.now" not in text, (
+            f"{rel} dong dau thoi gian chay vao bao cao duoc commit -> gay diff gia")

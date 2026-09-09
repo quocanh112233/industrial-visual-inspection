@@ -14,7 +14,6 @@ import argparse
 import statistics
 import sys
 from collections import defaultdict
-from datetime import datetime, timezone
 from pathlib import Path
 
 from .common import IMG_EXT, SPLITS, class_names, load_config, repo_root, write_json
@@ -84,8 +83,7 @@ def main() -> int:
 
     L: list[str] = []
     L.append(f"# Dataset — {cfg['dataset_name']}\n")
-    L.append(f"*Sinh tự động bởi `ivid.data.stats` lúc "
-             f"{datetime.now(timezone.utc).isoformat(timespec='seconds')}*\n")
+    L.append("*Sinh tự động bởi `ivid.data.stats` — chạy lại cho ra file giống hệt.*\n")
     L.append("Ảnh xám bề mặt thép cán nóng, kích thước gốc **200×200**, 6 loại lỗi. "
              "Chia train/val/test 70/15/15 phân tầng theo lớp, seed cố định "
              f"(`{cfg['split']['seed']}`) — xem `results/dataset_manifest.json`.\n")
