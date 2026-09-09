@@ -2,7 +2,7 @@
 
 *Sinh tự động bởi `ivid.data.validate` — chạy lại cho ra file giống hệt.*
 
-Thư mục kiểm tra: `/home/quocanh/quoc_anh/industrial-visual-inspection/data/processed`
+Thư mục kiểm tra: `data/processed`
 
 ## Tổng quan
 

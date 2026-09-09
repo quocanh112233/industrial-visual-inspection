@@ -22,7 +22,7 @@ from pathlib import Path
 
 import yaml
 
-from ..data.common import repo_root, write_json
+from ..data.common import rel_to_root, repo_root, write_json
 
 
 def lib_versions() -> dict[str, str]:
@@ -161,10 +161,10 @@ def main() -> int:
         "git_commit": git_commit(root),
         "dataset": json.loads(ds_manifest.read_text(encoding="utf-8")) if ds_manifest.exists() else "thieu",
         "weights": {
-            "best": str(dest / "best.pt"),
+            "best": rel_to_root(dest / "best.pt"),
             "size_mb": round((dest / "best.pt").stat().st_size / 1e6, 2),
         },
-        "run_dir": str(run_dir),
+        "run_dir": rel_to_root(run_dir),
     }
     write_json(root / "results" / f"train_{name}_manifest.json", manifest)
 

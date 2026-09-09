@@ -31,7 +31,16 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
-from .common import IMG_EXT, SPLITS, class_names, load_config, primary_class, repo_root, write_json
+from .common import (
+    IMG_EXT,
+    SPLITS,
+    class_names,
+    load_config,
+    primary_class,
+    rel_to_root,
+    repo_root,
+    write_json,
+)
 
 EPS = 1e-6
 
@@ -179,7 +188,7 @@ def main() -> int:
     # xung dot git giua may dev, Jetson va Colab du noi dung y het nhau.
     # Thoi diem chay da nam trong lich su git va trong results/*.json.
     L.append("*Sinh tự động bởi `ivid.data.validate` — chạy lại cho ra file giống hệt.*\n")
-    L.append(f"Thư mục kiểm tra: `{out_dir}`\n")
+    L.append(f"Thư mục kiểm tra: `{rel_to_root(out_dir)}`\n")
 
     L.append("## Tổng quan\n")
     L.append("| Tập | Ảnh | File nhãn | Bbox | Ảnh nhiều loại lỗi |")

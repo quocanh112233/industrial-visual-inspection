@@ -29,6 +29,7 @@ from .common import (
     class_names,
     load_config,
     primary_class,
+    rel_to_root,
     repo_root,
     sha256_of_files,
     write_json,
@@ -214,7 +215,7 @@ def main() -> int:
     # --- manifest tai lap (FR-06) ---
     manifest = {
         "dataset": cfg["dataset_name"],
-        "raw_dir": str(raw_dir),
+        "raw_dir": rel_to_root(raw_dir),
         "raw_source": (raw_dir.parent / "SOURCE.txt").read_text(encoding="utf-8").strip()
         if (raw_dir.parent / "SOURCE.txt").exists()
         else "?",

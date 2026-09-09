@@ -17,6 +17,21 @@ def repo_root() -> Path:
     return Path(__file__).resolve().parents[3]
 
 
+def rel_to_root(path: str | Path) -> str:
+    """Duong dan tuong doi so voi goc repo, neu no nam trong repo.
+
+    Cac file JSON/Markdown trong results/ va docs/ DUOC COMMIT. Neu chung chua
+    duong dan tuyet doi thi may dev ghi '/home/quocanh/...' con Jetson ghi
+    '/home/jetson/...' — hai may sinh ra hai noi dung khac nhau tu cung mot du
+    lieu, va 'git pull' bao xung dot. Da xay ra that.
+    """
+    p = Path(path)
+    try:
+        return str(p.resolve().relative_to(repo_root()))
+    except ValueError:
+        return str(p)
+
+
 def load_config(path: str | Path) -> dict[str, Any]:
     cfg = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
     root = repo_root()

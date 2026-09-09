@@ -21,7 +21,7 @@ from pathlib import Path
 import numpy as np
 import yaml
 
-from ..data.common import IMG_EXT, repo_root, write_json
+from ..data.common import IMG_EXT, rel_to_root, repo_root, write_json
 from ..preprocess import preprocess, read_image
 
 
@@ -119,7 +119,7 @@ def main() -> int:
     print(f"[onnx] input  {ir['inputs']}")
     print(f"[onnx] output {ir['outputs']}")
 
-    report = {"model": a.name, "onnx": str(onnx_path),
+    report = {"model": a.name, "onnx": rel_to_root(onnx_path),
               "size_mb": round(onnx_path.stat().st_size / 1e6, 2),
               "checker": "pass", "graph": ir, "config": oc}
 

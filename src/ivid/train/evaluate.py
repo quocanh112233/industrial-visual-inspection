@@ -18,7 +18,7 @@ from pathlib import Path
 
 import yaml
 
-from ..data.common import repo_root, write_json
+from ..data.common import rel_to_root, repo_root, write_json
 
 MAP50_TARGET = 0.65  # nguong FR-05 cho YOLOv8n tren NEU-DET
 
@@ -64,7 +64,7 @@ def evaluate(weights: Path, data: Path, split: str, imgsz: int, batch: int,
         per_class[cname] = entry
 
     return {
-        "weights": str(weights),
+        "weights": rel_to_root(weights),
         "format": weights.suffix.lstrip("."),
         "split": split,
         "imgsz": imgsz,

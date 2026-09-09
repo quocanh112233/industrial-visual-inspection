@@ -23,7 +23,7 @@ from pathlib import Path
 
 import yaml
 
-from ..data.common import repo_root, write_json
+from ..data.common import rel_to_root, repo_root, write_json
 
 
 def device_metadata() -> dict:
@@ -128,8 +128,8 @@ def main() -> int:
 
     report = {
         "model": a.name,
-        "onnx": str(onnx_path),
-        "engine": str(engine_path),
+        "onnx": rel_to_root(onnx_path),
+        "engine": rel_to_root(engine_path),
         "precision": precision,
         "workspace_mib": int(tc["workspace_mib"]),
         "build_ok": ok,

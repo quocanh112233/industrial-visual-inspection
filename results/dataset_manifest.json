@@ -1,6 +1,6 @@
 {
   "dataset": "NEU-DET",
-  "raw_dir": "/home/quocanh/quoc_anh/industrial-visual-inspection/data/raw/NEU-DET",
+  "raw_dir": "data/raw/NEU-DET",
   "raw_source": "github:Marfbin/NEU-DET-with-yolov8@main (YOLO txt, da chia san train/test)",
   "seed": 1337,
   "ratios": {

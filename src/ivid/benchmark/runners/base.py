@@ -18,6 +18,13 @@ from ...postprocess import decode, scale_boxes
 from ...preprocess import preprocess, read_image
 
 
+def _rel(path: Path) -> str:
+    """Duong dan tuong doi so voi goc repo — xem ivid.data.common.rel_to_root."""
+    from ...data.common import rel_to_root
+
+    return rel_to_root(path)
+
+
 def _num_classes() -> int | None:
     """Doc so lop tu configs/data.yaml. None neu khong doc duoc — luc do
     decode() quay ve cach doan truc, van dung voi model that."""
@@ -85,7 +92,7 @@ class BaseRunner(abc.ABC):
     def backend_info(self) -> dict:
         return {
             "runner": self.name,
-            "weights": str(self.weights),
+            "weights": _rel(self.weights),
             "model_size_mb": round(self.weights.stat().st_size / 1e6, 2),
             "imgsz": self.imgsz,
             "conf": self.conf,

@@ -202,3 +202,43 @@ def test_notebook_colab_hop_le_va_bat_gpu():
     text = p.read_text(encoding="utf-8")
     for leak in ("ghp_", "github_pat_", "AIza", "-----BEGIN"):
         assert leak not in text, f"notebook chua chuoi giong secret: {leak}"
+
+
+# ------------------------------------------- duong dan trong file duoc commit
+def test_khong_co_duong_dan_tuyet_doi_trong_file_duoc_commit():
+    """File trong results/ va docs/ duoc commit. Duong dan tuyet doi khien may
+    dev ghi '/home/quocanh/...' con Jetson ghi '/home/jetson/...' — hai may sinh
+    ra hai noi dung khac nhau tu cung mot du lieu, va 'git pull' bao xung dot.
+
+    Bo qua train_*_manifest.json: chung ghi lai moi truong train that (Colab),
+    duong dan o do la ban ghi lich su chu khong phai dau vao cua buoc sau.
+    """
+    import re
+
+    if not in_git_repo():
+        pytest.skip("khong phai git repo")
+
+    tracked = set(git("ls-files").splitlines())
+    suspicious = re.compile(r"(/home/|/Users/|C:\\\\)")
+    bad = []
+    for rel in sorted(tracked):
+        if not (rel.startswith(("results/", "docs/")) and rel.endswith((".json", ".md"))):
+            continue
+        if "train_" in rel and "manifest" in rel:
+            continue
+        text = (ROOT / rel).read_text(encoding="utf-8", errors="replace")
+        for m in suspicious.finditer(text):
+            line = text[:m.start()].count("\n") + 1
+            bad.append(f"{rel}:{line}")
+            break
+    assert not bad, ("duong dan tuyet doi trong file duoc commit:\n  " + "\n  ".join(bad)
+                     + "\n\nDung ivid.data.common.rel_to_root() khi ghi duong dan.")
+
+
+def test_rel_to_root_tra_ve_duong_dan_tuong_doi():
+    from ivid.data.common import rel_to_root
+
+    assert rel_to_root(ROOT / "results" / "x.json") == "results/x.json"
+    assert rel_to_root(ROOT / "src/ivid/data/prepare.py") == "src/ivid/data/prepare.py"
+    # ngoai repo thi giu nguyen
+    assert rel_to_root("/tmp/ngoai-repo.json") == "/tmp/ngoai-repo.json"
