@@ -21,6 +21,7 @@ BACKEND_ORDER = ["pytorch", "onnx", "tensorrt"]
 def rows_from(payload: dict) -> list[dict]:
     """Gop latency + accuracy + tai nguyen thanh mot dong moi (model, backend)."""
     runs, acc = payload.get("runs", {}), payload.get("accuracy", {})
+    memory = payload.get("memory", {})
     keys = sorted(set(runs) | set(acc),
                   key=lambda k: (k.split("|")[0],
                                  BACKEND_ORDER.index(k.split("|")[1])
@@ -28,7 +29,7 @@ def rows_from(payload: dict) -> list[dict]:
     out = []
     for k in keys:
         model, backend = k.split("|", 1)
-        r, an = runs.get(k, {}), acc.get(k, {})
+        r, an, mem = runs.get(k, {}), acc.get(k, {}), memory.get(k, {})
         row = {"model": model, "backend": backend,
                "backend_label": BACKEND_LABEL.get(backend, backend)}
         if r and not r.get("skipped"):
@@ -47,6 +48,8 @@ def rows_from(payload: dict) -> list[dict]:
             )
         else:
             row["latency_missing"] = (r or {}).get("reason", "chua do")
+        if mem and not mem.get("skipped"):
+            row["mem_delta_mb"] = mem.get("rss_delta_mb")
         if an and not an.get("skipped"):
             # accuracy.py moi tra ve mAP o cap cao nhat (khong con boc trong "overall"),
             # va per_class danh so theo CHI SO lop. Doi sang ten lop de bang doc duoc.
@@ -148,22 +151,25 @@ def make_charts(rows: list[dict], out_dir: Path) -> list[str]:
 
 
 def main_table(rows: list[dict]) -> list[str]:
-    # Cot bo nho dung `system_used_delta_mb` chu KHONG dung so cua torch.
-    # torch.cuda.max_memory_allocated() chi thay phan do CHINH torch cap phat:
-    # voi ONNX Runtime no bao 0 MB (ORT tu cap phat), voi TensorRT no chi dem
-    # buffer vao/ra chu khong dem bo nho cua engine. Dat con so do vao bang
-    # chinh se khien nguoi doc ket luan "ONNX khong ton bo nho GPU" — sai hoan
-    # toan. Tren Jetson, CPU va GPU dung chung DRAM nen muc tang bo nho HE THONG
-    # moi la con so co nghia.
+    # Cot bo nho lay tu `ivid.benchmark.memprobe`, KHONG lay tu phep do chay kem
+    # benchmark. Hai cach truoc deu sai theo hai kieu khac nhau:
+    #   * torch.cuda.max_memory_allocated(): bao 0 MB cho ONNX (ORT tu cap phat)
+    #     va chi dem buffer vao/ra cho TensorRT -> nguoi doc se ket luan "ONNX
+    #     khong ton bo nho GPU", sai hoan toan.
+    #   * system_used_delta_mb: dem ca may, ke ca tien trinh khac va bo dem trang
+    #     -> hai lan chay cung cau hinh ra 31.2 MB va 0.0 MB. Do la nhieu.
+    # memprobe chay moi runtime trong mot tien trinh RIENG va lay RSS dinh diem
+    # tru RSS luc khoi dong, nen con so so sanh duoc giua ba runtime.
     L = ["| Model | Runtime | mAP@0.5 | mAP@0.5:0.95 | p50 (ms) | p95 (ms) | FPS | "
-         "Model size | Bộ nhớ tăng thêm |",
+         "Model size | RAM tiến trình |",
          "|---|---|---:|---:|---:|---:|---:|---:|---:|"]
     for r in rows:
+        ram = (f"{fmt(r.get('mem_delta_mb'), 0)} MB" if r.get("mem_delta_mb") is not None
+               else "— *(`make mem`)*")
         L.append(
             f"| {r['model']} | {r['backend_label']} | {fmt(r.get('map50'), 4)} | "
             f"{fmt(r.get('map5095'), 4)} | {fmt(r.get('p50'))} | {fmt(r.get('p95'))} | "
-            f"{fmt(r.get('fps'), 1)} | {fmt(r.get('size_mb'), 1)} MB | "
-            f"{fmt(r.get('sys_delta_mb'), 0)} MB |")
+            f"{fmt(r.get('fps'), 1)} | {fmt(r.get('size_mb'), 1)} MB | {ram} |")
     return L
 
 

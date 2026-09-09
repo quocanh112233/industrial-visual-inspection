@@ -54,7 +54,7 @@ def test_rows_giu_dung_thu_tu_runtime():
 def test_bang_chinh_co_du_cot():
     lines = main_table(rows_from(BASE))
     header = lines[0]
-    for col in ("mAP@0.5", "p50 (ms)", "p95 (ms)", "FPS", "Model size", "Bộ nhớ tăng thêm"):
+    for col in ("mAP@0.5", "p50 (ms)", "p95 (ms)", "FPS", "Model size", "RAM tiến trình"):
         assert col in header
     assert "GPU mem" not in header, (
         "Cot bo nho chinh khong duoc lay so cua torch: no bao 0 MB cho ONNX "
@@ -140,3 +140,37 @@ def test_ma_sinh_bao_cao_khong_dong_dau_thoi_gian_chay():
         text = (root / rel).read_text(encoding="utf-8")
         assert "datetime.now" not in text, (
             f"{rel} dong dau thoi gian chay vao bao cao duoc commit -> gay diff gia")
+
+
+# ------------------------------------------------------- cot RAM (FR-12)
+def test_cot_ram_lay_tu_memprobe_chu_khong_lay_so_do_kem_benchmark():
+    """Con so RAM phai den tu khoi "memory" (memprobe, moi cau hinh mot tien
+    trinh), khong duoc lay `system_used_delta_mb` — cai do dem ca may nen hai
+    lan chay cung cau hinh ra 31.2 MB va 0.0 MB."""
+    payload = dict(BASE)
+    payload["memory"] = {
+        "yolov8n|pytorch": {"skipped": False, "rss_delta_mb": 1450.0},
+        "yolov8n|tensorrt": {"skipped": False, "rss_delta_mb": 620.0},
+    }
+    bang = main_table(rows_from(payload))
+    dong_pt = next(x for x in bang if "PyTorch" in x)
+    dong_trt = next(x for x in bang if "TensorRT" in x)
+    assert "1450 MB" in dong_pt
+    assert "620 MB" in dong_trt
+    # 700 + gpu = 1100 / 880 la system_used_delta_mb cua du lieu gia — khong duoc dung
+    assert "1100 MB" not in dong_pt and "880 MB" not in dong_trt
+
+
+def test_chua_do_ram_thi_bao_ro_chu_khong_bia_so():
+    """Khong co khoi "memory" thi o do phai noi ro la chua do. Dien 0 hoac bo
+    trong se bi doc nham thanh "runtime nay khong ton RAM"."""
+    bang = main_table(rows_from(BASE))
+    for dong in bang[2:]:
+        assert "make mem" in dong
+
+
+def test_cau_hinh_bi_bo_qua_khi_do_ram_khong_lam_hong_bang():
+    payload = dict(BASE)
+    payload["memory"] = {"yolov8n|pytorch": {"skipped": True, "reason": "khong thay best.pt"}}
+    bang = main_table(rows_from(payload))
+    assert "make mem" in next(x for x in bang if "PyTorch" in x)
