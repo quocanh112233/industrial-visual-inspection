@@ -124,13 +124,32 @@ curl -F "file=@data/processed/test/images/scratches_10.jpg" localhost:8000/predi
 - [docs/colab-training.md](docs/colab-training.md) — giải thích chi tiết từng bước Colab
 - `docs/benchmark-report.md` — ★ báo cáo so sánh ba runtime *(sinh bởi `make report`)*
 
+## Kết quả huấn luyện
+
+Tập test (270 ảnh, 615 bbox), imgsz 640, seed 1337:
+
+| Model | mAP@0.5 | mAP@0.5:0.95 | Tham số | GFLOPs | Trọng số |
+|---|---:|---:|---:|---:|---:|
+| YOLOv8n | 0.7634 | **0.4352** | 3.0M | 8.1 | 6.3 MB |
+| YOLOv8s | **0.7692** | 0.4319 | 11.1M | 28.4 | 22.5 MB |
+| Δ | +0.0058 | −0.0033 | 3.7× | 3.5× | 3.6× |
+
+**Hai model không phân biệt được về độ chính xác.** Chênh lệch +0.0058 nhỏ hơn
+1/3 ngưỡng nhiễu 0.02 đo được từ hai lần train cùng seed
+([docs/reproducibility.md](docs/reproducibility.md)), và mAP@0.5:0.95 còn nhỉnh về
+phía model nhỏ. YOLOv8s lớn gấp 3.7× nhưng không mua được độ chính xác nào đo được —
+1260 ảnh train là quá ít để 11.1M tham số phát huy.
+
+Điều này trả lời trực tiếp câu 3 của SRS §7.3: *không đáng đổi độ trễ lấy YOLOv8s,
+vì không có mAP cao hơn để mà đổi.* Số liệu: `results/model_comparison.json`.
+
 ## Trạng thái
 
 | Giai đoạn | Trạng thái |
 |---|---|
 | Dữ liệu (FR-01..03) | ✅ chạy thật, 0 bất thường |
 | Chuỗi export TensorRT | ✅ kiểm chứng trên Jetson |
-| Train + đánh giá (FR-04..06) | ✅ YOLOv8n mAP@0.5 = **0.763** trên test; FR-06 kiểm chứng |
+| Train + đánh giá (FR-04..06) | ✅ cả hai model; FR-06 kiểm chứng bằng 2 lần train |
 | Export + parity (FR-07..09) | ⏳ code xong, chờ có `best.pt` |
 | Benchmark (FR-10..15) | ⏳ code xong, chờ có engine |
 | Dịch vụ + Docker (FR-16..20) | ⏳ code xong, test API pass |
