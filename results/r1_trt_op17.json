@@ -1,0 +1,39 @@
+{
+  "engine": "/home/jetson/quoc_anh/industrial-visual-inspection/models/smoke/yolov8n_op17.engine",
+  "engine_size_mb": 9.39,
+  "tensorrt": "10.3.0",
+  "torch": "2.10.0",
+  "tensors": [
+    {
+      "name": "images",
+      "io": "INPUT",
+      "shape": [
+        1,
+        3,
+        640,
+        640
+      ],
+      "dtype": "float32"
+    },
+    {
+      "name": "output0",
+      "io": "OUTPUT",
+      "shape": [
+        1,
+        84,
+        8400
+      ],
+      "dtype": "float32"
+    }
+  ],
+  "iters": 100,
+  "warmup": 20,
+  "latency_ms": {
+    "p50": 6.252,
+    "p95": 6.273,
+    "min": 6.227,
+    "max": 6.284,
+    "mean": 6.253
+  },
+  "fps": 160.0
+}

@@ -11,7 +11,16 @@ nhiêu độ chính xác lấy tốc độ, và có kịp nhịp sản xuất kh
 ## Kết quả
 
 <!-- IVID_TABLE_START -->
-> 🚧 Bảng benchmark sẽ được `make report` chèn vào đây khi có số liệu thật.
+| Model | Runtime | mAP@0.5 | mAP@0.5:0.95 | p50 (ms) | p95 (ms) | FPS | Model size | Bộ nhớ tăng thêm |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| yolov8n | PyTorch | 0.7317 | 0.3547 | 34.73 | 35.17 | 28.8 | 6.3 MB | 2 MB |
+| yolov8n | ONNX Runtime | 0.7356 | 0.3549 | 18.69 | 18.93 | 53.5 | 12.3 MB | 6 MB |
+| yolov8n | TensorRT FP16 | 0.7357 | 0.3553 | 14.61 | 14.82 | 68.4 | 9.0 MB | 2 MB |
+| yolov8s | PyTorch | 0.7270 | 0.3335 | 42.94 | 43.26 | 23.3 | 22.5 MB | 1 MB |
+| yolov8s | ONNX Runtime | 0.7271 | 0.3331 | 28.40 | 28.61 | 35.2 | 44.8 MB | 2 MB |
+| yolov8s | TensorRT FP16 | 0.7270 | 0.3332 | 18.70 | 19.02 | 53.5 | 25.6 MB | 41 MB |
+
+![latency](docs/images/latency_comparison.png)
 <!-- IVID_TABLE_END -->
 
 **Đã kiểm chứng chuỗi export trên phần cứng thật** (YOLOv8n pretrained, 640×640, chỉ inference thuần, Jetson @15W):

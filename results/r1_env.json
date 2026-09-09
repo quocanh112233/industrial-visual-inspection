@@ -1,0 +1,19 @@
+{
+  "python": "3.10.12",
+  "arch": "aarch64",
+  "l4t": "# R36 (release), REVISION: 5.2, GCID: 46426093, BOARD: generic, EABI: aarch64, DATE: Thu Jul 16 18:56:22 UTC 2026",
+  "jetpack": "",
+  "cuda": "Cuda compilation tools, release 12.6, V12.6.68",
+  "nvpmodel": "pmode:0000",
+  "torch": "2.10.0",
+  "tensorrt": "10.3.0",
+  "onnx": "1.22.0",
+  "onnxruntime": "1.23.0",
+  "ultralytics": "8.4.132",
+  "torch_cuda": true,
+  "gpu": "Orin",
+  "ort_providers": [
+    "AzureExecutionProvider",
+    "CPUExecutionProvider"
+  ]
+}

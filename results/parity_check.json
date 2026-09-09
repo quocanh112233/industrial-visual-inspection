@@ -1,0 +1,68 @@
+{
+  "model": "yolov8n",
+  "n_images": 50,
+  "iou_match": 0.5,
+  "conf": 0.25,
+  "iou_nms": 0.7,
+  "backends": [
+    "pytorch",
+    "onnx",
+    "tensorrt"
+  ],
+  "total_detections": {
+    "pytorch": 93,
+    "onnx": 93,
+    "tensorrt": 92
+  },
+  "pairs": {
+    "pytorch_vs_onnx": {
+      "n_images": 50,
+      "detections": {
+        "pytorch": 93,
+        "onnx": 93
+      },
+      "matched": 93,
+      "only_pytorch": 0,
+      "only_onnx": 0,
+      "match_rate": 1.0,
+      "images_with_difference": 0,
+      "mean_iou_of_matched": 0.9991,
+      "max_conf_diff": 0.0032,
+      "examples_differing": []
+    },
+    "pytorch_vs_tensorrt": {
+      "n_images": 50,
+      "detections": {
+        "pytorch": 93,
+        "tensorrt": 92
+      },
+      "matched": 92,
+      "only_pytorch": 1,
+      "only_tensorrt": 0,
+      "match_rate": 0.9892,
+      "images_with_difference": 1,
+      "mean_iou_of_matched": 0.9988,
+      "max_conf_diff": 0.005,
+      "examples_differing": [
+        "crazing_193.jpg"
+      ]
+    },
+    "onnx_vs_tensorrt": {
+      "n_images": 50,
+      "detections": {
+        "onnx": 93,
+        "tensorrt": 92
+      },
+      "matched": 92,
+      "only_onnx": 1,
+      "only_tensorrt": 0,
+      "match_rate": 0.9892,
+      "images_with_difference": 1,
+      "mean_iou_of_matched": 0.9992,
+      "max_conf_diff": 0.0047,
+      "examples_differing": [
+        "crazing_193.jpg"
+      ]
+    }
+  }
+}
