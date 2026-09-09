@@ -139,6 +139,7 @@ curl -F "file=@data/processed/test/images/scratches_10.jpg" localhost:8000/predi
 - [docs/deployment.md](docs/deployment.md) — dựng trên Jetson, Docker, sự cố thường gặp
 - [notebooks/ivid_colab.ipynb](notebooks/ivid_colab.ipynb) — notebook train sẵn, mở thẳng bằng Colab
 - [docs/colab-training.md](docs/colab-training.md) — giải thích chi tiết từng bước Colab
+- [docs/input-framing.md](docs/input-framing.md) — ★ khung ảnh đầu vào: chỗ 0.085 mAP bị bỏ quên
 - `docs/benchmark-report.md` — ★ báo cáo so sánh ba runtime *(sinh bởi `make report`)*
 
 ## Kết quả huấn luyện
@@ -160,16 +161,14 @@ phía model nhỏ. YOLOv8s lớn gấp 3.7× nhưng không mua được độ ch
 Điều này trả lời trực tiếp câu 3 của SRS §7.3: *không đáng đổi độ trễ lấy YOLOv8s,
 vì không có mAP cao hơn để mà đổi.* Số liệu: `results/model_comparison.json`.
 
-> **Vì sao bảng này và bảng benchmark ở đầu README cho mAP khác nhau.** Bảng trên
-> đo bằng `ultralytics.val()` ở chế độ mặc định của nó cho bản `.pt` — `rect=True`,
-> nghĩa là ảnh được chấm trong khung **672×672** có viền xám 16 px mỗi bên
-> (`ceil(640/32 + 0.5) × 32 = 672`). Engine ONNX/TensorRT có đầu vào cố định
-> 640×640 nên **không tái lập được** chế độ đó. Cùng bản `.pt` ấy chấm ở 640×640
-> cho **0.7310** thay vì 0.7621 — chênh 0.031 mAP@0.5 và 0.083 mAP@0.5:0.95, chỉ
-> vì một tham số của trình đánh giá. Hai bảng dùng hai chế độ khác nhau là có chủ
-> đích: bảng này để **so hai model với nhau** (cùng chế độ nên so được), bảng
-> benchmark để biết **cái gì thật sự chạy được trên dây chuyền**. Bằng chứng:
-> `make diag-rect`.
+> **Hai bảng này giờ khớp nhau — và đó là kết quả của một lần sửa lỗi đáng kể.** Trước
+> đây bảng benchmark cho mAP@0.5 **0.7317** trong khi bảng trên cho 0.7634: cùng bộ trọng
+> số, chênh 0.031. Nguyên nhân không phải model mà là **cách đóng khung ảnh đầu vào** —
+> `ultralytics.val()` chấm bản `.pt` ở khung 672×672 (ảnh 640 nằm giữa viền xám 16 px)
+> còn đường ống triển khai cho ảnh phủ kín khung 640×640. Sau khi dựng lại engine ở khung
+> 672, đường ống triển khai **tái lập được** con số đó: +0.085 mAP@0.5:0.95 đổi lấy 6%
+> độ trễ. Toàn bộ quá trình truy vết và quét tham số:
+> **[docs/input-framing.md](docs/input-framing.md)**.
 
 ## Trạng thái
 

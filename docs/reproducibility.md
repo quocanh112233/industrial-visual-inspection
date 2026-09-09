@@ -12,9 +12,9 @@ chỉ khác là lần 1 do ultralytics âm thầm loại, lần 2 do `ivid.data.
 ## Kết quả trên tập test
 
 Đo bằng `ultralytics.val()` ở chế độ mặc định cho bản `.pt` (`rect=True`, khung
-672×672). Phép so sánh hai lần train không bị ảnh hưởng vì cả hai cùng chế độ;
-riêng con số tuyệt đối thì cao hơn số chạy được trên engine 640×640 khoảng 0.031
-mAP@0.5 — xem ghi chú ở README và `scripts/diag_rect.py`.
+672×672). Đó cũng là khung mà đường ống triển khai đang dùng, nên các con số ở
+đây so sánh trực tiếp được với bảng benchmark — xem
+[input-framing.md](input-framing.md) để biết vì sao khung 672 được chọn.
 
 | | Lần 1 | Lần 2 | Δ |
 |---|---:|---:|---:|

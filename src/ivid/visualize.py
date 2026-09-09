@@ -124,7 +124,11 @@ def main() -> int:
     ap.add_argument("--model", default="yolov8n")
     ap.add_argument("--backend", default="tensorrt", choices=["pytorch", "onnx", "tensorrt"])
     ap.add_argument("--data", default="data/processed/data.yaml")
-    ap.add_argument("--imgsz", type=int, default=640)
+    ap.add_argument("--config", default="configs/benchmark.yaml",
+                    help="lay imgsz va resize_to tu day, de hinh minh hoa dung che do "
+                         "khung anh voi so lieu trong bao cao")
+    ap.add_argument("--imgsz", type=int, default=None)
+    ap.add_argument("--resize-to", type=int, default=None)
     ap.add_argument("--conf", type=float, default=0.25)
     ap.add_argument("--iou", type=float, default=0.7)
     ap.add_argument("--tile", type=int, default=320, help="canh moi o anh, pixel")
@@ -132,9 +136,18 @@ def main() -> int:
     ap.add_argument("--out", default="docs/images/sample_detections.png")
     a = ap.parse_args()
 
+    import yaml
+
     root = repo_root()
     names = class_names(load_config(root / "configs/data.yaml"))
     nc = len(names)
+
+    # Che do khung anh PHAI giong luc benchmark, neu khong thi hinh minh hoa
+    # khong con minh hoa cho nhung con so trong bao cao nua.
+    cfg = yaml.safe_load((root / a.config).read_text(encoding="utf-8"))
+    imgsz = int(a.imgsz or cfg["imgsz"])
+    resize_to = a.resize_to if a.resize_to is not None else (
+        int(cfg["resize_to"]) if cfg.get("resize_to") else None)
 
     images, label_dir = test_set(root / a.data, "test")
     gts = load_ground_truth(images, label_dir)
@@ -147,7 +160,8 @@ def main() -> int:
     if not w.exists():
         print(f"[loi] khong thay {w}", file=sys.stderr)
         return 1
-    runner = build_runner(a.backend, w, imgsz=a.imgsz, conf=a.conf, iou=a.iou, nc=nc)
+    runner = build_runner(a.backend, w, imgsz=imgsz, conf=a.conf, iou=a.iou, nc=nc,
+                          resize_to=resize_to)
 
     tiles = []
     for i in idx:
@@ -171,7 +185,8 @@ def main() -> int:
     out = root / a.out
     out.parent.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(out), grid)
-    print(f"[demo] {len(tiles)} anh, backend {a.backend}, conf {a.conf}")
+    khung = f"{imgsz}" + (f"/{resize_to}" if resize_to else "")
+    print(f"[demo] {len(tiles)} anh, backend {a.backend}, conf {a.conf}, khung {khung}")
     print("[demo] hop trang = ground truth, hop mau = du doan")
     print(f"[demo] ghi -> {rel_to_root(out)}  ({grid.shape[1]}x{grid.shape[0]})")
     return 0
