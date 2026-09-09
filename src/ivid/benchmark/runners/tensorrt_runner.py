@@ -1,29 +1,3 @@
-"""Runner TensorRT — dung API TensorRT 10.x, KHONG phu thuoc PyTorch.
-
-VI SAO BO TORCH
-
-Ban dau runner nay cap phat bo nho GPU bang torch, voi ly do "Jetson da co san
-torch ban CUDA cua NVIDIA nen khong them phu thuoc moi". Dung tren may dev,
-sai khi dong goi: anh L4T co CUDA/cuDNN/TensorRT nhung KHONG co torch, va
-Dockerfile co y cai ultralytics bang --no-deps de torch khoi bi keo ve. Ket qua
-dich vu trong container chet ngay luc nap model:
-
-    {"status":"degraded","backend":"tensorrt","loaded":false,
-     "error":"ModuleNotFoundError: No module named 'torch'"}
-
-Cach chua khong phai la nhet torch vao image. Chay mot engine 9 MB thi khong
-can mot framework HUAN LUYEN 2-3 GB — torch o day chi lam moi viec cap phat va
-sao chep bo nho, von la viec cua CUDA runtime. Nen runner dung thang
-`cuda-python` (goi mong len cudart), va anh trien khai chi con TensorRT +
-ONNX Runtime.
-
-Luu y ve stream: TensorRT canh bao neu enqueue tren default stream (no phai
-chen them cudaStreamSynchronize). Runner dung stream rieng.
-
-Bo nho host o day la bo nho thuong (pageable), khong phai pinned. Pinned se
-nhanh hon o buoc sao chep nhung them mot lop quan ly bo nho; neu can toi uu
-tiep thi do la cho de nhin nhat, vi H2D moi lan la 4.9 MB (640x640x3 float32).
-"""
 from __future__ import annotations
 
 import numpy as np
@@ -32,20 +6,14 @@ from .base import BaseRunner
 
 
 def _nap_cudart():
-    """cuda-python doi duong import o ban 12.8: thu ca hai."""
     try:
-        from cuda.bindings import runtime as cudart  # cuda-python >= 12.8
+        from cuda.bindings import runtime as cudart
     except ImportError:                                   # pragma: no cover
-        from cuda import cudart  # cuda-python < 12.8
+        from cuda import cudart
     return cudart
 
 
 def kiem_tra(ret):
-    """Moi ham cudart tra ve (ma_loi, ...gia_tri). Nem loi neu ma khac 0.
-
-    Bo qua buoc nay la kieu loi kho tim nhat trong ma CUDA: cudaMalloc that bai
-    tra ve con tro 0, roi chuong trinh chay tiep va hong o mot cho khac han.
-    """
     if not isinstance(ret, tuple):
         ret = (ret,)
     err, gia_tri = ret[0], ret[1:]
@@ -65,14 +33,9 @@ class TensorRTRunner(BaseRunner):
         cudart = _nap_cudart()
         self.trt, self.cudart = trt, cudart
 
-        # Kiem tra phien ban TRUOC khi lam gi khac. cuda-python mang theo runtime
-        # CUDA cua chinh no, va neu no moi hon driver thi MOI loi goi CUDA deu tra
-        # ve cudaErrorInsufficientDriver (35) — mot ma loi khong he goi y nguyen
-        # nhan. Da mat thoi gian vi no: cuda-python 13.3.1 tren JetPack 6.2
-        # (driver CUDA 12.6) bao runtime 13030 roi hong toan bo.
         ver = int(kiem_tra(cudart.cudaRuntimeGetVersion()))
         err, so_gpu = cudart.cudaGetDeviceCount()
-        if int(err) == 35:                       # cudaErrorInsufficientDriver
+        if int(err) == 35:
             raise RuntimeError(
                 f"cuda-python mang runtime CUDA {ver // 1000}.{ver % 1000 // 10} nhung "
                 "driver tren may cu hon, nen khong loi goi CUDA nao chay duoc.\n"
@@ -95,7 +58,7 @@ class TensorRTRunner(BaseRunner):
 
         self.inputs: list[str] = []
         self.outputs: list[str] = []
-        self.dptr: dict[str, int] = {}       # con tro bo nho GPU
+        self.dptr: dict[str, int] = {}
         self.nbytes: dict[str, int] = {}
         self.host: dict[str, np.ndarray] = {}
         self.io_spec: list[dict] = []
@@ -104,7 +67,7 @@ class TensorRTRunner(BaseRunner):
             name = self.engine.get_tensor_name(i)
             mode = self.engine.get_tensor_mode(name)
             shape = tuple(self.ctx.get_tensor_shape(name))
-            if any(d < 0 for d in shape):                    # truc dong -> chot batch 1
+            if any(d < 0 for d in shape):
                 shape = tuple(1 if d < 0 else d for d in shape)
                 if mode == trt.TensorIOMode.INPUT:
                     self.ctx.set_input_shape(name, shape)
@@ -139,7 +102,6 @@ class TensorRTRunner(BaseRunner):
         H2D = cudart.cudaMemcpyKind.cudaMemcpyHostToDevice
         D2H = cudart.cudaMemcpyKind.cudaMemcpyDeviceToHost
 
-        # engine co the nhan FP16; ep kieu cho khop truoc khi sao chep
         vao = np.ascontiguousarray(x, dtype=self.host[self._in].dtype)
         kiem_tra(cudart.cudaMemcpyAsync(
             self.dptr[self._in], vao.ctypes.data, self.nbytes[self._in], H2D, self.stream))
@@ -149,8 +111,6 @@ class TensorRTRunner(BaseRunner):
             ra.ctypes.data, self.dptr[self._out], self.nbytes[self._out], D2H, self.stream))
         kiem_tra(cudart.cudaStreamSynchronize(self.stream))
 
-        # PHAI sao chep: self.host[...] duoc dung lai o lan goi sau, tra thang ra
-        # thi ket qua cu bi ghi de ngay sau lung nguoi goi.
         return np.array(ra, dtype=np.float32)
 
     def backend_info(self) -> dict:
@@ -163,8 +123,6 @@ class TensorRTRunner(BaseRunner):
             gpu=ten.decode(errors="replace").strip("\x00") if isinstance(ten, bytes) else str(ten),
             cap_phat="cuda-python (cudart), khong dung torch",
             io=self.io_spec,
-            # engine FP16 van co the co IO la FP32; precision that nam trong engine.
-            # Ghi lai cach build de khong phai doan.
             precision="fp16 (theo configs/export.yaml)",
             io_dtypes=sorted(dtypes),
         )

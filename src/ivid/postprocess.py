@@ -1,15 +1,3 @@
-"""Hau xu ly YOLOv8 dung CHUNG cho ba runtime — thuan NumPy.
-
-Vi sao viet lai thay vi dung ham cua ultralytics: ultralytics chay NMS bang
-torch tren GPU cho ban .pt, nhung ban ONNX/TensorRT lai di duong khac. Neu de
-nhu vay, thoi gian "postprocess" do duoc cua ba dinh dang khong so sanh duoc,
-va detection cuoi cung co the lech nhau vi thuat toan NMS chu khong phai vi
-model. Dung mot ham NumPy duy nhat cho ca ba loai bo ca hai van de.
-
-Dau vao la tensor tho cua YOLOv8: (1, 4+nc, N) — 4 gia tri xywh (toa do tam,
-theo pixel cua anh da letterbox) roi den nc diem so lop, KHONG co objectness
-(YOLOv8 bo objectness so voi v5).
-"""
 from __future__ import annotations
 
 import numpy as np
@@ -26,7 +14,6 @@ def xywh2xyxy(x: np.ndarray) -> np.ndarray:
 
 
 def nms(boxes: np.ndarray, scores: np.ndarray, iou_thres: float) -> list[int]:
-    """NMS tham lam tren mot lop. boxes dang xyxy."""
     if len(boxes) == 0:
         return []
     x1, y1, x2, y2 = boxes[:, 0], boxes[:, 1], boxes[:, 2], boxes[:, 3]
@@ -51,35 +38,21 @@ def nms(boxes: np.ndarray, scores: np.ndarray, iou_thres: float) -> list[int]:
     return keep
 
 
-MAX_NMS = 30000  # tran ung vien truoc NMS, giong ultralytics
+MAX_NMS = 30000
 
 
 def decode(raw: np.ndarray, conf_thres: float = 0.25, iou_thres: float = 0.7,
            max_det: int = 300, nc: int | None = None,
            multi_label: bool = False) -> np.ndarray:
-    """(1, 4+nc, N) -> (M, 6) gom [x1, y1, x2, y2, conf, class_id].
-
-    Toa do van o he anh da letterbox; goi scale_boxes() de doi ve anh goc.
-
-    `multi_label=True` cho phep MOT anchor sinh nhieu detection — mot cho moi lop
-    co diem vuot nguong, thay vi chi lay lop argmax. Ultralytics bat co nay o
-    duong val (models/yolo/detect/val.py, non_max_suppression(multi_label=True))
-    nhung tat o duong predict. Co nghia khi conf rat thap (0.001) de ve duong PR.
-
-    `nc` (so lop) la tuy chon nhung NEN truyen vao khi biet. Khong co no, ham
-    phai doan truc nao la truc kenh bang gia thiet "so anchor > 4+nc" — dung
-    voi moi cau hinh YOLOv8 thuc te (imgsz 640 cho 8400 anchor, so voi 10 kenh),
-    nhung se doan sai neu ai do dua vao mot tensor do choi rat nho.
-    """
     if raw.ndim == 3:
         raw = raw[0]
 
     if nc is not None:
-        if raw.shape[0] == 4 + nc:       # (4+nc, N) -> (N, 4+nc)
+        if raw.shape[0] == 4 + nc:
             raw = raw.T
         elif raw.shape[1] != 4 + nc:
             raise ValueError(f"tensor {raw.shape} khong khop nc={nc} (mong doi mot truc = {4 + nc})")
-    elif raw.shape[0] < raw.shape[1]:    # gia thiet: truc nho hon la truc kenh
+    elif raw.shape[0] < raw.shape[1]:
         raw = raw.T
 
     boxes_xywh, scores_all = raw[:, :4], raw[:, 4:]
@@ -103,8 +76,6 @@ def decode(raw: np.ndarray, conf_thres: float = 0.25, iou_thres: float = 0.7,
         top = np.argsort(-confs)[:MAX_NMS]
         boxes, confs, class_ids = boxes[top], confs[top], class_ids[top]
 
-    # NMS theo tung lop: hai loi khac loai chong len nhau la binh thuong
-    # tren be mat thep, khong duoc trie tieu nhau
     keep_all: list[int] = []
     for c in np.unique(class_ids):
         idx = np.nonzero(class_ids == c)[0]
@@ -125,7 +96,6 @@ def decode(raw: np.ndarray, conf_thres: float = 0.25, iou_thres: float = 0.7,
 
 def scale_boxes(det: np.ndarray, ratio: float, pad: tuple[int, int],
                 orig_hw: tuple[int, int]) -> np.ndarray:
-    """Doi toa do tu anh letterbox ve anh goc, roi kep vao trong bien."""
     if len(det) == 0:
         return det
     out = det.copy()
@@ -138,7 +108,6 @@ def scale_boxes(det: np.ndarray, ratio: float, pad: tuple[int, int],
 
 
 def match_detections(a: np.ndarray, b: np.ndarray, iou_thres: float = 0.5) -> dict:
-    """So khop hai tap detection (FR-09). Tra ve so cap khop / thua / thieu."""
     if len(a) == 0 and len(b) == 0:
         return {"matched": 0, "only_a": 0, "only_b": 0, "mean_iou": 1.0, "max_conf_diff": 0.0}
     if len(a) == 0 or len(b) == 0:

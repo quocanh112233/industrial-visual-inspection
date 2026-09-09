@@ -1,9 +1,3 @@
-# IVID — moi buoc cua pipeline la mot lenh (rang buoc C5)
-#
-# PYTHONUTF8=1: Jetson chay locale C/POSIX, nen Python mac dinh dung ascii cho
-# stdout va cho file. Bao cao co ky tu tieng Viet va dau '—' se lam no
-# UnicodeEncodeError. Moi cho doc/ghi file da khai bao encoding tuong minh;
-# bien nay lo not phan in ra man hinh.
 PY      := PYTHONPATH=src PYTHONUTF8=1 PYTHONIOENCODING=utf-8 python3
 CONFIG  := configs/data.yaml
 MODEL   ?= yolov8n
@@ -16,7 +10,6 @@ PORT    ?= 8000
 help:
 	@grep -E '^[a-z-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-14s\033[0m %s\n", $$1, $$2}'
 
-# ---------------------------------------------------------------- du lieu
 data: ## Tai NEU-DET + chuan bi + kiem tra + thong ke (FR-01..03)
 	bash scripts/download_dataset.sh
 	$(MAKE) prepare validate stats
@@ -30,7 +23,6 @@ validate: ## FR-02 kiem tra toan ven -> results/data_report.md
 stats: ## FR-03 thong ke phan bo lop -> docs/dataset.md
 	$(PY) -m ivid.data.stats --config $(CONFIG)
 
-# ---------------------------------------------------------------- huan luyen
 train: ## FR-04 train (MODEL=yolov8s de train ban s)
 	$(PY) -m ivid.train.train --config configs/train_$(MODEL).yaml
 
@@ -40,7 +32,6 @@ train-jetson: ## FR-04 train ngay tren Jetson (imgsz 512, batch 8)
 eval: ## FR-05 danh gia tren tap test -> results/train_eval.json
 	$(PY) -m ivid.train.evaluate --name $(MODEL)
 
-# ---------------------------------------------------------------- chuyen doi
 export-onnx: ## FR-07 export ONNX + kiem tra so hoc
 	$(PY) -m ivid.export.to_onnx --name $(MODEL)
 
@@ -50,7 +41,6 @@ export-trt: ## FR-08 build TensorRT engine FP16 (CHI TREN JETSON)
 parity: ## FR-09 so sanh detection cua ba dinh dang
 	$(PY) -m ivid.export.verify_parity --name $(MODEL)
 
-# ---------------------------------------------------------------- benchmark
 bench: ## FR-10..12 do latency + tai nguyen (CHI TREN JETSON)
 	$(PY) -m ivid.benchmark.latency --config configs/benchmark.yaml
 
@@ -86,7 +76,6 @@ all: ## Toan bo pipeline tu du lieu toi bao cao (NFR-03)
 	$(MAKE) parity MODEL=yolov8n
 	$(MAKE) bench accuracy report
 
-# ---------------------------------------------------------------- dich vu
 serve: ## FR-16..18 chay API (IVID_BACKEND=pytorch|onnx|tensorrt)
 	PYTHONPATH=src python3 -m uvicorn ivid.serve.app:app --host 0.0.0.0 --port $(PORT)
 
@@ -103,7 +92,6 @@ docker-up: ## FR-19 chay dich vu bang Docker
 docker-down:
 	docker compose -f docker/docker-compose.yml down
 
-# ---------------------------------------------------------------- khac
 smoke: ## Kiem chung rui ro R1 tren Jetson (.pt -> .onnx -> .engine)
 	bash scripts/smoke_tensorrt.sh
 

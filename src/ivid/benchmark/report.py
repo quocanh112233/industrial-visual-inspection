@@ -1,10 +1,3 @@
-"""FR-15 — Sinh bang so sanh, bieu do va bao cao tu results/benchmark.json.
-
-Moi con so trong bao cao deu doc tu file JSON, khong go tay (NFR-06). Neu
-benchmark chua chay du, bao cao ghi ro o nao con thieu thay vi bo trong.
-
-    PYTHONPATH=src python -m ivid.benchmark.report
-"""
 from __future__ import annotations
 
 import argparse
@@ -19,7 +12,6 @@ BACKEND_ORDER = ["pytorch", "onnx", "tensorrt"]
 
 
 def rows_from(payload: dict) -> list[dict]:
-    """Gop latency + accuracy + tai nguyen thanh mot dong moi (model, backend)."""
     runs, acc = payload.get("runs", {}), payload.get("accuracy", {})
     memory = payload.get("memory", {})
     keys = sorted(set(runs) | set(acc),
@@ -52,8 +44,6 @@ def rows_from(payload: dict) -> list[dict]:
             row["mem_delta_mb"] = mem.get("rss_delta_mb")
             row["load_s"] = mem.get("nap_giay")
         if an and not an.get("skipped"):
-            # accuracy.py moi tra ve mAP o cap cao nhat (khong con boc trong "overall"),
-            # va per_class danh so theo CHI SO lop. Doi sang ten lop de bang doc duoc.
             names = an.get("class_names") or []
             pc = {}
             for cid, v in (an.get("per_class") or {}).items():
@@ -92,7 +82,6 @@ def make_charts(rows: list[dict], out_dir: Path) -> list[str]:
     if not have:
         return []
 
-    # --- 1. cot do tre theo dinh dang ---
     fig, ax = plt.subplots(figsize=(9, 4.5))
     labels = [f"{r['model']}\n{r['backend_label']}" for r in have]
     x = range(len(have))
@@ -112,7 +101,6 @@ def make_charts(rows: list[dict], out_dir: Path) -> list[str]:
     plt.close(fig)
     made.append(p.name)
 
-    # --- 2. thanh phan pre/infer/post ---
     fig, ax = plt.subplots(figsize=(9, 4.5))
     bottoms = [0.0] * len(have)
     for stage, key in (("Tiền xử lý", "pre"), ("Inference", "infer"), ("Hậu xử lý (NMS)", "post")):
@@ -130,7 +118,6 @@ def make_charts(rows: list[dict], out_dir: Path) -> list[str]:
     plt.close(fig)
     made.append(p.name)
 
-    # --- 3. mAP vs do tre ---
     pts = [r for r in have if "map50" in r]
     if pts:
         fig, ax = plt.subplots(figsize=(7, 5))
@@ -152,15 +139,6 @@ def make_charts(rows: list[dict], out_dir: Path) -> list[str]:
 
 
 def main_table(rows: list[dict]) -> list[str]:
-    # Cot bo nho lay tu `ivid.benchmark.memprobe`, KHONG lay tu phep do chay kem
-    # benchmark. Hai cach truoc deu sai theo hai kieu khac nhau:
-    #   * torch.cuda.max_memory_allocated(): bao 0 MB cho ONNX (ORT tu cap phat)
-    #     va chi dem buffer vao/ra cho TensorRT -> nguoi doc se ket luan "ONNX
-    #     khong ton bo nho GPU", sai hoan toan.
-    #   * system_used_delta_mb: dem ca may, ke ca tien trinh khac va bo dem trang
-    #     -> hai lan chay cung cau hinh ra 31.2 MB va 0.0 MB. Do la nhieu.
-    # memprobe chay moi runtime trong mot tien trinh RIENG va lay RSS dinh diem
-    # tru RSS luc khoi dong, nen con so so sanh duoc giua ba runtime.
     L = ["| Model | Runtime | mAP@0.5 | mAP@0.5:0.95 | p50 (ms) | p95 (ms) | FPS | "
          "Model size | RAM tiến trình | Nạp (s) |",
          "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|"]
@@ -175,11 +153,6 @@ def main_table(rows: list[dict]) -> list[str]:
     return L
 
 
-# Nguong duoi day thi chenh lech mAP khong con y nghia. KHONG phai so chon bua:
-# do that tu hai lan train YOLOv8n cung seed 1337, cung dataset, chi khac
-# cache ram/disk -> 0.7749 va 0.7634 (docs/reproducibility.md). Neu chinh mot
-# quy trinh train tai lap lai con lech ngan ay, thi moi chenh lech nho hon
-# giua HAI MODEL KHAC NHAU deu khong the quy cho model.
 NGUONG_NHIEU_MAP = 0.0115
 
 
@@ -188,7 +161,6 @@ def conclusions(rows: list[dict], cycle_ms: float) -> list[str]:
     by = {(r["model"], r["backend"]): r for r in rows}
     models = sorted({r["model"] for r in rows})
 
-    # --- Chi phi khoi dong: chi hien khi co chenh lech lon that su ---
     canh_bao_nap = []
     for m in models:
         trt, onx = by.get((m, "tensorrt")), by.get((m, "onnx"))
@@ -216,7 +188,6 @@ def conclusions(rows: list[dict], cycle_ms: float) -> list[str]:
             "thì phải bật `trt_engine_cache_enable` và nung sẵn bộ nhớ đệm lúc đóng gói "
             "image; còn engine `.plan` dựng sẵn thì nạp thẳng trong 0.3 s.\n")
 
-    # --- Cau 1 ---
     L.append("### 1. TensorRT FP16 nhanh hơn PyTorch bao nhiêu, đổi lấy bao nhiêu mAP?\n")
     any1 = False
     for m in models:
@@ -240,7 +211,6 @@ def conclusions(rows: list[dict], cycle_ms: float) -> list[str]:
     if not any1:
         L.append("- *(chưa đủ dữ liệu — cần chạy cả `pytorch` và `tensorrt`)*")
 
-    # --- Cau 2 ---
     L.append(f"\n### 2. Với nhịp dây chuyền {cycle_ms:.0f} ms/sản phẩm, cấu hình nào đáp ứng?\n")
     have = [r for r in rows if "p95" in r]
     if have:
@@ -255,9 +225,6 @@ def conclusions(rows: list[dict], cycle_ms: float) -> list[str]:
                      f"{'✅' if ok else '❌'} | {rate:.1f} sp/giây ({r['p95']:.0f} ms) |")
         passing = [r for r in have if r["p95"] <= cycle_ms]
         if passing:
-            # Chon theo mAP cao nhat, NHUNG neu nhieu cau hinh co mAP gan bang nhau
-            # thi lay cai nhanh nhat. Chon thuan theo mAP se de xuat PyTorch chi vi
-            # hon TensorRT 0.003 mAP trong khi cham gap 2.5 lan — mot khuyen nghi to.
             top_map = max(r.get("map50", 0) for r in passing)
             TIE = 0.005
             tied = [r for r in passing if r.get("map50", 0) >= top_map - TIE]
@@ -277,7 +244,6 @@ def conclusions(rows: list[dict], cycle_ms: float) -> list[str]:
     else:
         L.append("*(chưa có dữ liệu latency)*")
 
-    # --- Cau 3 ---
     L.append("\n### 3. YOLOv8s có đáng đổi độ trễ lấy mAP không?\n")
     n, s = by.get(("yolov8n", "tensorrt")), by.get(("yolov8s", "tensorrt"))
     if n and s and "p50" in n and "p50" in s and "map50" in n and "map50" in s:
@@ -312,9 +278,6 @@ def build_report(payload: dict, rows: list[dict], charts: list[str], cycle_ms: f
     L: list[str] = []
 
     L.append("# Báo cáo benchmark — ba định dạng runtime trên Jetson Orin Nano\n")
-    # Dung thoi diem DO (nam trong benchmark.json) chu khong phai thoi diem sinh
-    # bao cao: sinh lai bao cao tu cung mot file JSON phai cho ra file giong het,
-    # neu khong thi moi lan chay 'make report' lai tao mot diff gia.
     measured = payload.get("benchmarked_utc") or dev.get("collected_utc") or "?"
     L.append(f"*Sinh tự động bởi `ivid.benchmark.report` từ `results/benchmark.json`. "
              f"Số liệu đo lúc {measured}. Mọi con số đều truy được về file JSON đó.*\n")

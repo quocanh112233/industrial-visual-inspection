@@ -1,9 +1,3 @@
-"""Test 4 endpoint cua dich vu (FR-16, FR-18, FR-20).
-
-Chay voi IVID_BACKEND=mock nen khong can GPU, TensorRT hay file trong so —
-nho vay CI kiem tra duoc hop dong cua API. Phan inference that duoc kiem o
-tests khac va o benchmark tren Jetson.
-"""
 from __future__ import annotations
 
 import importlib
@@ -42,19 +36,17 @@ def png_bytes(w: int = 200, h: int = 200) -> bytes:
     return buf.tobytes()
 
 
-# ------------------------------------------------------------------- /health
 def test_health_bao_dung_backend_dang_dung(client):
     r = client.get("/health")
     assert r.status_code == 200
     d = r.json()
     assert d["status"] == "ok"
-    assert d["backend"] == "mock"          # FR-17: doi bien moi truong -> doi bao cao
+    assert d["backend"] == "mock"
     assert d["loaded"] is True
     assert d["model_version"]
     assert d["uptime_seconds"] >= 0
 
 
-# ------------------------------------------------------------------ /predict
 def test_predict_tra_ve_json_hop_le(client):
     r = client.post("/predict", files={"file": ("a.png", png_bytes(), "image/png")})
     assert r.status_code == 200, r.text
@@ -81,7 +73,6 @@ def test_predict_bbox_nam_trong_anh(client):
         assert 0 <= y1 <= 240 and 0 <= y2 <= 240
 
 
-# --------------------------------------------------- FR-20: dau vao khong hop le
 def test_tu_choi_file_khong_phai_anh(client):
     r = client.post("/predict", files={"file": ("note.txt", b"khong phai anh", "text/plain")})
     assert r.status_code == 400
@@ -89,7 +80,6 @@ def test_tu_choi_file_khong_phai_anh(client):
 
 
 def test_tu_choi_anh_hong(client):
-    """Duoi .png nhung noi dung la rac -> phai 400, khong duoc 500."""
     r = client.post("/predict", files={"file": ("hong.png", b"\x89PNG\r\n" + b"rac" * 50,
                                                 "image/png")})
     assert r.status_code == 400
@@ -109,7 +99,6 @@ def test_tu_choi_file_rong(client):
 
 
 def test_ba_loi_tren_khong_lam_sap_service(client):
-    """FR-20: sau ca ba truong hop loi, service van phuc vu binh thuong."""
     client.post("/predict", files={"file": ("a.txt", b"x", "text/plain")})
     client.post("/predict", files={"file": ("b.png", b"rac", "image/png")})
     client.post("/predict", files={"file": ("c.png", b"\x00" * (11 * 1024 * 1024), "image/png")})
@@ -118,7 +107,6 @@ def test_ba_loi_tren_khong_lam_sap_service(client):
     assert client.get("/health").json()["status"] == "ok"
 
 
-# ------------------------------------------------------------------ /metrics
 def test_metrics_dem_dung_request(client):
     before = client.get("/metrics").json()
     for _ in range(3):

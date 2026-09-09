@@ -1,41 +1,28 @@
-# FR-04 — Sieu tham so fine-tune YOLOv8s tren NEU-DET
-# Cau hinh nay danh cho GPU roi (Colab T4 / L4). Train tren Jetson: dung
-# configs/train_yolov8n_jetson.yaml.
+name: yolov8s
+model: yolov8s.pt
+data: data/processed/data.yaml
+seed: 1337
 
-name: yolov8s                       # ten run -> models/yolov8s/best.pt
-model: yolov8s.pt                   # trong so pretrained COCO
-data: data/processed/data.yaml      # do ivid.data.prepare sinh ra
-seed: 1337                          # cung seed voi buoc chia du lieu
-
-# Moi khoa duoi day duoc truyen thang cho ultralytics model.train().
-# Giu nguyen ten cua ultralytics de doc doi chieu tai lieu cua ho de dang.
 train:
   epochs: 100
-  patience: 30                      # dung som neu 30 epoch khong cai thien
+  patience: 30
   imgsz: 640
-  batch: 16                        # yolov8s nang gap ~3.5x yolov8n
+  batch: 16
   workers: 8
   optimizer: auto
   lr0: 0.01
   lrf: 0.01
   cos_lr: true
   warmup_epochs: 3
-  amp: true                         # FP16 luc train — nhanh hon, khong anh huong FP16 luc infer
-  # 'disk' chu KHONG phai 'ram': ultralytics canh bao cache='ram' lam ket qua
-  # train khong tai lap duoc, ma tai lap chinh la thu FR-06 doi hoi. Dataset chi
-  # ~30MB nen cache dia cung nhanh gan bang va khong danh doi gi.
+  amp: true
   cache: disk
-  deterministic: true               # doi lai chut toc do de lay tinh tai lap (FR-06)
+  deterministic: true
   val: true
   plots: true
 
-  # --- Augmentation ---
-  # Anh NEU-DET la anh xam be mat kim loai, khong co "chieu tren duoi" tu nhien.
-  # Vi vay lat doc (flipud) la phep bien doi HOP LE o day, khac voi anh doi thuong.
-  # Mau sac gan nhu vo nghia -> ha hsv xuong rat thap thay vi dung mac dinh.
   hsv_h: 0.0
   hsv_s: 0.0
-  hsv_v: 0.3                        # chi doi do sang, mo phong thay doi chieu sang day chuyen
+  hsv_v: 0.3
   degrees: 10.0
   translate: 0.1
   scale: 0.5
@@ -44,6 +31,6 @@ train:
   flipud: 0.5
   fliplr: 0.5
   mosaic: 1.0
-  close_mosaic: 10                  # tat mosaic 10 epoch cuoi de model quen anh that
+  close_mosaic: 10
   mixup: 0.0
   copy_paste: 0.0

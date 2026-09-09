@@ -1,4 +1,3 @@
-"""Kieu du lieu cho REST API (FR-16, FR-18)."""
 from __future__ import annotations
 
 from pydantic import BaseModel, Field

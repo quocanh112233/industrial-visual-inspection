@@ -1,33 +1,3 @@
-"""Truy tim nguon goc chenh lech mAP giua duong ong cua du an va ultralytics.val().
-
-BOI CANH. Cross-check FR-13 bao LECH LON:
-
-    ultralytics .pt   mAP@0.5 0.7621   mAP@0.5:0.95 0.4348
-    ultralytics ONNX  mAP@0.5 0.7312   mAP@0.5:0.95 0.3520
-    duong ong cua ta  mAP@0.5 0.7317   mAP@0.5:0.95 0.3547   (ca ba backend)
-
-So cua ta trung gan khit voi so ultralytics bao cho ONNX — hai cai dat doc lap
-ra cung mot ket qua. Nen nghi van dau tien khong phai phep tinh mAP ma la
-DUONG ONG. Doc ma nguon ultralytics tim ra hai khac biet:
-
-  1. data/dataset.py build_transforms  -> LetterBox(scaleup=False)
-     Anh NEU-DET la 200x200. Ultralytics KHONG phong to, chi dem xam ra 640x640.
-     Ta phong to 3.2 lan — dua cho model mot thang do no chua tung thay khi hoc.
-  2. models/yolo/detect/val.py         -> non_max_suppression(multi_label=True)
-     Mot anchor duoc sinh nhieu detection, moi lop vuot nguong mot cai.
-
-Script chay hai phep kiem tra doc lap:
-
-  A. PHEP TINH mAP  — lay CUNG MOT tap detection cua ta, cham diem hai lan:
-     mot lan bang ivid.benchmark.metrics, mot lan bang chinh ma cua ultralytics
-     (match_predictions + ap_per_class). Hai so bang nhau thi phep tinh cua ta
-     dung, va moi chenh lech con lai la do duong ong.
-
-  B. CHE DO DUONG ONG — chay 4 to hop (scaleup x multi_label) tren yolov8n/.pt,
-     xem to hop nao tai lap duoc con so 0.7621 cua ultralytics.
-
-    PYTHONPATH=src PYTHONUTF8=1 python3 scripts/diag_map.py
-"""
 from __future__ import annotations
 
 import argparse
@@ -46,12 +16,6 @@ from ivid.preprocess import read_image  # noqa: E402
 
 
 def score_with_ultralytics(dets: list[np.ndarray], gts: list[np.ndarray]) -> dict | None:
-    """Cham diem CUNG tap detection bang chinh ma cua ultralytics.
-
-    Dung match_predictions cua BaseValidator (chi can thuoc tinh iouv) va
-    ap_per_class cua utils.metrics. Vi chu ky ap_per_class doi giua cac ban,
-    ta khong lay theo vi tri ma tim mang 2 chieu co 10 cot — do la `ap`.
-    """
     try:
         import torch
         from ultralytics.engine.validator import BaseValidator
@@ -135,7 +99,6 @@ def main() -> int:
                   f"mAP@0.5:0.95 {m['mAP50_95']:.4f}  ({m['n_detections']} detection)")
             ket_qua.append((scaleup, multi_label, m, dets))
 
-    # --- A. phep tinh mAP: cham lai to hop dau bang chinh ma ultralytics ---
     print("\n[A] Doi chieu PHEP TINH mAP tren cung mot tap detection:")
     for scaleup, multi_label, m, dets in ket_qua:
         ul = score_with_ultralytics(dets, gts)

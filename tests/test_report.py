@@ -1,9 +1,3 @@
-"""Test sinh bao cao benchmark (FR-15).
-
-Dung du lieu benchmark gia: test kiem tra LOGIC rut ket luan, khong kiem tra
-so lieu that. Muc tieu la bat cac loi suy luan — vi du de xuat mot cau hinh
-cham hon chi vi no hon 0.001 mAP.
-"""
 from __future__ import annotations
 
 import sys
@@ -34,8 +28,6 @@ def make_run(p50: float, size: float = 6.2, gpu: float = 400) -> dict:
 
 
 def make_acc(m50: float) -> dict:
-    """Dang tra ve cua ivid.benchmark.accuracy sau khi bo ultralytics.val():
-    mAP nam o cap cao nhat, per_class danh so theo CHI SO lop."""
     return {"skipped": False, "mAP50": m50, "mAP50_95": round(m50 * 0.54, 4),
             "precision": round(m50 - 0.05, 4), "recall": round(m50 - 0.09, 4),
             "class_names": ["crazing", "inclusion", "patches",
@@ -65,20 +57,16 @@ def test_bang_chinh_co_du_cot():
     assert "GPU mem" not in header, (
         "Cot bo nho chinh khong duoc lay so cua torch: no bao 0 MB cho ONNX "
         "Runtime va bo qua bo nho engine cua TensorRT")
-    assert len(lines) == 2 + 2          # header + separator + 2 dong
+    assert len(lines) == 2 + 2
 
 
 def test_ket_luan_tinh_dung_ty_le_tang_toc():
     text = "\n".join(conclusions(rows_from(BASE), 200.0))
-    assert "2.42×" in text              # 27.4 / 11.3
-    assert "-0.0027" in text            # 0.7385 - 0.7412
+    assert "2.42×" in text
+    assert "-0.0027" in text
 
 
 def test_khuyen_nghi_khong_chon_cau_hinh_cham_chi_vi_hon_ti_mAP():
-    """Loi suy luan de mac: PyTorch hon TensorRT 0.0027 mAP nhung cham 2.4 lan.
-
-    Khuyen nghi phai la TensorRT.
-    """
     text = "\n".join(conclusions(rows_from(BASE), 200.0))
     reco = [line for line in text.splitlines() if "Khuyến nghị" in line]
     assert reco, "khong sinh ra dong khuyen nghi"
@@ -87,7 +75,6 @@ def test_khuyen_nghi_khong_chon_cau_hinh_cham_chi_vi_hon_ti_mAP():
 
 
 def test_khuyen_nghi_van_chon_mAP_cao_khi_chenh_lech_that_su():
-    """Neu chenh lech mAP lon (> 0.005) thi phai chon cau hinh chinh xac hon."""
     data = {
         "runs": {"yolov8n|tensorrt": make_run(11.3), "yolov8s|tensorrt": make_run(21.0)},
         "accuracy": {"yolov8n|tensorrt": make_acc(0.7385), "yolov8s|tensorrt": make_acc(0.7900)},
@@ -98,7 +85,7 @@ def test_khuyen_nghi_van_chon_mAP_cao_khi_chenh_lech_that_su():
 
 
 def test_bao_cao_noi_ro_khi_khong_cau_hinh_nao_dap_ung_nhip():
-    text = "\n".join(conclusions(rows_from(BASE), 5.0))   # nhip 5 ms, khong ai dat
+    text = "\n".join(conclusions(rows_from(BASE), 5.0))
     assert "Không cấu hình nào đáp ứng" in text
 
 
@@ -111,12 +98,7 @@ def test_thieu_du_lieu_thi_bao_thieu_chu_khong_no():
     assert "chưa đủ dữ liệu" in text or "chưa có dữ liệu" in text
 
 
-# ------------------------------------------------- bao cao phai tat dinh
 def test_sinh_bao_cao_hai_lan_cho_ra_noi_dung_giong_het():
-    """Bao cao duoc commit vao repo. Neu no dong dau thoi gian CHAY, thi may dev,
-    Jetson va Colab moi may lai tao mot diff khac nhau du noi dung y het —
-    va 'git pull' tren Jetson bao xung dot. Da xay ra that.
-    """
     from ivid.benchmark.report import build_report
 
     payload = {
@@ -138,7 +120,6 @@ def test_sinh_bao_cao_hai_lan_cho_ra_noi_dung_giong_het():
 
 
 def test_ma_sinh_bao_cao_khong_dong_dau_thoi_gian_chay():
-    """Chan viec vo tinh dua datetime.now() tro lai phan tieu de bao cao."""
     from pathlib import Path
 
     root = Path(__file__).resolve().parents[1]
@@ -148,11 +129,7 @@ def test_ma_sinh_bao_cao_khong_dong_dau_thoi_gian_chay():
             f"{rel} dong dau thoi gian chay vao bao cao duoc commit -> gay diff gia")
 
 
-# ------------------------------------------------------- cot RAM (FR-12)
 def test_cot_ram_lay_tu_memprobe_chu_khong_lay_so_do_kem_benchmark():
-    """Con so RAM phai den tu khoi "memory" (memprobe, moi cau hinh mot tien
-    trinh), khong duoc lay `system_used_delta_mb` — cai do dem ca may nen hai
-    lan chay cung cau hinh ra 31.2 MB va 0.0 MB."""
     payload = dict(BASE)
     payload["memory"] = {
         "yolov8n|pytorch": {"skipped": False, "rss_delta_mb": 1450.0},
@@ -163,13 +140,10 @@ def test_cot_ram_lay_tu_memprobe_chu_khong_lay_so_do_kem_benchmark():
     dong_trt = next(x for x in bang if "TensorRT" in x)
     assert "1450 MB" in dong_pt
     assert "620 MB" in dong_trt
-    # 700 + gpu = 1100 / 880 la system_used_delta_mb cua du lieu gia — khong duoc dung
     assert "1100 MB" not in dong_pt and "880 MB" not in dong_trt
 
 
 def test_chua_do_ram_thi_bao_ro_chu_khong_bia_so():
-    """Khong co khoi "memory" thi o do phai noi ro la chua do. Dien 0 hoac bo
-    trong se bi doc nham thanh "runtime nay khong ton RAM"."""
     bang = main_table(rows_from(BASE))
     for dong in bang[2:]:
         assert "make mem" in dong
@@ -182,7 +156,6 @@ def test_cau_hinh_bi_bo_qua_khi_do_ram_khong_lam_hong_bang():
     assert "make mem" in next(x for x in bang if "PyTorch" in x)
 
 
-# ------------------------------------------- chi phi khoi dong (do thay tren Jetson)
 def _payload_co_thoi_gian_nap(nap_onnx: float, nap_trt: float = 0.3) -> dict:
     d = {"runs": dict(BASE["runs"]), "accuracy": dict(BASE["accuracy"])}
     d["runs"]["yolov8n|onnx"] = make_run(18.5, 12.3, 200)
@@ -196,8 +169,6 @@ def _payload_co_thoi_gian_nap(nap_onnx: float, nap_trt: float = 0.3) -> dict:
 
 
 def test_bao_cao_neu_bat_duoc_chi_phi_khoi_dong_lon():
-    """ONNX Runtime chay TensorrtExecutionProvider tu dung engine luc nap: do
-    duoc 100s so voi 0.3s cua engine dung san. Cot p50 khong he thay dieu do."""
     L = conclusions(rows_from(_payload_co_thoi_gian_nap(100.5)), cycle_ms=1000.0)
     van_ban = "\n".join(L)
     assert "Chi phí khởi động" in van_ban
@@ -216,7 +187,6 @@ def test_thieu_so_lieu_nap_thi_khong_ket_luan():
     assert "Chi phí khởi động" not in "\n".join(conclusions(rows_from(d), cycle_ms=1000.0))
 
 
-# ------------------------------------ nguong nhieu khi so hai model (SRS 7.3 cau 3)
 def _hai_model(map_n: float, map_s: float, p50_s: float = 18.4) -> dict:
     return {
         "runs": {"yolov8n|tensorrt": make_run(14.2, 9.0, 180),
@@ -227,8 +197,6 @@ def _hai_model(map_n: float, map_s: float, p50_s: float = 18.4) -> dict:
 
 
 def test_chenh_lech_duoi_nguong_nhieu_thi_ket_luan_la_khong_phan_biet_duoc():
-    """Khong duoc noi 'YOLOv8s kem hon' khi chenh lech nho hon muc ma chinh
-    quy trinh train tai lap lai duoc."""
     van_ban = "\n".join(conclusions(rows_from(_hai_model(0.7357, 0.7270)), cycle_ms=200.0))
     assert "không phân biệt được" in van_ban
     assert "reproducibility.md" in van_ban
@@ -248,8 +216,6 @@ def test_vuot_nhip_day_chuyen_thi_khong_dang_du_mAP_cao_hon():
 
 
 def test_nguong_nhieu_khop_voi_so_do_duoc_trong_tai_lieu():
-    """0.0115 = |0.7749 - 0.7634|, hai lan train cung seed. Neu ai do sua hang so
-    nay ma khong sua tai lieu thi test do."""
     assert round(abs(0.7749 - 0.7634), 4) == NGUONG_NHIEU_MAP
     tl = (Path(__file__).resolve().parents[1] / "docs/reproducibility.md")
     if tl.exists():

@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-# Kiem tra moi truong Jetson truoc khi bat dau IVID
-# Chay:  bash check_jetson.sh 2>&1 | tee jetson_env.txt
 
 sec() { printf '\n===== %s =====\n' "$1"; }
 

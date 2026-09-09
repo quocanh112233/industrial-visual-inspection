@@ -1,13 +1,3 @@
-"""FR-03 — Thong ke phan bo lop va hinh dang bounding box.
-
-Ngoai bang dem mau theo lop (yeu cau toi thieu cua FR-03), script con tinh
-kich thuoc va ti le khung — nhung con so nay giai thich VI SAO mot so lop kho:
-khung rat lon phu kin anh (crazing) hoac rat det (scratches) deu lam giam mAP,
-va do la phan tich can co trong bao cao thay vi chi noi "lop nay mAP thap".
-
-Chay:
-    PYTHONPATH=src python -m ivid.data.stats --config configs/data.yaml
-"""
 from __future__ import annotations
 
 import argparse

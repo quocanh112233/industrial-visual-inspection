@@ -1,9 +1,3 @@
-"""Runner PyTorch — moc so sanh goc.
-
-Dung truc tiep nn.Module ben trong ultralytics thay vi model.predict(), vi
-predict() da kem san tien/hau xu ly rieng cua ho; goi no se do lan ca phan do
-vao cot "inference" va lam ban so lieu.
-"""
 from __future__ import annotations
 
 import numpy as np
@@ -36,7 +30,7 @@ class PyTorchRunner(BaseRunner):
             y = self.model(t)
         y = y[0] if isinstance(y, (list, tuple)) else y
         if self._dev.type == "cuda":
-            self.torch.cuda.synchronize()   # bat buoc: khong dong bo thi do trung
+            self.torch.cuda.synchronize()
         return y.detach().cpu().numpy()
 
     def backend_info(self) -> dict:

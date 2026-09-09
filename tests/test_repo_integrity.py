@@ -1,12 +1,3 @@
-"""Bat cac loi lam ma nguon khong den duoc may khac.
-
-Co that: '.gitignore' tung co dong 'data/' (khong dau '/' o dau). Git hieu do la
-"moi thu muc ten data o moi do sau", nen no chan luon src/ivid/data/ — toan bo
-FR-01..03 khong bao gio duoc commit. Tren may dev moi thu chay binh thuong;
-tren Jetson thi 'ModuleNotFoundError: No module named ivid.data'.
-
-Loai loi nay khong bao gio lo ra khi test tren may da co san file.
-"""
 from __future__ import annotations
 
 import importlib
@@ -51,14 +42,12 @@ def test_gitignore_khong_chan_nham_thu_muc_ma_nguon():
 
 @pytest.mark.skipif(not in_git_repo(), reason="khong phai git repo")
 def test_gitignore_van_chan_du_lieu_va_trong_so():
-    """Sua loi tren khong duoc lam mat tac dung chan file nang."""
     for path in ("data/raw/x.jpg", "data/processed/data.yaml",
                  "models/yolov8n/best.pt", "models/yolov8n/best.engine"):
         assert git("check-ignore", "-v", path).strip(), f"'{path}' PHAI bi chan"
 
 
 def test_moi_thu_muc_con_cua_ivid_deu_la_package():
-    """Thieu __init__.py thi import se hong theo cach kho doan."""
     missing = [str(d.relative_to(ROOT)) for d in (ROOT / "src/ivid").rglob("*")
                if d.is_dir() and d.name != "__pycache__" and not (d / "__init__.py").exists()]
     assert not missing, "thieu __init__.py o: " + ", ".join(missing)
@@ -72,16 +61,10 @@ def test_moi_thu_muc_con_cua_ivid_deu_la_package():
     "ivid.serve.schemas", "ivid.serve.backends",
 ])
 def test_module_import_duoc_khong_can_gpu(mod):
-    """Cac module nay phai import duoc tren may khong co torch/tensorrt —
-    neu khong, CI khong chay duoc va Docker build cung se hong."""
     importlib.import_module(mod)
 
 
-# --------------------------------------------------------------- encoding
 def test_moi_cho_doc_ghi_text_deu_khai_bao_encoding():
-    """Jetson chay locale C/POSIX: Python mac dinh dung ascii cho file va stdout.
-    Mot dau '—' trong bao cao la du de lam vo ca phien benchmark.
-    """
     import re
 
     bad = []
@@ -113,12 +96,7 @@ def test_write_json_giu_duoc_ky_tu_tieng_viet(tmp_path):
     assert json.loads(f.read_text(encoding="utf-8")) == payload
 
 
-# ---------------------------------------------------------------- warm-up
 def test_warmup_chay_ca_duong_ong_khong_chi_inference():
-    """Neu warm-up chi goi infer(), backend do TRUOC se ganh chi phi khoi tao
-    OpenCV va trong nhu tien xu ly cua no cham hon — trong khi ca ba backend
-    dung chung mot ham preprocess. Da xay ra that: 10.2 ms vs 5.6 ms.
-    """
     import inspect
 
     from ivid.benchmark.runners.base import BaseRunner
@@ -127,17 +105,13 @@ def test_warmup_chay_ca_duong_ong_khong_chi_inference():
     assert "run_array" in src, "warmup phai goi run_array, khong duoc chi goi infer"
 
 
-# ------------------------------------------------------- tai lieu khong lac hau
 def _doc_files() -> list[Path]:
-    """Tai lieu + notebook. Notebook quan trong hon ca: nguoi dung dang o Colab,
-    khong co cach nao doan ra lenh dung khi mot lenh trong do bi lac hau."""
     files = list((ROOT / "docs").glob("*.md")) + [ROOT / "README.md"]
     files += list((ROOT / "notebooks").glob("*.ipynb"))
     return [f for f in files if f.exists()]
 
 
 def _commands_in_docs() -> tuple[set[str], set[str]]:
-    """Rut cac lenh 'python -m ivid.x' va 'bash scripts/y.sh' tu tai lieu."""
     import re
 
     mods, scripts = set(), set()
@@ -149,9 +123,6 @@ def _commands_in_docs() -> tuple[set[str], set[str]]:
 
 
 def test_tai_lieu_khong_tro_toi_module_da_bien_mat():
-    """Doi ten mot module ma quen sua docs/ thi nguoi doc go lenh se gap loi.
-    Voi docs/colab-training.md thi con te hon: nguoi dung dang o Colab, khong
-    co cach nao doan ra lenh dung."""
     mods, _ = _commands_in_docs()
     missing = [m for m in mods
                if not (ROOT / "src" / (m.replace(".", "/") + ".py")).exists()]
@@ -188,8 +159,6 @@ def test_makefile_target_duoc_nhac_trong_tai_lieu_deu_ton_tai():
 
 
 def test_notebook_colab_hop_le_va_bat_gpu():
-    """Notebook hong hoac quen bat GPU la loi im lang: Colab van chay, chi la
-    train bang CPU cham gap ~50 lan."""
     import json
 
     p = ROOT / "notebooks" / "ivid_colab.ipynb"
@@ -198,21 +167,12 @@ def test_notebook_colab_hop_le_va_bat_gpu():
     assert nb["nbformat"] == 4
     assert nb["metadata"].get("accelerator") == "GPU", "notebook phai khai bao accelerator GPU"
     assert any(c["cell_type"] == "code" for c in nb["cells"])
-    # khong duoc lo token/secret trong notebook
     text = p.read_text(encoding="utf-8")
     for leak in ("ghp_", "github_pat_", "AIza", "-----BEGIN"):
         assert leak not in text, f"notebook chua chuoi giong secret: {leak}"
 
 
-# ------------------------------------------- duong dan trong file duoc commit
 def test_khong_co_duong_dan_tuyet_doi_trong_file_duoc_commit():
-    """File trong results/ va docs/ duoc commit. Duong dan tuyet doi khien may
-    dev ghi '/home/quocanh/...' con Jetson ghi '/home/jetson/...' — hai may sinh
-    ra hai noi dung khac nhau tu cung mot du lieu, va 'git pull' bao xung dot.
-
-    Bo qua train_*_manifest.json: chung ghi lai moi truong train that (Colab),
-    duong dan o do la ban ghi lich su chu khong phai dau vao cua buoc sau.
-    """
     import re
 
     if not in_git_repo():
@@ -240,5 +200,4 @@ def test_rel_to_root_tra_ve_duong_dan_tuong_doi():
 
     assert rel_to_root(ROOT / "results" / "x.json") == "results/x.json"
     assert rel_to_root(ROOT / "src/ivid/data/prepare.py") == "src/ivid/data/prepare.py"
-    # ngoai repo thi giu nguyen
     assert rel_to_root("/tmp/ngoai-repo.json") == "/tmp/ngoai-repo.json"

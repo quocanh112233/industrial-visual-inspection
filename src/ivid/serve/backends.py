@@ -1,17 +1,3 @@
-"""FR-17 — Chon runtime qua bien moi truong.
-
-    IVID_BACKEND   pytorch | onnx | tensorrt | mock   (mac dinh: tensorrt)
-    IVID_MODEL     ten thu muc trong models/          (mac dinh: yolov8n)
-    IVID_IMGSZ     kich thuoc dau vao                 (mac dinh: 640)
-    IVID_CONF      nguong tin cay                     (mac dinh: 0.25)
-    IVID_IOU       nguong IoU cua NMS                 (mac dinh: 0.7)
-    IVID_DEVICE    cuda | cpu                         (mac dinh: cuda)
-    IVID_MAX_UPLOAD_MB                                (mac dinh: 10)
-
-Model duoc nap LUOI va loi nap duoc giu lai thay vi lam sap tien trinh: mot
-dich vu khong nap duoc model van phai tra loi /health de he thong giam sat biet
-chuyen gi dang xay ra. Sap ngay luc khoi dong thi chi thay container restart lien tuc.
-"""
 from __future__ import annotations
 
 import contextlib
@@ -30,7 +16,6 @@ class Settings:
     backend: str = os.getenv("IVID_BACKEND", "tensorrt").lower()
     model: str = os.getenv("IVID_MODEL", "yolov8n")
     imgsz: int = int(os.getenv("IVID_IMGSZ", "672"))
-    # Anh duoc thu ve co nay roi dem xam ra imgsz. Xem configs/benchmark.yaml.
     resize_to: int | None = int(os.getenv("IVID_RESIZE_TO", "640")) or None
     conf: float = float(os.getenv("IVID_CONF", "0.25"))
     iou: float = float(os.getenv("IVID_IOU", "0.7"))
@@ -43,11 +28,6 @@ class Settings:
 
 
 class MockRunner:
-    """Runner gia cho test va cho demo khi chua co trong so.
-
-    Khong dung de do hieu nang. Ton tai de test API chay duoc tren CI, noi
-    khong co GPU lan trong so model.
-    """
 
     name = "mock"
 
@@ -56,15 +36,6 @@ class MockRunner:
         self.weights = Path("mock")
 
     def run_array(self, img_bgr: np.ndarray):
-        """Tra ve mot detection co dinh, va thoi gian DO THAT chu khong bia ra.
-
-        Truoc day ham nay tra ve Timing(0.5, 1.0, 0.2) — nhung con so bia. Hai
-        cai hai: (1) /predict bao "inference_ms": 1.0 trong khi khong co gi ton
-        1 ms, ai do do hieu nang qua mock se nhan so vo nghia; (2) no pha vo bat
-        bien total_ms >= inference_ms, vi total_ms la thoi gian THAT cua ca yeu
-        cau va o mock thi no nho hon 1 ms. Test tung do do gay ra loi phu thuoc
-        thu tu chay: chi hong khi may du nhanh.
-        """
         import time
 
         from ..benchmark.runners.base import RunOutput, Timing
@@ -88,7 +59,6 @@ class MockRunner:
 
 
 class BackendHolder:
-    """Giu runner + trang thai nap, an toan khi nhieu request goi cung luc."""
 
     def __init__(self, settings: Settings | None = None):
         self.settings = settings or Settings()
@@ -97,7 +67,6 @@ class BackendHolder:
         self.names: dict[int, str] = {}
         self._lock = threading.Lock()
 
-    # ------------------------------------------------------------------ nap
     def load(self) -> None:
         with self._lock:
             if self.runner is not None:
@@ -130,7 +99,6 @@ class BackendHolder:
                     return {int(k): v for k, v in d["names"].items()}
         return {}
 
-    # -------------------------------------------------------------- thong tin
     @property
     def loaded(self) -> bool:
         return self.runner is not None
@@ -139,7 +107,6 @@ class BackendHolder:
         return self.names.get(cid, str(cid))
 
     def model_version(self) -> str:
-        """Van tat nhan dang model dang phuc vu — kich thuoc + thoi diem sua file."""
         s = self.settings
         if s.backend == "mock":
             return "mock"

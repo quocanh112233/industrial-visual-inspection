@@ -1,13 +1,3 @@
-"""FR-05 — Danh gia model tren tap test: mAP tong the va theo tung lop.
-
-Chay duoc voi bat ky dinh dang trong so nao (.pt / .onnx / .engine), nen buoc
-do mAP cho ba runtime (FR-13) dung lai chinh script nay thay vi viet lai —
-va quan trong hon: dam bao ba dinh dang duoc cham diem bang CUNG mot ham,
-neu khong thi chenh lech mAP do duoc co the la do cach cham chu khong phai runtime.
-
-    PYTHONPATH=src python -m ivid.train.evaluate --name yolov8n
-    PYTHONPATH=src python -m ivid.train.evaluate --weights models/yolov8n/best.engine
-"""
 from __future__ import annotations
 
 import argparse
@@ -20,7 +10,7 @@ import yaml
 
 from ..data.common import rel_to_root, repo_root, write_json
 
-MAP50_TARGET = 0.65  # nguong FR-05 cho YOLOv8n tren NEU-DET
+MAP50_TARGET = 0.65
 
 
 def _to_float(x) -> float:
@@ -33,24 +23,6 @@ def _to_float(x) -> float:
 def evaluate(weights: Path, data: Path, split: str, imgsz: int, batch: int,
              device: str | None, conf: float, iou: float,
              rect: bool | None = None) -> dict:
-    """Chay ultralytics.val(). `rect` de None nghia la de ultralytics tu quyet.
-
-    CAN BIET VE `rect`. Ultralytics dat rect=True cho ban .pt nhung ep
-    rect=False cho moi dinh dang xuat (engine/validator.py). O che do rect voi
-    pad=0.5, khung anh khong phai 640 ma la ceil(640/32 + 0.5) * 32 = 672: anh
-    640 nam giua mot khung 672 co vien xam 16 px moi ben. Do duoc tren yolov8n:
-
-        rect=True  imgsz=640   mAP@0.5 0.7621   mAP@0.5:0.95 0.4348
-        rect=False imgsz=640   mAP@0.5 0.7310   mAP@0.5:0.95 0.3521
-        rect=False imgsz=672   mAP@0.5 0.7279   mAP@0.5:0.95 0.3410
-
-    Tuc la CUNG MOT BO TRONG SO cho hai con so cach nhau 0.031 mAP@0.5, chi vi
-    mot tham so cua trinh danh gia. Dong thu ba cho thay nguyen nhan la VIEN XAM
-    chu khong phai do phan giai — phong thang len 672 con kem hon.
-
-    Hau qua thuc te: engine ONNX/TensorRT co dau vao co dinh 640x640 khong the
-    tai lap che do rect, nen 0.7621 KHONG phai con so chay duoc tren day chuyen.
-    """
     from ultralytics import YOLO
 
     model = YOLO(str(weights))
@@ -67,9 +39,6 @@ def evaluate(weights: Path, data: Path, split: str, imgsz: int, batch: int,
     if isinstance(names, dict):
         names = [names[i] for i in sorted(names)]
 
-    # Cac mang p/r/ap50 chi chua cac lop CO MAT trong ket qua, danh so qua
-    # ap_class_index. Con maps thi danh so thang theo class id. Tron hai kieu
-    # nay la nguon sai lech im lang kinh dien -> anh xa tuong minh.
     idx = list(getattr(box, "ap_class_index", range(len(names))))
     per_class: dict[str, dict] = {}
     for pos, cid in enumerate(idx):
@@ -99,8 +68,6 @@ def evaluate(weights: Path, data: Path, split: str, imgsz: int, batch: int,
             "recall": _to_float(box.mr),
         },
         "per_class": per_class,
-        # ms/anh do chinh ultralytics bao — chi de tham khao, KHONG dung cho
-        # bang benchmark (FR-10 do rieng, co warm-up va lap 3 phien)
         "speed_ms_ultralytics": {k: _to_float(v) for k, v in getattr(m, "speed", {}).items()},
         "evaluated_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
     }
@@ -163,7 +130,6 @@ def main() -> int:
     if not out.is_absolute():
         out = root / out
 
-    # gom nhieu lan danh gia vao cung mot file thay vi ghi de
     payload = {}
     if out.exists():
         try:

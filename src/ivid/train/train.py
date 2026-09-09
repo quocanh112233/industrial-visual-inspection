@@ -1,13 +1,3 @@
-"""FR-04 / FR-06 — Fine-tune YOLO tu trong so pretrained, co ghi lai cau hinh tai lap.
-
-Cung mot lenh chay duoc tren Colab lan tren Jetson; khac nhau chi o file config.
-
-    PYTHONPATH=src python -m ivid.train.train --config configs/train_yolov8n.yaml
-
-FR-06 doi hoi moi lan train phai luu lai du de chay lai: seed, phien ban thu vien,
-sieu tham so, hash dataset. Tat ca gom trong results/train_<name>_manifest.json.
-Neu khong co file do, mot con so mAP trong bao cao la con so khong kiem chung duoc.
-"""
 from __future__ import annotations
 
 import argparse
@@ -101,7 +91,6 @@ def main() -> int:
     if a.device is not None:
         targs["device"] = a.device
 
-    # tinh tai lap: khoa cac nguon ngau nhien nam ngoai ultralytics
     os.environ.setdefault("PYTHONHASHSEED", str(cfg["seed"]))
     os.environ.setdefault("CUBLAS_WORKSPACE_CONFIG", ":4096:8")
 
@@ -120,9 +109,6 @@ def main() -> int:
     started = datetime.now(timezone.utc)
     model = YOLO(cfg["model"])
 
-    # Ghi so tham so vao manifest. Neu config tro nham trong so (vi du
-    # train_yolov8s.yaml lai nap yolov8n.pt), so nay la thu duy nhat lo ra —
-    # ten run, thu muc va ten file ket qua deu van trong dung. Da xay ra that.
     try:
         n_params = sum(x.numel() for x in model.model.parameters())
     except Exception:
@@ -139,12 +125,10 @@ def main() -> int:
         print(f"[loi] khong sinh ra {best}", file=sys.stderr)
         return 1
 
-    # copy sang models/<name>/best.pt de cac buoc export dung mot duong dan on dinh
     dest = root / "models" / name
     dest.mkdir(parents=True, exist_ok=True)
     shutil.copy2(best, dest / "best.pt")
 
-    # ---------------------------------------------------- FR-06: manifest tai lap
     ds_manifest = root / "results" / "dataset_manifest.json"
     manifest = {
         "run_name": name,
@@ -168,7 +152,6 @@ def main() -> int:
     }
     write_json(root / "results" / f"train_{name}_manifest.json", manifest)
 
-    # giu lai duong cong loss de ve bieu do sau
     csv = run_dir / "results.csv"
     if csv.exists():
         shutil.copy2(csv, root / "results" / f"train_{name}_curve.csv")

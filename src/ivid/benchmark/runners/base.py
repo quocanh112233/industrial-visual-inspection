@@ -1,10 +1,3 @@
-"""Giao dien chung cho ba runtime.
-
-Moi runner chi chiu trach nhiem MOT viec: nhan mang NCHW float32 va tra ve
-tensor tho. Tien xu ly (ivid.preprocess) va hau xu ly (ivid.postprocess) nam
-ngoai, dung chung — nho vay chenh lech do duoc giua ba dinh dang chi den tu
-buoc inference, dung nhu muc dich cua bang benchmark.
-"""
 from __future__ import annotations
 
 import abc
@@ -19,15 +12,12 @@ from ...preprocess import preprocess, read_image
 
 
 def _rel(path: Path) -> str:
-    """Duong dan tuong doi so voi goc repo — xem ivid.data.common.rel_to_root."""
     from ...data.common import rel_to_root
 
     return rel_to_root(path)
 
 
 def _num_classes() -> int | None:
-    """Doc so lop tu configs/data.yaml. None neu khong doc duoc — luc do
-    decode() quay ve cach doan truc, van dung voi model that."""
     try:
         import yaml
 
@@ -45,7 +35,6 @@ def _num_classes() -> int | None:
 
 @dataclass
 class Timing:
-    """Thoi gian mot lan xu ly, tach lam ba phan (FR-11)."""
     preprocess_ms: float = 0.0
     inference_ms: float = 0.0
     postprocess_ms: float = 0.0
@@ -57,12 +46,11 @@ class Timing:
 
 @dataclass
 class RunOutput:
-    detections: np.ndarray                    # (M, 6) x1 y1 x2 y2 conf cls
+    detections: np.ndarray
     timing: Timing = field(default_factory=Timing)
 
 
 class BaseRunner(abc.ABC):
-    """Lop cha cho pytorch / onnx / tensorrt runner."""
 
     name: str = "base"
 
@@ -75,30 +63,22 @@ class BaseRunner(abc.ABC):
         self.conf = conf
         self.iou = iou
         self.device = device
-        # Che do tien/hau xu ly. Dat o day chu khong hard-code trong run_array de
-        # ba runner luon dung CHUNG mot che do — neu moi runner mot khac thi bang
-        # benchmark do lan ca khac biet duong ong vao khac biet runtime.
         self.scaleup = scaleup
         self.multi_label = multi_label
-        # Kich thuoc anh duoc thu ve BEN TRONG khung imgsz. None = phu kin khung.
-        # imgsz=672 + resize_to=640 tai lap che do rect cua ultralytics.
         self.resize_to = resize_to
-        # So lop: truyen tuong minh cho decode() thay vi de no doan truc tensor
         self.nc = nc if nc is not None else _num_classes()
         if not self.weights.exists():
             raise FileNotFoundError(f"khong thay trong so: {self.weights}")
         self._load()
 
-    # ------------------------------------------------------------ bat buoc
     @abc.abstractmethod
     def _load(self) -> None:
-        """Nap model. Goi mot lan trong __init__."""
+        pass
 
     @abc.abstractmethod
     def infer(self, x: np.ndarray) -> np.ndarray:
-        """x: (1,3,H,W) float32 -> tensor tho (1, 4+nc, N). Da dong bo GPU khi tra ve."""
+        pass
 
-    # ------------------------------------------------------------ mac dinh
     def backend_info(self) -> dict:
         return {
             "runner": self.name,
@@ -113,22 +93,12 @@ class BaseRunner(abc.ABC):
         }
 
     def warmup(self, n: int = 20, img_bgr: np.ndarray | None = None) -> None:
-        """Chay khong tai n lan de bo chi phi khoi tao.
-
-        PHAI di qua ca duong ong (preprocess -> infer -> postprocess), khong chi
-        infer. OpenCV khoi tao thread pool va nap nhan SIMD o lan resize dau tien;
-        neu warm-up bo qua buoc do, backend NAO DUOC DO TRUOC se ganh chi phi ay
-        va trong nhu the tien xu ly cua no cham hon — trong khi ca ba backend
-        dung chung dung mot ham. Loi nay tung lam pytorch hien 10.2 ms tien xu ly
-        con onnx chi 5.6 ms.
-        """
         if img_bgr is None:
             img_bgr = np.random.randint(0, 255, (self.imgsz, self.imgsz, 3), dtype=np.uint8)
         for _ in range(n):
             self.run_array(img_bgr)
 
     def run_array(self, img_bgr: np.ndarray) -> RunOutput:
-        """Chay tren mot anh BGR, do rieng ba giai doan."""
         t = Timing()
 
         t0 = time.perf_counter()
@@ -150,12 +120,11 @@ class BaseRunner(abc.ABC):
     def run_file(self, path: Path) -> RunOutput:
         return self.run_array(read_image(path))
 
-    def close(self) -> None:  # noqa: B027 — hook tuy chon, khong bat buoc override
-        """Giai phong tai nguyen. Mac dinh khong lam gi."""
+    def close(self) -> None:  # noqa: B027
+        pass
 
 
 def build_runner(backend: str, weights: Path, **kw) -> BaseRunner:
-    """Tao runner theo ten backend: pytorch | onnx | tensorrt."""
     backend = backend.lower()
     if backend in ("pytorch", "pt", "torch"):
         from .pytorch_runner import PyTorchRunner
@@ -173,7 +142,6 @@ def build_runner(backend: str, weights: Path, **kw) -> BaseRunner:
 
 
 def weights_for(model_dir: Path, backend: str) -> Path:
-    """models/yolov8n + 'onnx' -> models/yolov8n/best.onnx"""
     suffix = {"pytorch": ".pt", "pt": ".pt", "torch": ".pt",
               "onnx": ".onnx", "onnxruntime": ".onnx", "ort": ".onnx",
               "tensorrt": ".engine", "trt": ".engine", "engine": ".engine"}[backend.lower()]

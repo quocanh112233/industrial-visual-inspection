@@ -1,10 +1,3 @@
-"""FR-12 — Do RAM va bo nho GPU dinh diem trong luc chay, va kich thuoc model.
-
-Tren Jetson, CPU va GPU dung CHUNG mot vung DRAM vat ly. Vi vay "GPU memory"
-o day khong phai VRAM roi nhu tren card PCIe — no la phan bo nho ma driver cap
-cho ngu canh CUDA, nam trong cung 8GB. Bao cao phai noi ro dieu do, neu khong
-nguoi doc se so sanh nham voi so lieu cua may ban.
-"""
 from __future__ import annotations
 
 import threading
@@ -34,7 +27,6 @@ def _system_used_mb() -> float:
 
 
 def _torch_gpu_mb() -> tuple[float, float]:
-    """(dang cap phat, dinh diem) theo MB — chi co y nghia voi runner dung torch."""
     try:
         import torch
 
@@ -47,12 +39,6 @@ def _torch_gpu_mb() -> tuple[float, float]:
 
 
 class ResourceMonitor:
-    """Lay mau bo nho trong nen trong khi benchmark chay.
-
-        with ResourceMonitor() as rm:
-            ...chay benchmark...
-        print(rm.summary())
-    """
 
     def __init__(self, interval: float = 0.2):
         self.interval = interval
@@ -109,7 +95,6 @@ def model_size_mb(path: Path) -> float:
 
 
 def measure_idle(seconds: float = 2.0) -> dict:
-    """Muc bo nho nen truoc khi nap model, de tru ra."""
     end = time.time() + seconds
     sys_s, rss_s = [], []
     while time.time() < end:

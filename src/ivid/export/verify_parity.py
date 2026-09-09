@@ -1,14 +1,3 @@
-"""FR-09 — Xac minh ba dinh dang cho ra detection giong nhau.
-
-Chay cung N anh qua ca ba runner voi cung tien/hau xu ly, roi so tung cap:
-bao nhieu detection khop, bao nhieu chi mot ben co, IoU trung binh, lech diem
-tin cay lon nhat.
-
-SRS ghi ro: "neu TensorRT lech nhieu thi ghi nhan, khong che giau". Script vi
-vay khong bao gio 'that bai' vi lech — no bao cao con so va de nguoi doc danh gia.
-
-    PYTHONPATH=src python -m ivid.export.verify_parity --name yolov8n
-"""
 from __future__ import annotations
 
 import argparse
@@ -46,7 +35,6 @@ def main() -> int:
     pc = cfg["parity"]
     n = a.n or int(pc["n_images_full"])
     imgsz = int(cfg["onnx"]["imgsz"])
-    # resize_to lay tu configs/benchmark.yaml de parity chay dung che do dang trien khai
     bcfg_path = root / "configs/benchmark.yaml"
     bcfg = yaml.safe_load(bcfg_path.read_text(encoding="utf-8")) if bcfg_path.exists() else {}
     resize_to = int(bcfg["resize_to"]) if bcfg.get("resize_to") else None

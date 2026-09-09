@@ -1,15 +1,4 @@
 #!/usr/bin/env bash
-# =============================================================================
-# IVID - Tai dataset NEU-DET (lo i be mat thep can nong, 6 lop, 1800 anh)
-#
-# Chay giong het nhau tren may dev (x86) va tren Jetson (aarch64).
-#
-#   bash scripts/download_dataset.sh                  # nguon mac dinh: github
-#   bash scripts/download_dataset.sh --source kaggle  # ban goc VOC XML (can token)
-#   bash scripts/download_dataset.sh --force          # tai lai tu dau
-#
-# Ket qua:  data/raw/NEU-DET/...   +  data/raw/SOURCE.txt  (ghi nguon da dung)
-# =============================================================================
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -28,16 +17,13 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-# nguon github: mirror da kiem chung, khong can dang nhap, nhan YOLO .txt san
 GH_TARBALL="https://codeload.github.com/Marfbin/NEU-DET-with-yolov8/tar.gz/refs/heads/main"
-# nguon kaggle: ban goc, annotation VOC XML, license CC0
 KAGGLE_SLUG="ousmanesangary/neu-det"
 
 log()  { printf '\033[1;34m[ivid]\033[0m %s\n' "$*"; }
 warn() { printf '\033[1;33m[canh bao]\033[0m %s\n' "$*"; }
 die()  { printf '\033[1;31m[loi]\033[0m %s\n' "$*" >&2; exit 1; }
 
-# ---------------------------------------------------------------- 0. chuan bi
 if [[ -d "$DEST" && $FORCE -eq 0 ]]; then
   log "Da co $DEST — bo qua buoc tai. Dung --force de tai lai."
 else
@@ -45,7 +31,6 @@ else
   mkdir -p "$CACHE"
 
   case "$SOURCE" in
-  # ------------------------------------------------------------- 1a. github
   github)
     TARBALL="$CACHE/neu-det-github.tar.gz"
     if [[ ! -s "$TARBALL" ]]; then
@@ -67,12 +52,10 @@ else
     echo "github:Marfbin/NEU-DET-with-yolov8@main (YOLO txt, da chia san train/test)" > "$RAW/SOURCE.txt"
     ;;
 
-  # ------------------------------------------------------------- 1b. kaggle
   kaggle)
     command -v kaggle >/dev/null 2>&1 || die \
 "Chua co lenh 'kaggle'. Cai va lay token:
   pip install kaggle
-  # Vao kaggle.com > Settings > API > Create New Token  -> tai ve kaggle.json
   mkdir -p ~/.kaggle && mv ~/Downloads/kaggle.json ~/.kaggle/
   chmod 600 ~/.kaggle/kaggle.json"
 
@@ -92,7 +75,6 @@ else
   esac
 fi
 
-# ---------------------------------------------------------------- 2. kiem tra
 log "Kiem tra dataset vua tai..."
 python3 - "$DEST" <<'PY'
 import sys, collections
@@ -113,7 +95,6 @@ print(f"  nhan VOC XML: {len(xmls)}")
 if not imgs:
     sys.exit("  [loi] khong tim thay anh nao -> dataset hong")
 
-# kich thuoc anh (khong can PIL: doc header JPEG/PNG thu cong neu thieu)
 try:
     from PIL import Image
     sizes = collections.Counter(Image.open(p).size for p in imgs[:300])
@@ -121,13 +102,11 @@ try:
 except ImportError:
     print("  kich thuoc  : (bo qua - chua cai Pillow)")
 
-# phan bo lop suy ra tu ten file (NEU-DET dat ten <lop>_<so>.jpg)
 prefix = collections.Counter(p.stem.rsplit("_", 1)[0] for p in imgs)
 print(f"  lop theo ten file ({len(prefix)}):")
 for k, v in sorted(prefix.items()):
     print(f"      {k:18s} {v}")
 
-# doc thu nhan YOLO neu co
 if txts:
     ids, boxes, oob, empty = collections.Counter(), 0, 0, 0
     for t in txts:

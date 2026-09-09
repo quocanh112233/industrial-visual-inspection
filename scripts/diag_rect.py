@@ -1,26 +1,3 @@
-"""Kiem chung gia thuyet: ultralytics cham ban .pt o 672x672, con moi thu khac o 640x640.
-
-BOI CANH. scripts/diag_map.py da chung minh hai dieu:
-  * phep tinh mAP cua du an dung (lech 0.0004 so voi ma ultralytics tren cung
-    mot tap detection),
-  * va che do tien xu ly hien tai (phong anh 200 -> 640) la dung, vi khong
-    phong to thi mAP sap tu 0.73 xuong 0.51.
-
-Con lai chenh lech 0.030 giua ban .pt (0.7621) va moi thu khac (~0.7315).
-Nghi van: ultralytics dat rect=True cho .pt nhung ep rect=False cho cac dinh
-dang xuat (engine/validator.py, "if not (pt or dynamic): self.args.rect = False").
-O che do rect voi pad=0.5, khung anh khong phai 640 ma la
-
-    ceil(640/32 + 0.5) * 32 = 21 * 32 = 672
-
-nghia la ban .pt duoc cham voi anh 640 nam giua mot khung 672 co vien xam 16px,
-trong khi ONNX/TensorRT — von co dau vao co dinh 640x640 — khong the lam vay.
-
-Script chay ultralytics.val() ba lan tren CUNG ban .pt, chi doi mot tham so,
-va in kich thuoc tensor that su di vao model (bat bang forward hook).
-
-    PYTHONPATH=src PYTHONUTF8=1 python3 scripts/diag_rect.py
-"""
 from __future__ import annotations
 
 import argparse
@@ -36,16 +13,12 @@ from ivid.data.common import repo_root  # noqa: E402
 
 def chay(weights: Path, data: Path, imgsz: int, rect: bool, conf: float,
          iou: float, batch: int) -> tuple[float, float, str]:
-    """Mot lan val(). Tra ve (mAP50, mAP50_95, kich thuoc dau vao that)."""
     from ultralytics import YOLO
 
     model = YOLO(str(weights))
     thay: Counter[str] = Counter()
 
     def hook(_mod, inp):
-        # KHONG lay lan forward dau tien: truoc vong val, ultralytics con chay
-        # mot luot dung stride bang tensor gia rat nho (32x32). Dem tan suat roi
-        # lay hinh dang pho bien nhat moi ra dung anh that.
         if inp and hasattr(inp[0], "shape") and len(inp[0].shape) == 4:
             thay["x".join(str(int(v)) for v in inp[0].shape)] += 1
 

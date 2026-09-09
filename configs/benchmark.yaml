@@ -1,42 +1,19 @@
-# FR-10..15 — Cau hinh phien do hieu nang. PHAI chay tren Jetson (rang buoc C1).
+models: [yolov8n, yolov8s]
+backends: [pytorch, onnx, tensorrt]
 
-models: [yolov8n, yolov8s]          # thu muc trong models/
-backends: [pytorch, onnx, tensorrt] # thu tu nay cung la thu tu chay
-
-# KHUNG DAU VAO 672 VOI ANH THU VE 640 — khong phai loi danh may.
-#
-# Anh duoc thu ve 640 roi dem xam ra 672 (16 px moi ben) truoc khi vao model.
-# Do bang quet tham so tren yolov8n / tap test, chi doi mot con so nay:
-#
-#     khung   mAP@0.5   mAP@0.5:0.95   pixel so voi 640
-#     640     0.7317    0.3547         1.00x   <- khong dem vien
-#     672     0.7648    0.4401         1.10x
-#     704     0.7730    0.4421         1.21x
-#     736     0.7691    0.4410         1.32x
-#     768     0.7726    0.4403         1.44x
-#
-# Buoc nhay nam tron o 640 -> 672. Tu 672 tro di, mAP@0.5 dao dong trong 0.0082
-# va mAP@0.5:0.95 trong 0.0020 — deu DUOI nguong nhieu 0.0115 do duoc tu hai lan
-# train cung seed. Tuc hieu ung nay NHI PHAN chu khong ti le: co vien la duoc,
-# them vien khong duoc them gi. Vi vay chon khung NHO NHAT bat duoc hieu ung.
-#
-# Chon 704 vi no "cao nhat trong bang" se la bia tin hieu tu nhieu.
-imgsz: 672        # kich thuoc dau vao model (khung)
-resize_to: 640    # anh duoc thu ve co nay, phan con lai la vien xam
-conf: 0.25                          # nguong cho do latency (giong luc phuc vu that)
+imgsz: 672
+resize_to: 640
+conf: 0.25
 iou: 0.7
 
-warmup: 20                          # SRS §7.1 — bo 20 lan dau, chi phi nap engine
-sessions: 3                         # lap ca phien 3 lan, bao cao trung vi
-cooldown_seconds: 60                # de nguoi giua cac phien, tranh throttling (R3)
-settle_seconds: 300                 # cho on dinh nhiet truoc phien dau (SRS §7.1 buoc 1)
+warmup: 20
+sessions: 3
+cooldown_seconds: 60
+settle_seconds: 300
 
-split: test                         # do tren toan bo tap test, cung thu tu cho moi dinh dang
-max_images: null                    # null = dung het; dat so nho de chay thu nhanh
+split: test
+max_images: null
 
-# Cho phep ONNX Runtime roi ve CPU neu khong co GPU provider.
-# De true thi van chay duoc va bao cao se GHI RO la do tren CPU;
-# de false thi dung han, buoc phai sua moi truong truoc.
 allow_onnx_cpu_fallback: true
 
 percentiles: [50, 95, 99]

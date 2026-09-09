@@ -1,15 +1,3 @@
-"""FR-08 — Build TensorRT engine FP16 tu file ONNX. BAT BUOC chay tren Jetson.
-
-Engine TensorRT gan chat voi phan cung va phien ban thu vien: engine build tren
-may khac se khong nap duoc, hoac nap duoc nhung sai. Vi vay script tu chan neu
-khong phai aarch64, tru khi ep bang --allow-non-jetson.
-
-Dung `trtexec` thay vi TensorRT Python API co chu dich: day dung dung binary ma
-smoke test R1 da kiem chung, va log build (chon layer, chien luoc chien thuat)
-duoc luu lai de doi chieu khi so lieu benchmark co bat thuong.
-
-    PYTHONPATH=src python -m ivid.export.to_tensorrt --name yolov8n
-"""
 from __future__ import annotations
 
 import argparse
@@ -27,8 +15,6 @@ from ..data.common import rel_to_root, repo_root, write_json
 
 
 def device_metadata() -> dict:
-    """Ghi lai dieu kien build (FR-14 doi hoi cho luc do; luc build cung nen co,
-    vi engine build o che do nguon thap co the chon chien thuat khac)."""
     def sh(cmd: str) -> str:
         try:
             return subprocess.run(cmd, shell=True, capture_output=True,
@@ -58,9 +44,8 @@ def build(onnx_path: Path, engine_path: Path, trtexec: str, precision: str,
         trtexec,
         f"--onnx={onnx_path}",
         f"--saveEngine={engine_path}",
-        # TensorRT 10 da bo --workspace; day la cu phap thay the
         f"--memPoolSize=workspace:{workspace_mib}MiB",
-        "--skipInference",          # do latency o buoc rieng, khong tin so cua trtexec
+        "--skipInference",
         *extra,
     ]
     if precision.lower() == "fp16":

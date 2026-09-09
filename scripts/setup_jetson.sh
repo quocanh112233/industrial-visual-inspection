@@ -1,15 +1,4 @@
 #!/usr/bin/env bash
-# =============================================================================
-# IVID - Dung moi truong Python tren Jetson Orin Nano (JetPack 6.2 / L4T R36.5.2)
-#
-#   bash scripts/setup_jetson.sh
-#
-# TAI SAO PHUC TAP HON "pip install -r requirements.txt":
-#   Tren Jetson, torch va tensorrt la ban NVIDIA build rieng cho aarch64+CUDA,
-#   cai san trong he thong. Neu chay 'pip install ultralytics' binh thuong,
-#   pip se keo torch tu PyPI ve va GHI DE ban CUDA -> torch.cuda.is_available()
-#   thanh False, mat toan bo GPU. Script nay tranh dieu do.
-# =============================================================================
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -22,12 +11,10 @@ die()  { printf '\033[1;31m[loi]\033[0m %s\n' "$*" >&2; exit 1; }
 
 [[ "$(uname -m)" == "aarch64" ]] || die "Script nay chi chay tren Jetson (aarch64). May hien tai: $(uname -m)"
 
-# --- 1. venv KE THUA package he thong (de thay torch CUDA + tensorrt) --------
 if [[ ! -d "$VENV" ]]; then
   log "Tao venv ke thua system-site-packages (bat buoc de thay torch/tensorrt cua NVIDIA)..."
   python3 -m venv --system-site-packages "$VENV"
 fi
-# shellcheck disable=SC1091
 source "$VENV/bin/activate"
 python -m pip install -qU pip setuptools wheel
 
@@ -55,31 +42,9 @@ except Exception as e:
 sys.exit(0 if ok else 1)
 PY
 
-# --- 2. onnxruntime-gpu ban Jetson ------------------------------------------
-# Ban tren PyPI KHONG co CUDA/TensorRT EP cho aarch64 -> cot "ONNX Runtime"
-# trong bang benchmark se do nham tren CPU. Phai lay wheel cua jetson-ai-lab.
-#
-# BAY: 'onnxruntime' (CPU) va 'onnxruntime-gpu' cai DE LEN NHAU — ca hai cung
-# giai nen vao thu muc  site-packages/onnxruntime/. Ai cai sau thi de len file
-# .so cua nguoi truoc. Neu ban CPU cai sau, import se ra CPU du pip van liet ke
-# ca hai. Ngoai ra 'pip uninstall' chay TRONG venv KHONG xoa duoc goi nam o
-# ~/.local (user-site) — phai dung python he thong.
 log "Don dep onnxruntime o user-site (~/.local) bang python he thong..."
 /usr/bin/python3 -m pip uninstall -y onnxruntime onnxruntime-gpu 2>/dev/null || true
 
-# Ghim numpy TRUOC khi cai onnxruntime-gpu, va ghim dung ban ma L4T dung.
-#
-# JetPack cai san mot bo thu vien da build KHOP VOI NHAU quanh numpy 1.26.4:
-# torch, torchvision, opencv, matplotlib, scipy, pandas. Cac goi nay bien dich
-# voi header numpy 1.x, nen khi numpy 2 co mat chung no ngay luc import:
-#     AttributeError: _ARRAY_API not found
-# Chieu nguoc lai thi an toan: wheel build voi header numpy 2 (nhu
-# onnxruntime-gpu 1.24) van chay duoc voi numpy 1.26 — day la thiet ke cua
-# numpy 2. Vi vay ha xuong 1.26.4 lam ca hai phia deu hoat dong, va khong phai
-# tai lai matplotlib/scipy/pandas qua mang cham cua Jetson.
-#
-# (Da thu numpy 2.2.6: torch/cv2/ORT van chay, nhung matplotlib cua he thong
-#  vo -> khong sinh duoc bieu do cho FR-15.)
 NUMPY_PIN="${NUMPY_PIN:-1.26.4}"
 log "Ghim numpy==$NUMPY_PIN (ban ma L4T build cac thu vien khac cung)..."
 python -m pip install "numpy==$NUMPY_PIN"
@@ -90,15 +55,7 @@ python -m pip install --force-reinstall --no-cache-dir \
   --index-url "$JETSON_INDEX" onnxruntime-gpu \
   || die "Khong tai duoc onnxruntime-gpu tu $JETSON_INDEX (kiem tra mang)."
 
-# --- 3. ultralytics KHONG keo theo torch ------------------------------------
 log "Cai ultralytics (--no-deps) + cac phu thuoc an toan..."
-# cuda-python: runner TensorRT cap phat bo nho GPU qua cudart thay vi torch,
-# de anh Docker khong phai keo ca torch ve chi de chay mot engine 9 MB.
-#
-# PHAI ghim <13. cuda-python mang theo runtime CUDA cua chinh no: ban 13.x doi
-# driver CUDA 13, con JetPack 6.2 chi co 12.6. Cai nham ban 13 thi
-# cudaRuntimeGetVersion bao 13030 va moi loi goi CUDA tra ve
-# cudaErrorInsufficientDriver (35) — engine khong chay duoc mot dong nao.
 python -m pip install "cuda-python<13"
 
 python -m pip install --no-deps ultralytics
@@ -106,12 +63,10 @@ python -m pip install \
   opencv-python-headless pillow pyyaml requests scipy \
   matplotlib pandas psutil py-cpuinfo tqdm ultralytics-thop
 
-# --- 4. phan con lai cua du an ----------------------------------------------
 log "Cai phu thuoc cua IVID..."
 python -m pip install fastapi "uvicorn[standard]" python-multipart pydantic \
   onnx pytest ruff jetson-stats || true
 
-# --- 5. kiem tra lai ---------------------------------------------------------
 log "Kiem tra cuoi:"
 python - <<'PY'
 import torch, tensorrt as trt, onnxruntime as ort

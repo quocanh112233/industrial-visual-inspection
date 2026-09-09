@@ -1,6 +1,3 @@
-# --- du lieu & trong so (khong bao gio commit) ---
-# LUU Y: phai co dau '/' o dau. Viet 'data/' khong thoi se khop MOI thu muc
-# ten 'data' o moi do sau — ke ca src/ivid/data/ (ma do la ma nguon).
 /data/
 /datasets/
 /runs/
@@ -14,15 +11,12 @@
 *.engine
 !/models/.gitkeep
 
-# --- ket qua chay ---
 *.log
 /results/**/*.csv
 /results/smoke_images/
 
-# --- SRS (theo yeu cau: khong dua vao repo) ---
 /docs/SRS*.md
 
-# --- python ---
 __pycache__/
 *.py[cod]
 .venv/
@@ -33,7 +27,6 @@ env/
 .ruff_cache/
 .ipynb_checkpoints/
 
-# --- he thong ---
 .DS_Store
 .idea/
 .vscode/

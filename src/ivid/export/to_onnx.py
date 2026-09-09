@@ -1,16 +1,3 @@
-"""FR-07 — Export best.pt sang ONNX voi opset co dinh, roi kiem chung.
-
-Hai buoc kiem chung, khong bo buoc nao:
-  1. onnx.checker  — do thi hop le ve mat cau truc
-  2. so sanh so hoc — chay PyTorch va ONNX Runtime tren cung N anh THAT
-     (khong phai nhieu ngau nhien) va do do lech lon nhat cua tensor dau ra
-
-Buoc 2 moi la buoc quan trong. Mot file ONNX co the pass checker ma van sai so
-hoc (sai thu tu kenh, sai chuan hoa, layer bi thay the sai). Neu bo qua, sai so
-do se lang le di vao bang benchmark duoi dang "TensorRT lam giam mAP".
-
-    PYTHONPATH=src python -m ivid.export.to_onnx --name yolov8n
-"""
 from __future__ import annotations
 
 import argparse
@@ -26,7 +13,6 @@ from ..preprocess import preprocess, read_image
 
 
 def sample_images(data_yaml: Path, n: int) -> list[Path]:
-    """Lay N anh dau tien cua tap test, theo thu tu ten -> lap lai duoc."""
     d = yaml.safe_load(data_yaml.read_text(encoding="utf-8"))
     img_dir = Path(d["path"]) / d.get("test", "test/images")
     imgs = sorted((p for p in img_dir.iterdir() if p.suffix.lower() in IMG_EXT), key=lambda p: p.name)
@@ -35,21 +21,6 @@ def sample_images(data_yaml: Path, n: int) -> list[Path]:
 
 def compare_outputs(pt_path: Path, onnx_path: Path, images: list[Path], imgsz: int,
                     nc: int, conf: float, iou: float) -> dict:
-    """So sanh dau ra tho cua PyTorch va ONNX Runtime tren cung N anh that.
-
-    Vi sao KHONG dung mot nguong tuyet doi duy nhat cho ca tensor:
-    dau ra YOLOv8 la (1, 4+nc, N) trong do 4 kenh dau la TOA DO tinh bang pixel
-    (gia tri 0..imgsz) con cac kenh sau la DIEM SO lop (0..1). Lech 0.002 tren
-    mot toa do 300 pixel la sai so tuong doi 7e-6 — khong dang ke. Lech 0.002
-    tren mot diem so 0.5 la 0.4% — dang ke hon nhieu. Gop chung lai thanh mot
-    con so thi khong doc duoc gi.
-
-    Vi vay ham nay tach lam ba muc, tu tho den tinh:
-      1. do lech tho tren toan tensor  — chinh la chi so SRS §FR-07 neu ra
-      2. tach rieng toa do (pixel) va diem so (tuyet doi)
-      3. sau khi giai ma + NMS, detection cuoi cung co khac nhau khong —
-         day moi la thu anh huong toi nguoi dung
-    """
     import onnxruntime as ort
     import torch
     from ultralytics import YOLO
@@ -57,8 +28,6 @@ def compare_outputs(pt_path: Path, onnx_path: Path, images: list[Path], imgsz: i
     from ..postprocess import decode, match_detections
 
     model = YOLO(str(pt_path))
-    # ep ve CPU: so sanh so hoc chi can dung ket qua, va CPU tranh duoc
-    # khac biet do TF32/FP16 tu dong tren GPU lam nhieu phep do lech
     torch_model = model.model.float().cpu().eval()
 
     sess = ort.InferenceSession(str(onnx_path), providers=["CPUExecutionProvider"])
@@ -104,14 +73,11 @@ def compare_outputs(pt_path: Path, onnx_path: Path, images: list[Path], imgsz: i
         "ok": True,
         "n_images": len(images),
         "images": [p.name for p in images],
-        # chi so tho — chinh la con so SRS FR-07 neu ra
         "max_abs_diff": max(raw_max),
         "mean_abs_diff_per_image": round(float(np.mean(raw_max)), 8),
-        # tach theo y nghia
         "box_max_diff_px": max(box_px),
         "box_max_relative": max(box_rel),
         "score_max_abs_diff": max(score_abs),
-        # thu thuc su anh huong toi nguoi dung
         "detections": {
             "conf": conf, "iou": iou,
             "n_pytorch": n_pt, "n_onnx": n_ort,
@@ -125,7 +91,6 @@ def compare_outputs(pt_path: Path, onnx_path: Path, images: list[Path], imgsz: i
 
 
 def judge(par: dict, tol_raw: float, tol_box_px: float, tol_score: float) -> dict:
-    """Danh gia ket qua so sanh theo ba tieu chi co y nghia."""
     checks = {
         "toa_do_hop": {
             "gia_tri": par["box_max_diff_px"], "nguong": tol_box_px, "don_vi": "pixel",

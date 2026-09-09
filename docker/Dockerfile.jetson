@@ -1,15 +1,3 @@
-# FR-19 — Anh Docker cho Jetson (base L4T).
-#
-# QUAN TRONG ve phien ban: engine TensorRT gan chat voi phien ban TensorRT da
-# build ra no. Neu TensorRT trong container khac voi ban tren host, file
-# best.engine build o host se KHONG nap duoc trong container. Hai cach xu ly:
-#   (a) chon tag l4t-jetpack co TensorRT trung voi host  (khuyen nghi)
-#   (b) build lai engine BEN TRONG container: make export-trt
-# Host hien tai: L4T R36.5.2 / JetPack 6.2 / TensorRT 10.3.0 / CUDA 12.6.
-#
-# Kiem tra sau khi build:
-#   docker run --rm --runtime nvidia ivid:jetson python3 -c "import tensorrt;print(tensorrt.__version__)"
-
 ARG L4T_TAG=r36.4.0
 FROM nvcr.io/nvidia/l4t-jetpack:${L4T_TAG}
 
@@ -27,26 +15,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Wheel onnxruntime-gpu cho aarch64 + CUDA 12.6. Ban tren PyPI chi co CPU.
 ARG JETSON_INDEX=https://pypi.jetson-ai-lab.io/jp6/cu126
 RUN python3 -m pip install --upgrade pip \
  && python3 -m pip install --index-url ${JETSON_INDEX} onnxruntime-gpu || \
     echo "CANH BAO: khong tai duoc onnxruntime-gpu, backend onnx se chay CPU"
 
-# KHONG cai torch va ultralytics vao anh trien khai.
-#
-# Anh nay chi chay SUY LUAN. Runner TensorRT cap phat bo nho GPU bang
-# cuda-python chu khong bang torch (xem docstring tensorrt_runner.py), con
-# runner ONNX chi can onnxruntime-gpu. Ca hai deu khong can framework huan
-# luyen. Nho vay anh nho hon vai GB.
-#
-# cuda-python phai ghim <13: no mang theo runtime CUDA cua chinh no, ban 13.x
-# doi driver CUDA 13 con JetPack 6.2 chi co 12.6 -> cudaErrorInsufficientDriver.
-#
-# Hau qua can biet: IVID_BACKEND=pytorch KHONG chay duoc trong container nay —
-# co y nhu vay. Bang benchmark cua chinh du an khuyen nghi TensorRT FP16
-# (14.6 ms, 68 FPS) chu khong phai PyTorch (34.7 ms), nen dinh dang duy nhat
-# khong nen dung lai la dinh dang duy nhat bi bo ra.
 RUN python3 -m pip install \
         "cuda-python<13" \
         "numpy<2.3" opencv-python-headless pillow pyyaml requests \
@@ -55,8 +28,6 @@ RUN python3 -m pip install \
 COPY src/ /app/src/
 COPY configs/ /app/configs/
 
-# models/ KHONG copy vao image (file lon, va engine phai build tren dung may).
-# Mount tu ngoai vao qua docker-compose.
 VOLUME ["/app/models", "/app/data"]
 
 ENV IVID_BACKEND=tensorrt \

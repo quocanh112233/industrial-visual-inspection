@@ -1,12 +1,8 @@
-# Phu thuoc cho MAY DEV (x86_64) — dung de doc/sua code, chay test, xem dataset.
-# TREN JETSON DUNG FILE NAY: se ghi de torch ban CUDA cua NVIDIA.
-#   -> tren Jetson chay:  bash scripts/setup_jetson.sh
 ultralytics>=8.3.0
 torch>=2.2
 torchvision
 onnx>=1.16
 onnxruntime>=1.18
-# cuda-python mang theo runtime CUDA cua chinh no. Ban 13.x doi driver CUDA 13; JetPack 6.2 chi co 12.6 nen cudaGetDeviceCount tra ve cudaErrorInsufficientDriver (35).
 cuda-python<13
 numpy<2.3
 opencv-python-headless

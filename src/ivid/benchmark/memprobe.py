@@ -1,33 +1,3 @@
-"""FR-12 — Do bo nho MOI runtime thuc su can, moi cau hinh mot TIEN TRINH RIENG.
-
-VI SAO PHAI TACH TIEN TRINH
-
-Ban dau cot bo nho trong bao cao lay `system_used_delta_mb`: muc tang cua
-MemTotal - MemAvailable tren toan he thong. Do la con so vo nghia — no dem ca
-moi tien trinh khac, ca bo dem trang cua chinh nhung file anh vua doc. Hai lan
-chay cung cau hinh, cach nhau 40 phut:
-
-    cau hinh            lan day du   lan nhanh
-    yolov8n tensorrt      31.2 MB      0.0 MB
-    yolov8s pytorch       32.3 MB      0.4 MB
-
-Chuyen sang `process_rss_peak_mb` thi on dinh (lech 1.2% giua hai lan) nhung
-VAN khong doc duoc: ivid.benchmark.latency chay ca sau cau hinh trong CUNG MOT
-tien trinh, nen RSS cong don. ONNX hien 2683 MB roi TensorRT hien 2272 MB khong
-co nghia TensorRT ton it hon — chi la no duoc nap sau, khi bo nho cua backend
-truoc chua duoc tra het.
-
-Bo nho, khac voi thoi gian, khong tro ve trang thai cu sau moi phep do. Cach
-duy nhat de co con so so sanh duoc la moi runtime mot tien trinh sach.
-
-Con so bao cao la RSS dinh diem TRU RSS luc tien trinh vua khoi dong, nen no
-BAO GOM chi phi nap thu vien (torch, onnxruntime, tensorrt). Do la dung y: cau
-hoi trien khai that su la "chay runtime nay tren Jetson 8GB ton bao nhieu RAM",
-chu khong phai "engine chiem bao nhieu byte".
-
-    PYTHONPATH=src python -m ivid.benchmark.memprobe            # do tat ca
-    PYTHONPATH=src python -m ivid.benchmark.memprobe --con --model yolov8n --backend onnx
-"""
 from __future__ import annotations
 
 import argparse
@@ -48,8 +18,7 @@ BACKEND_LABEL = {"pytorch": "PyTorch", "onnx": "ONNX Runtime", "tensorrt": "Tens
 
 def do_mot_cau_hinh(model: str, backend: str, imgsz: int, conf: float, iou: float,
                     n_anh: int, root: Path, resize_to: int | None = None) -> dict:
-    """Chay trong tien trinh CON. Tra ve muc bo nho tang them cua rieng no."""
-    nen = _rss_mb()                      # truoc khi nap bat cu thu vien nang nao
+    nen = _rss_mb()
 
     from ..preprocess import read_image
     from .runners.base import build_runner, weights_for

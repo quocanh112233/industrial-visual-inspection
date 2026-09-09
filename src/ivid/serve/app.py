@@ -1,13 +1,3 @@
-"""FR-16 / FR-18 / FR-20 — Dich vu REST phat hien loi be mat.
-
-    IVID_BACKEND=tensorrt uvicorn ivid.serve.app:app --host 0.0.0.0 --port 8000
-
-Endpoint:
-    POST /predict   nhan file anh -> danh sach {class, confidence, bbox} + thoi gian
-    GET  /health    trang thai, backend, phien ban model
-    GET  /metrics   so request va do tre trung binh
-    GET  /          thong tin ngan + link toi /docs
-"""
 from __future__ import annotations
 
 import statistics
@@ -35,7 +25,6 @@ ALLOWED_EXT = {".jpg", ".jpeg", ".png", ".bmp", ".webp", ".tif", ".tiff"}
 
 
 class Metrics:
-    """Bo dem don gian, giu 1000 do tre gan nhat de tinh phan vi."""
 
     def __init__(self, keep: int = 1000):
         self.lock = threading.Lock()
@@ -87,8 +76,6 @@ STARTED = time.time()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Nap model luc khoi dong nhung KHONG lam sap tien trinh neu that bai:
-    # /health con phai tra loi duoc de biet vi sao.
     holder.load()
     yield
     holder.close()
@@ -143,7 +130,6 @@ def get_metrics() -> MetricsResponse:
 
 
 def _decode(raw: bytes) -> np.ndarray:
-    """bytes -> anh BGR. Nem HTTPException 400 neu khong phai anh doc duoc (FR-20)."""
     import cv2
 
     arr = np.frombuffer(raw, dtype=np.uint8)
@@ -163,7 +149,6 @@ def _decode(raw: bytes) -> np.ndarray:
 async def predict(file: UploadFile = File(..., description="Ảnh cần kiểm tra")):
     t_start = time.perf_counter()
 
-    # --- FR-20: kiem tra dau vao truoc khi lam bat cu viec gi ---
     name = (file.filename or "").lower()
     ext_ok = any(name.endswith(e) for e in ALLOWED_EXT)
     type_ok = (file.content_type or "") in ALLOWED_TYPES
@@ -187,7 +172,7 @@ async def predict(file: UploadFile = File(..., description="Ảnh cần kiểm t
         )
 
     if not holder.loaded:
-        holder.load()                      # thu nap lai: trong so co the vua duoc copy vao
+        holder.load()
     if not holder.loaded:
         metrics.fail()
         raise HTTPException(
@@ -230,7 +215,6 @@ async def predict(file: UploadFile = File(..., description="Ảnh cần kiểm t
             preprocess_ms=round(out.timing.preprocess_ms, 3),
             inference_ms=round(out.timing.inference_ms, 3),
             postprocess_ms=round(out.timing.postprocess_ms, 3),
-            # total do o tang HTTP nen lon hon tong ba phan: gom ca doc file va dung JSON
             total_ms=round(total_ms, 3),
         ),
         backend=settings.backend,

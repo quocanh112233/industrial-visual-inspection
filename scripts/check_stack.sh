@@ -1,11 +1,7 @@
 #!/usr/bin/env bash
-# Kiem tra cac thu vien co lam viec duoc VOI NHAU khong.
-# Import duoc tung cai khong co nghia la chung tuong thich: numpy 2 va mot thu
-# vien build voi numpy 1 se import binh thuong roi no ngay khi truyen mang.
 set -uo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 [[ -d "$ROOT/.venv" ]] && source "$ROOT/.venv/bin/activate"
-# Jetson chay locale C -> Python mac dinh ascii cho stdout
 export PYTHONUTF8=1 PYTHONIOENCODING=utf-8
 
 python - <<'PY'
@@ -22,9 +18,6 @@ def check(name, fn):
 import numpy as np
 print(f"\n=== phien ban ===")
 print(f"  numpy        {np.__version__}  ({np.__file__})")
-# matplotlib/scipy/pandas la cua HE THONG (build cung numpy cua L4T).
-# Chung khong duoc quen: ultralytics can pandas+scipy luc train/val, va
-# report.py can matplotlib cho FR-15. Chinh chung vo dau tien khi numpy lech.
 for m in ("torch", "torchvision", "cv2", "onnxruntime", "tensorrt", "ultralytics",
           "onnx", "matplotlib", "scipy", "pandas"):
     try:
@@ -53,8 +46,6 @@ check("trt logger", lambda: type(trt.Logger(trt.Logger.ERROR)).__name__)
 
 check("ultralytics YOLO", lambda: __import__("ultralytics").YOLO.__name__)
 
-# Day la cac phep goi that su cham vao numpy C-API cua tung thu vien.
-# Import thanh cong khong du: numpy 1/2 lech ABI chi lo ra o day.
 def _mpl():
     import matplotlib
     matplotlib.use("Agg")

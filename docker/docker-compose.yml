@@ -1,56 +1,24 @@
-# FR-19 — mot lenh la co API chay:  docker compose -f docker/docker-compose.yml up
-#
-# Yeu cau tren Jetson: Docker phai co nvidia runtime.
-#   docker info | grep -i 'default runtime'      # phai la 'nvidia'
-# Neu chua, sua /etc/docker/daemon.json roi: sudo systemctl restart docker
-#
-# VI SAO DUNG MANG HOST (network: host / network_mode: host)
-#
-# Mac dinh Docker cap mang cho container bang mot cap giao dien ao `veth`: mot
-# dau cam vao cau docker0 cua host, dau kia nam trong container. Kernel Jetson
-# khong co module do:
-#
-#   $ uname -r
-#   5.15.185-tegra
-#   $ sudo modprobe veth
-#   modprobe: FATAL: Module veth not found in directory /lib/modules/5.15.185-tegra
-#
-# Nen moi lenh docker dung mang cau deu chet ngay tu buoc apt-get:
-#
-#   failed to create endpoint ... on network bridge: failed to add the host
-#   (veth...) <=> sandbox (veth...) pair interfaces: operation not supported
-#
-# Dung mang host thi container xai thang ngan xep mang cua may, khong can veth.
-# Doi lai: khong con anh xa cong `8000:8000` nua — dich vu mo THANG cong 8000
-# tren host. Tren thiet bi bien nhu Jetson day thuong la dieu mong muon: bot
-# mot lop NAT tren duong anh di vao.
-
 services:
   ivid:
     build:
       context: ..
       dockerfile: docker/Dockerfile.jetson
-      network: host          # kernel Jetson khong co veth — xem ghi chu dau file
+      network: host
       args:
         L4T_TAG: ${L4T_TAG:-r36.4.0}
     image: ivid:jetson
     container_name: ivid
     runtime: nvidia
     restart: unless-stopped
-    network_mode: host       # thay cho ports "8000:8000" — xem ghi chu dau file
+    network_mode: host
     environment:
-      # FR-17: doi mot dong nay la doi runtime, khong phai build lai image
       IVID_BACKEND: ${IVID_BACKEND:-tensorrt}
       IVID_MODEL: ${IVID_MODEL:-yolov8n}
-      # 672 la KHUNG dau vao model, 640 la co anh ben trong khung do — phan con lai
-      # la vien xam. Doi mot trong hai ma khong doi engine la sai. Xem configs/benchmark.yaml.
       IVID_IMGSZ: ${IVID_IMGSZ:-672}
       IVID_RESIZE_TO: ${IVID_RESIZE_TO:-640}
       IVID_CONF: ${IVID_CONF:-0.25}
       IVID_MAX_UPLOAD_MB: ${IVID_MAX_UPLOAD_MB:-10}
     volumes:
-      # trong so mount tu host: engine phai build tren chinh may nay
       - ../models:/app/models:ro
       - ../data/processed:/app/data/processed:ro
-    # Jetson 8GB: gioi han de dich vu khong an het bo nho cua he thong
     mem_limit: 4g

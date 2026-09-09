@@ -1,19 +1,5 @@
 #!/usr/bin/env bash
-# =============================================================================
-# IVID - SMOKE TEST R1  (chay NGAY NGAY DAU, tren Jetson)
-#
-# Muc dich: chung minh chuoi  .pt -> .onnx -> .engine (FP16)  chay duoc TRUOC KHI
-# bo cong train model. SRS §9 goi R1 la "rui ro chet nguoi": xung dot phien ban
-# JetPack / TensorRT / ONNX opset co the ngon nhieu ngay.
-#
-# Dung yolov8n PRETRAINED (chua fine-tune) — chi de kiem tra duong ong.
-#
-#   bash scripts/smoke_tensorrt.sh              # thu opset 12 va 17
-#   bash scripts/smoke_tensorrt.sh --opsets 17  # chi mot opset
-#
-# Ket qua: results/r1_smoke.json  +  models/smoke/*.onnx *.engine
-# =============================================================================
-set -uo pipefail   # KHONG dung -e: muon thu tung opset, that bai thi ghi nhan roi di tiep
+set -uo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 OUT="$ROOT/models/smoke"
@@ -37,10 +23,8 @@ bad()  { printf '\033[1;31m  [that bai]\033[0m %s\n' "$*"; }
 
 mkdir -p "$OUT" "$RES"
 [[ -d "$ROOT/.venv" ]] && source "$ROOT/.venv/bin/activate"
-# Jetson chay locale C -> Python mac dinh ascii cho stdout
 export PYTHONUTF8=1 PYTHONIOENCODING=utf-8
 
-# ---------------------------------------------------------- 0. ghi phien ban
 log "Phien ban moi truong"
 python - "$RES/r1_env.json" <<'PY'
 import json, platform, subprocess, sys
@@ -56,14 +40,11 @@ info = {
     "python": platform.python_version(),
     "arch": platform.machine(),
     "l4t": sh("head -1 /etc/nv_tegra_release"),
-    # nvidia-jetpack la meta-package, thuong KHONG duoc cai -> dpkg-query rong.
-    # Lay tu apt-cache truoc, khong co thi suy ra tu nvidia-l4t-core.
     "jetpack": (sh("apt-cache policy nvidia-jetpack 2>/dev/null | awk '/Installed/{print $2}'")
                 or sh("apt-cache show nvidia-jetpack 2>/dev/null | awk '/^Version:/{print $2; exit}'")
                 or "?"),
     "l4t_core": sh("dpkg-query --showformat='${Version}' --show nvidia-l4t-core 2>/dev/null"),
     "cuda": sh("/usr/local/cuda/bin/nvcc --version | tail -2 | head -1"),
-    # /var/lib/nvpmodel/status cho ra 'pmode:0000' -> doi sang so + ten che do
     "nvpmodel_id": sh("awk -F: '{print $2+0}' /var/lib/nvpmodel/status 2>/dev/null"),
     "nvpmodel_name": sh("grep -oP '(?<=^< POWER_MODEL ID=)[0-9]+ NAME=\\S+' /etc/nvpmodel.conf 2>/dev/null | "
                         "awk -v id=\"$(awk -F: '{print $2+0}' /var/lib/nvpmodel/status 2>/dev/null)\" "
@@ -97,7 +78,6 @@ PY
 command -v "$TRTEXEC" >/dev/null 2>&1 || [[ -x "$TRTEXEC" ]] || {
   bad "khong thay trtexec tai $TRTEXEC — dat bien TRTEXEC=/duong/dan/trtexec"; exit 1; }
 
-# ---------------------------------------------------------- 1. lay yolov8n.pt
 cd "$OUT"
 if [[ ! -f yolov8n.pt ]]; then
   log "Tai trong so pretrained yolov8n.pt"
@@ -110,7 +90,7 @@ ls -lh yolov8n.pt
 RESULTS_JSON="$RES/r1_smoke.json"
 echo '{"imgsz": '"$IMGSZ"', "runs": []}' > "$RESULTS_JSON"
 
-record() {  # record <opset> <stage> <status> <detail>
+record() {
   python - "$RESULTS_JSON" "$1" "$2" "$3" "$4" <<'PY'
 import json, sys
 p, opset, stage, status, detail = sys.argv[1:6]
@@ -120,14 +100,12 @@ json.dump(d, open(p, "w"), indent=2)
 PY
 }
 
-# ---------------------------------------------------------- 2. thu tung opset
 for OP in $OPSETS; do
   echo
   log "=============== OPSET $OP ==============="
   ONNX="$OUT/yolov8n_op${OP}.onnx"
   ENG="$OUT/yolov8n_op${OP}.engine"
 
-  # --- 2a. export ONNX ---
   log "Export ONNX (opset $OP, batch 1, imgsz $IMGSZ)"
   if python - "$OP" "$IMGSZ" "$ONNX" <<'PY'
 import shutil, sys
@@ -138,15 +116,13 @@ m = YOLO("yolov8n.pt")
 out = m.export(format="onnx", opset=opset, imgsz=imgsz, batch=1, dynamic=False, simplify=True)
 shutil.move(str(out), dst)
 import onnx
-onnx.checker.check_model(str(dst))      # FR-07
+onnx.checker.check_model(str(dst))
 print(f"  onnx.checker PASS -> {dst} ({dst.stat().st_size/1e6:.1f} MB)")
 PY
   then ok "ONNX opset $OP"; record "$OP" onnx ok "$(du -h "$ONNX" | cut -f1)"
   else bad "ONNX opset $OP"; record "$OP" onnx fail "export hoac onnx.checker loi"; continue
   fi
 
-  # --- 2b. build engine FP16 ---
-  # TensorRT 10 da BO co --workspace, thay bang --memPoolSize=workspace:...
   log "Build TensorRT engine FP16 (co the mat 2-5 phut)"
   LOG="$OUT/trtexec_op${OP}.log"
   if "$TRTEXEC" --onnx="$ONNX" --saveEngine="$ENG" --fp16 \
@@ -155,7 +131,6 @@ PY
   else bad "trtexec that bai — xem $LOG"; tail -15 "$LOG"; record "$OP" engine fail "xem $LOG"; continue
   fi
 
-  # --- 2c. nap engine + chay thu ---
   log "Nap engine va chay 100 lan inference"
   if PYTHONPATH="$ROOT/src" python -m ivid.export.trt_infer_check "$ENG" \
         --json "$RES/r1_trt_op${OP}.json"

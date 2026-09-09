@@ -1,35 +1,23 @@
-# FR-07 / FR-08 — Cau hinh chuyen doi dinh dang.
-#
-# Cac gia tri nay da duoc kiem chung bang scripts/smoke_tensorrt.sh tren
-# Jetson Orin Nano / JetPack 6.2 / TensorRT 10.3.0 / CUDA 12.6.
-# Doi bat ky dong nao thi phai chay lai smoke test truoc khi tin so benchmark.
-
 onnx:
-  opset: 17           # smoke test: opset 17 nhanh hon opset 12 ~14% tren cung engine
-  imgsz: 672        # PHAI khop imgsz trong configs/benchmark.yaml — xem ghi chu o do
-  batch: 1            # benchmark do tung anh mot, dung batch dong
-  dynamic: false      # shape co dinh -> TensorRT toi uu duoc manh hon
+  opset: 17
+  imgsz: 672
+  batch: 1
+  dynamic: false
   simplify: true
-  half: false         # giu FP32 o buoc ONNX; ha xuong FP16 la viec cua TensorRT
+  half: false
 
 tensorrt:
   precision: fp16
   workspace_mib: 2048
-  # TensorRT 10 da BO co --workspace, dung --memPoolSize=workspace:<N>MiB
   trtexec: /usr/src/tensorrt/bin/trtexec
-  builder_optimization_level: 3   # mac dinh cua trtexec; tang len 5 lau hon nhieu
+  builder_optimization_level: 3
 
 parity:
-  n_images_onnx: 10   # FR-07: lech dau ra PyTorch vs ONNX tren anh that
+  n_images_onnx: 10
 
-  # SRS FR-07 neu mot nguong tuyet doi duy nhat cho ca tensor dau ra. Nhung dau
-  # ra YOLOv8 la (1, 4+nc, N): 4 kenh dau la TOA DO tinh bang PIXEL (0..640),
-  # cac kenh sau la DIEM SO (0..1). Mot nguong chung se bi toa do chi phoi va
-  # khong noi len dieu gi. Vi vay giu lai chi so tho de doi chieu, nhung ket
-  # luan dua tren ba tieu chi co y nghia ben duoi.
-  tolerance: 1.0e-3         # chi so tho theo chu SRS — chi bao cao, khong ket luan
-  tolerance_box_px: 0.1     # lech toa do, tinh bang pixel cua anh 640x640
-  tolerance_score: 1.0e-3   # lech diem so lop, tuyet doi (thang do 0..1)
-  n_images_full: 50   # FR-09: so sanh detection cuoi cung cua ca ba dinh dang
+  tolerance: 1.0e-3
+  tolerance_box_px: 0.1
+  tolerance_score: 1.0e-3
+  n_images_full: 50
   conf: 0.25
   iou: 0.7

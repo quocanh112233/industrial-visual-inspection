@@ -1,11 +1,3 @@
-"""Runner ONNX Runtime.
-
-Diem quan trong ve tinh trung thuc cua so lieu: ORT im lang bo qua execution
-provider nao khong nap duoc. Neu ban ORT tren Jetson thieu CUDA EP, session van
-tao thanh cong nhung chay tren CPU — va bang benchmark se ghi mot con so cham
-gap 20 lan ma khong ai biet vi sao. Runner nay ghi lai provider THUC SU duoc
-dung va bao dong neu no roi ve CPU.
-"""
 from __future__ import annotations
 
 import numpy as np
@@ -33,7 +25,6 @@ class OnnxRunner(BaseRunner):
         if self._requested_providers:
             chosen = [p for p in self._requested_providers if p in available]
         elif self.device.startswith("cuda"):
-            # bo qua Azure EP: no khong phai bo tang toc cuc bo
             chosen = [p for p in PREFERRED if p in available]
         else:
             chosen = ["CPUExecutionProvider"]

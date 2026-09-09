@@ -1,13 +1,3 @@
-"""Nap mot TensorRT engine, chay inference thu va do thoi gian.
-
-Dung TensorRT 10.x API (get_tensor_name / execute_async_v3) — API cu
-(get_binding_*/execute_v2) da bi bo tu TRT 10, va Jetson nay dang chay TRT 10.3.
-
-Bo nho GPU duoc cap phat bang torch thay vi pycuda: Jetson da co san torch ban
-CUDA cua NVIDIA, nen tranh duoc them mot phu thuoc de vo phien ban.
-
-    python -m ivid.export.trt_infer_check models/smoke/yolov8n_op17.engine
-"""
 from __future__ import annotations
 
 import argparse
@@ -48,7 +38,7 @@ def run(engine_path: Path, iters: int = 100, warmup: int = 20) -> dict:
         mode = engine.get_tensor_mode(name)
         shape = tuple(ctx.get_tensor_shape(name))
         dtype = trt.nptype(engine.get_tensor_dtype(name))
-        if any(d < 0 for d in shape):  # dynamic axis -> chot batch 1
+        if any(d < 0 for d in shape):
             shape = tuple(1 if d < 0 else d for d in shape)
             if mode == trt.TensorIOMode.INPUT:
                 ctx.set_input_shape(name, shape)
@@ -59,8 +49,6 @@ def run(engine_path: Path, iters: int = 100, warmup: int = 20) -> dict:
             {"name": name, "io": mode.name, "shape": list(shape), "dtype": np.dtype(dtype).name}
         )
 
-    # TensorRT canh bao neu dung default stream (no phai chen them
-    # cudaStreamSynchronize). Tao stream rieng de tranh chi phi do.
     torch_stream = torch.cuda.Stream()
     stream = torch_stream.cuda_stream
 

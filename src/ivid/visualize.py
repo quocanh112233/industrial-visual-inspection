@@ -1,16 +1,3 @@
-"""Ve detection len anh test -> docs/images/sample_detections.png.
-
-Bang so lieu tra loi duoc "nhanh bao nhieu, chinh xac bao nhieu", nhung khong
-cho thay model thuc su nhin thay gi. Hinh nay lam viec do: moi lop mot anh, hop
-du doan ve theo mau lop kem diem tin cay, hop that ve bang net trang mong de
-doi chieu.
-
-Anh duoc chon TAT DINH — voi moi lop, lay anh test dau tien (sap theo ten) chi
-chua dung lop do. Nho vay chay lai tren may khac cho ra dung hinh ay, khong sinh
-diff giay trong git.
-
-    PYTHONPATH=src python -m ivid.visualize --backend tensorrt
-"""
 from __future__ import annotations
 
 import argparse
@@ -19,14 +6,13 @@ from pathlib import Path
 
 import numpy as np
 
-# Mau BGR cho 6 lop NEU-DET, chon de phan biet duoc ca khi in den trang
 COLORS = [
-    (60, 76, 231),    # do
-    (80, 175, 76),    # xanh la
-    (243, 150, 33),   # xanh duong
-    (39, 174, 245),   # cam
-    (156, 39, 176),   # tim
-    (22, 190, 207),   # vang
+    (60, 76, 231),
+    (80, 175, 76),
+    (243, 150, 33),
+    (39, 174, 245),
+    (156, 39, 176),
+    (22, 190, 207),
 ]
 WHITE = (255, 255, 255)
 
@@ -34,7 +20,6 @@ WHITE = (255, 255, 255)
 def draw_detections(img_bgr: np.ndarray, det: np.ndarray, names: list[str],
                     gt: np.ndarray | None = None, conf_thres: float = 0.25,
                     scale: float = 1.0) -> np.ndarray:
-    """Ve hop du doan (mau theo lop) va hop that (net trang mong) len mot ban sao."""
     import cv2
 
     out = img_bgr.copy()
@@ -55,10 +40,7 @@ def draw_detections(img_bgr: np.ndarray, det: np.ndarray, names: list[str],
         nhan = f"{names[ci] if ci < len(names) else ci} {conf:.2f}"
         fs = 0.35 * scale
         (tw, th), _ = cv2.getTextSize(nhan, cv2.FONT_HERSHEY_SIMPLEX, fs, thick)
-        # nhan nam tren hop, nhung neu hop sat mep tren thi lat xuong duoi
         ty = p1[1] - 4 if p1[1] - th - 6 >= 0 else p1[1] + th + 6
-        # ...va keo vao trong neu no se tran qua mep phai (hop sat mep la chuyen
-        # thuong voi anh NEU-DET, nhieu loi chay ra tan bien anh)
         tx = min(p1[0], out.shape[1] - tw - 6)
         tx = max(tx, 0)
         cv2.rectangle(out, (tx, ty - th - 4), (tx + tw + 4, ty + 2), color, -1)
@@ -68,24 +50,11 @@ def draw_detections(img_bgr: np.ndarray, det: np.ndarray, names: list[str],
 
 
 def nhan_o(lop: str, n_hop: int, n_that: int) -> str:
-    """Tieu de mot o anh. CHI DUNG ASCII.
-
-    cv2.putText voi font Hershey khong ve duoc ky tu ngoai ASCII — no thay bang
-    dau '?'. Dung dau gach ngang em (—) o day tung lam tieu de hien ra
-    'crazing ??? 2 hop / 3 that'.
-    """
     return f"{lop}  |  {n_hop} du doan / {n_that} that"
 
 
 def co_chu_vua(text: str, rong: int, lon_nhat: float = 0.45,
                nho_nhat: float = 0.28, le: int = 16) -> float:
-    """Co chu lon nhat ma `text` van nam gon trong `rong` pixel.
-
-    Khong the co dinh mot co chu: ten lop dai ngan khac nhau (`crazing` so voi
-    `rolled-in_scale`), va tieu de con ghep them so lieu. Dat cung mot co thi o
-    nao chu dai se bi cat cut — da xay ra: 'rolled-in_scale | 1 du doan / 2' bi
-    mat chu cuoi.
-    """
     import cv2
 
     co = lon_nhat
@@ -98,7 +67,6 @@ def co_chu_vua(text: str, rong: int, lon_nhat: float = 0.45,
 
 
 def add_caption(tile: np.ndarray, text: str, height: int = 30) -> np.ndarray:
-    """Dan mot dai chu den phia tren o anh, tu co chu cho vua be ngang."""
     import cv2
 
     w = tile.shape[1]
@@ -109,7 +77,6 @@ def add_caption(tile: np.ndarray, text: str, height: int = 30) -> np.ndarray:
 
 
 def build_grid(tiles: list[np.ndarray], cols: int = 3, gap: int = 6) -> np.ndarray:
-    """Ghep cac o cung kich thuoc thanh luoi, chen khe mau xam."""
     if not tiles:
         raise ValueError("khong co o nao de ghep")
     h, w = tiles[0].shape[:2]
@@ -124,8 +91,6 @@ def build_grid(tiles: list[np.ndarray], cols: int = 3, gap: int = 6) -> np.ndarr
 
 
 def chon_anh_moi_lop(images: list[Path], gts: list[np.ndarray], nc: int) -> list[int]:
-    """Voi moi lop, lay anh dau tien CHI chua lop do; khong co thi lay anh dau
-    tien co chua lop do. Duyet theo thu tu ten file nen ket qua tat dinh."""
     chon: list[int] = []
     for c in range(nc):
         du_phong = None
@@ -176,8 +141,6 @@ def main() -> int:
     names = class_names(load_config(root / "configs/data.yaml"))
     nc = len(names)
 
-    # Che do khung anh PHAI giong luc benchmark, neu khong thi hinh minh hoa
-    # khong con minh hoa cho nhung con so trong bao cao nua.
     cfg = yaml.safe_load((root / a.config).read_text(encoding="utf-8"))
     imgsz = int(a.imgsz or cfg["imgsz"])
     resize_to = a.resize_to if a.resize_to is not None else (

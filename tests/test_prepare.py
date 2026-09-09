@@ -1,8 +1,3 @@
-"""Test cho buoc chuan bi du lieu (FR-01).
-
-Cac test khong can dataset that: chung tu sinh mot dataset gia nho, nen chay
-duoc tren CI (noi khong tai NEU-DET ve).
-"""
 from __future__ import annotations
 
 import sys
@@ -24,14 +19,12 @@ def fake_images(per_class: int = 100) -> list[Path]:
 
 
 def test_primary_class_tach_dung_ten_co_gach_ngang():
-    # 'rolled-in_scale_42.jpg' de bay: co ca '-' va nhieu '_'
     assert primary_class(Path("rolled-in_scale_42.jpg")) == "rolled-in_scale"
     assert primary_class(Path("crazing_1.jpg")) == "crazing"
     assert primary_class(Path("pitted_surface_300.jpg")) == "pitted_surface"
 
 
 def test_chia_tap_lap_lai_duoc():
-    """FR-01: chay hai lan cho ra cung mot cach chia."""
     imgs = fake_images()
     a = stratified_split(imgs, RATIOS, seed=1337, stratify=True)
     b = stratified_split(imgs, RATIOS, seed=1337, stratify=True)
@@ -46,7 +39,6 @@ def test_doi_seed_thi_doi_cach_chia():
 
 
 def test_khong_mat_anh_va_khong_trung_giua_cac_tap():
-    """FR-01: tong so anh khop, khong co anh nao nam o hai tap."""
     imgs = fake_images()
     s = stratified_split(imgs, RATIOS, seed=1337, stratify=True)
     got = [p for v in s.values() for p in v]
@@ -67,7 +59,6 @@ def test_chia_deu_tung_lop_khi_bat_stratify():
 
 
 def test_thu_tu_dau_vao_khong_anh_huong_ket_qua():
-    """Thu tu duyet thu muc khac nhau giua cac may khong duoc lam doi cach chia."""
     imgs = fake_images()
     a = stratified_split(imgs, RATIOS, seed=1337, stratify=True)
     b = stratified_split(list(reversed(imgs)), RATIOS, seed=1337, stratify=True)
@@ -85,8 +76,8 @@ def test_voc_to_yolo_doi_dung_toa_do(tmp_path: Path):
     assert len(lines) == 1
     cid, cx, cy, bw, bh = lines[0].split()
     assert int(cid) == CLASSES.index("scratches") == 5
-    assert float(cx) == pytest.approx(0.5)     # (50+150)/2/200
-    assert float(cy) == pytest.approx(0.55)    # (60+160)/2/200
+    assert float(cx) == pytest.approx(0.5)
+    assert float(cy) == pytest.approx(0.55)
     assert float(bw) == pytest.approx(0.5)
     assert float(bh) == pytest.approx(0.5)
 
@@ -123,19 +114,17 @@ def test_hash_khong_phu_thuoc_thu_tu(tmp_path: Path):
     assert sha256_of_files(files) == sha256_of_files(list(reversed(files)))
 
 
-# ------------------------------------------------------------------ preprocess
 def test_letterbox_giu_ti_le_va_ra_dung_kich_thuoc():
-    """Anh khong vuong phai duoc dem vien, khong bi keo gian."""
     pytest.importorskip("cv2")
     import numpy as np
 
     from ivid.preprocess import letterbox
 
-    img = np.zeros((100, 200, 3), dtype=np.uint8)   # rong gap doi cao
+    img = np.zeros((100, 200, 3), dtype=np.uint8)
     out, r, (px, py) = letterbox(img, 640)
     assert out.shape[:2] == (640, 640)
-    assert r == pytest.approx(3.2)                   # 640/200
-    assert px == 0 and py == 160                     # dem tren duoi, khong dem trai phai
+    assert r == pytest.approx(3.2)
+    assert px == 0 and py == 160
 
 
 def test_preprocess_ra_dung_dinh_dang_model_can():
@@ -159,21 +148,19 @@ def test_preprocess_doi_bgr_sang_rgb():
     from ivid.preprocess import preprocess
 
     img = np.zeros((200, 200, 3), dtype=np.uint8)
-    img[:, :, 0] = 255                               # kenh B day
+    img[:, :, 0] = 255
     x, _, _ = preprocess(img, 640)
-    # sau khi doi sang RGB, kenh 2 (B) moi la kenh day
     assert x[0, 2].mean() == pytest.approx(1.0, abs=1e-3)
     assert x[0, 0].mean() == pytest.approx(0.0, abs=1e-3)
 
 
-# ------------------------------------------------------------ nhan trung lap
 def test_dedupe_bo_dong_trung_y_het():
     from ivid.data.prepare import dedupe
 
     lines = [
         "0 0.6525 0.1575 0.475 0.255",
         "0 0.295 0.5675 0.58 0.325",
-        "0 0.295 0.5675 0.58 0.325",   # trung
+        "0 0.295 0.5675 0.58 0.325",
         "0 0.725 0.655 0.54 0.21",
     ]
     out, removed = dedupe(lines)
@@ -183,7 +170,6 @@ def test_dedupe_bo_dong_trung_y_het():
 
 
 def test_dedupe_giu_box_cung_toa_do_nhung_khac_lop():
-    """Hai loai loi chong len nhau tren cung vi tri la chuyen that o be mat thep."""
     from ivid.data.prepare import dedupe
 
     out, removed = dedupe(["1 0.5 0.5 0.2 0.2", "3 0.5 0.5 0.2 0.2"])

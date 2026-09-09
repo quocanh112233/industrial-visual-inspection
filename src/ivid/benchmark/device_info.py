@@ -1,10 +1,3 @@
-"""FR-14 — Ghi lai dieu kien do.
-
-Mot bang benchmark khong kem dieu kien do la mot bang khong kiem chung duoc:
-cung mot Jetson chay o 15W va o MAXN_SUPER cho ra so lieu chenh nhau rat nhieu,
-va so do luc chip da nong 80C khac han luc vua khoi dong. Vi vay moi ket qua
-benchmark deu phai di kem khoi metadata nay.
-"""
 from __future__ import annotations
 
 import json
@@ -24,7 +17,6 @@ def _sh(cmd: str, timeout: int = 20) -> str:
 
 
 def power_modes() -> dict:
-    """Doc /etc/nvpmodel.conf: cac che do co san + che do dang dung."""
     modes: dict[int, str] = {}
     conf = Path("/etc/nvpmodel.conf")
     if conf.exists():
@@ -58,15 +50,12 @@ def temperatures() -> dict[str, float]:
             v = int((z / "temp").read_text(encoding="utf-8")) / 1000.0
         except Exception:
             continue
-        # mot so zone tren x86 bao gia tri vo nghia (0.05C); bo di de trung binh
-        # khong bi keo lech. Tren Jetson moi zone deu that.
         if 5.0 < v < 150.0:
             out[(z / "type").read_text(encoding="utf-8").strip()] = v
     return out
 
 
 def clocks() -> dict:
-    """Tan so CPU/GPU hien tai (MHz)."""
     out: dict[str, float] = {}
     cpu = []
     for p in sorted(Path("/sys/devices/system/cpu").glob("cpu[0-9]*/cpufreq/scaling_cur_freq")):
@@ -116,7 +105,6 @@ def library_versions() -> dict[str, str]:
 
 
 def collect(note: str = "") -> dict:
-    """Toan bo metadata thiet bi cho mot phien do."""
     temps = temperatures()
     is_jetson = Path("/etc/nv_tegra_release").exists()
     info = {
@@ -152,7 +140,7 @@ def _mem() -> dict:
         for line in Path("/proc/meminfo").read_text(encoding="utf-8").splitlines():
             k, v = line.split(":", 1)
             if k in ("MemTotal", "MemAvailable", "SwapTotal", "SwapFree"):
-                out[k] = round(int(v.strip().split()[0]) / 1e6, 2)  # GB
+                out[k] = round(int(v.strip().split()[0]) / 1e6, 2)
     except Exception:
         pass
     return out

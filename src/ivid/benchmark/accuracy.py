@@ -1,49 +1,3 @@
-"""FR-13 — Do mAP rieng cho tung dinh dang tren cung tap test.
-
-Cot loi cua ca du an: neu chi do latency, khong ai biet TensorRT FP16 danh doi
-bao nhieu do chinh xac. SRS §3.1 noi ro — "phai dinh luong, khong gia dinh la
-bang nhau".
-
-VI SAO KHONG DUNG ultralytics.val()
-
-Ban dau buoc nay goi `ultralytics.val()` cho ca ba dinh dang, voi ly do "cung
-mot ham cham diem thi khong the lech vi cach cham". Do la sai lam: goi CUNG MOT
-HAM khong co nghia la dung CUNG MOT PHEP DO. No bao:
-
-    yolov8n PyTorch  mAP@0.5 0.7621   mAP@0.5:0.95 0.4348
-    yolov8n ONNX     mAP@0.5 0.7312   mAP@0.5:0.95 0.3520   (-0.031 / -0.083)
-
-Chenh lech ay khong phai do ONNX kem hon: no la FP32, diem so lop chi lech
-1.371e-06 so voi PyTorch, va parity @ conf 0.001 cho 8629 vs 8624 detection
-khop 98.9%. Nguyen nhan that da truy ra duoc bang scripts/diag_rect.py —
-ultralytics dat rect=True cho ban .pt nhung ep rect=False cho moi dinh dang
-xuat (engine/validator.py). O che do rect voi pad=0.5, khung anh khong phai
-640 ma la ceil(640/32 + 0.5) * 32 = 672: anh 640 nam giua mot khung 672 co
-vien xam 16 px moi ben. Do lai tren CUNG mot ban .pt:
-
-    rect=True  imgsz=640   mAP@0.5 0.7621   mAP@0.5:0.95 0.4348
-    rect=False imgsz=640   mAP@0.5 0.7310   mAP@0.5:0.95 0.3521
-    rect=False imgsz=672   mAP@0.5 0.7279   mAP@0.5:0.95 0.3410
-
-Dong thu ba loai bo cach giai thich "do phan giai cao hon": phong thang anh len
-672 con KEM hon. Thu tao ra khoang cach la VIEN XAM cua che do rect.
-
-Engine ONNX/TensorRT co dau vao co dinh 640x640 nen khong tai lap duoc che do
-ay. Vi vay 0.7621 la con so cua trinh danh gia chu khong phai con so chay duoc
-tren day chuyen — dung luan diem SRS 3.1.
-
-Module nay tu chay tap test qua chinh runner cua du an — von dung chung
-ivid.preprocess va ivid.postprocess cho ca ba dinh dang — roi tinh mAP bang
-ivid.benchmark.metrics. Chenh lech con lai chi den tu ban than runtime.
-
-Ban .pt duoc doi chieu voi ultralytics.val(rect=False) — DUNG moc, cung che do
-khung anh — de xac nhan phep tinh mAP tu viet la dung (--cross-check). Phep tinh
-ay con duoc kiem chung doc lap bang scripts/diag_map.py: cham cung mot tap
-detection bang chinh ma ultralytics (match_predictions + ap_per_class) cho ket
-qua lech 0.0004.
-
-    PYTHONPATH=src python -m ivid.benchmark.accuracy
-"""
 from __future__ import annotations
 
 import argparse
@@ -103,11 +57,6 @@ def evaluate_backend(model: str, backend: str, images: list[Path], gts: list,
 
 
 def khung_rect(resize_to: int, stride: int = 32, pad: float = 0.5) -> int:
-    """Khung anh ma ultralytics dung o che do rect, voi anh vuong.
-
-    ceil(640/32 + 0.5) * 32 = 672. Cong thuc nam trong
-    ultralytics/data/base.py, set_rectangle().
-    """
     import math
 
     return math.ceil(resize_to / stride + pad) * stride
@@ -115,19 +64,6 @@ def khung_rect(resize_to: int, stride: int = 32, pad: float = 0.5) -> int:
 
 def cross_check_pt(model: str, data: Path, imgsz: int, conf: float, iou: float,
                    root: Path, resize_to: int | None = None) -> dict:
-    """Chay ultralytics.val(rect=False) tren ban .pt de doi chieu phep tinh mAP.
-
-    Moc doi chieu PHAI cung che do khung anh voi duong ong cua ta, neu khong
-    thi con so lech vi cau hinh chu khong vi loi:
-
-      * resize_to = None  -> anh phu kin khung  -> ultralytics rect=False
-      * resize_to = 640, imgsz = 672            -> ultralytics imgsz=640 rect=True
-        (che do rect cua ultralytics tu tinh khung = ceil(640/32+0.5)*32 = 672,
-        dung bang khung cua ta)
-
-    Chon nham moc tung lam cross-check bao "LECH LON 0.0304" trong khi phep tinh
-    mAP hoan toan dung — mat mot vong lam viec de truy ra.
-    """
     from ..train.evaluate import evaluate as ul_evaluate
 
     w = root / "models" / model / "best.pt"
@@ -179,7 +115,7 @@ def main() -> int:
     backends = a.backends or cfg["backends"]
     imgsz = int(a.imgsz or cfg["imgsz"])
     if a.resize_to is None and a.imgsz is None and cfg.get("resize_to"):
-        a.resize_to = int(cfg["resize_to"])      # chi lay tu config khi khong ghi de imgsz
+        a.resize_to = int(cfg["resize_to"])
     global NAMES
     NAMES = class_names(load_config(root / a.data_config))
     nc = len(NAMES)
@@ -230,7 +166,6 @@ def main() -> int:
                       f"({r['n_detections']} detection, {r['wall_seconds']}s)")
             write_json(out_path, payload)
 
-    # --- doi chieu phep tinh mAP tu viet voi ultralytics, tren ban .pt ---
     if a.cross_check:
         payload["accuracy_cross_check"] = {
             "ghi_chu": "Che do khung anh cua ultralytics duoc chon cho KHOP voi duong "

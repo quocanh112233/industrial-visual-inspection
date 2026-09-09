@@ -1,17 +1,3 @@
-"""FR-10 / FR-11 / FR-12 — Do do tre va tai nguyen cho tung dinh dang.
-
-Nguyen tac de so lieu co gia tri:
-  * cung mot tap anh, CUNG MOT THU TU cho ca ba dinh dang
-  * bo `warmup` lan chay dau (chi phi nap engine, cap phat, JIT)
-  * lap ca phien nhieu lan, bao cao TRUNG VI cua cac phien — mot phien don le
-    co the dinh dung luc he thong lam viec khac
-  * de nguoi giua cac phien, vi Jetson bi throttling khi nong (rui ro R3)
-  * tach rieng preprocess / inference / postprocess (FR-11)
-
-    PYTHONPATH=src python -m ivid.benchmark.latency --config configs/benchmark.yaml
-    PYTHONPATH=src python -m ivid.benchmark.latency --models yolov8n --backends tensorrt \
-        --sessions 1 --settle 0 --max-images 20        # chay thu nhanh
-"""
 from __future__ import annotations
 
 import argparse
@@ -55,7 +41,6 @@ def summarize(values: list[float], percentiles: list[int]) -> dict:
 
 
 def _warm_opencv(n: int = 50) -> None:
-    """Chay preprocess vai chuc lan tren anh gia de OpenCV khoi tao xong."""
     from ..preprocess import preprocess
 
     dummy = np.random.randint(0, 255, (200, 200, 3), dtype=np.uint8)
@@ -67,7 +52,7 @@ def test_images(data_yaml: Path, split: str, limit: int | None) -> list[Path]:
     d = yaml.safe_load(data_yaml.read_text(encoding="utf-8"))
     img_dir = Path(d["path"]) / d.get(split, f"{split}/images")
     imgs = sorted((p for p in img_dir.iterdir() if p.suffix.lower() in IMG_EXT),
-                  key=lambda p: p.name)          # thu tu co dinh cho moi dinh dang
+                  key=lambda p: p.name)
     return imgs[:limit] if limit else imgs
 
 
@@ -94,8 +79,6 @@ def benchmark_backend(model: str, backend: str, images: list[Path], cfg: dict,
     kw = dict(imgsz=int(cfg["imgsz"]), conf=float(cfg["conf"]), iou=float(cfg["iou"]),
               resize_to=(int(cfg["resize_to"]) if cfg.get("resize_to") else None))
     if cfg.get("nc"):
-        # Ghi de so lop. Can khi do thu bang model pretrained COCO (80 lop)
-        # thay vi model da fine-tune cho NEU-DET (6 lop).
         kw["nc"] = int(cfg["nc"])
     if backend == "onnx":
         kw["allow_cpu_fallback"] = bool(cfg.get("allow_onnx_cpu_fallback", True))
@@ -108,7 +91,6 @@ def benchmark_backend(model: str, backend: str, images: list[Path], cfg: dict,
         return {"skipped": True, "reason": f"{type(e).__name__}: {e}"}
     load_s = time.perf_counter() - t0
 
-    # nap anh vao RAM truoc: doc dia khong phai thu can do
     images_bgr = [read_image(p) for p in images]
 
     print(f"    warm-up {cfg['warmup']} lan (ca duong ong, bang anh that)...")
@@ -152,7 +134,6 @@ def benchmark_backend(model: str, backend: str, images: list[Path], cfg: dict,
     runner_info = runner.backend_info()
     runner.close()
 
-    # trung vi giua cac phien (SRS §7.1 buoc 5)
     def med(stage: str, key: str) -> float:
         vals = [s["stages"][stage][key] for s in sessions if key in s["stages"][stage]]
         return round(statistics.median(vals), 3) if vals else float("nan")
@@ -179,14 +160,12 @@ def benchmark_backend(model: str, backend: str, images: list[Path], cfg: dict,
         "latency_p95_ms": median_stages["total"]["p95"],
         "fps": round(1000.0 / median_stages["total"]["p50"], 1)
         if median_stages["total"]["p50"] else 0.0,
-        # FR-11: ba phan phai cong lai xap xi tong
         "stage_sum_check": {
             "sum_of_parts_p50": round(median_stages["preprocess"]["p50"]
                                       + median_stages["inference"]["p50"]
                                       + median_stages["postprocess"]["p50"], 3),
             "total_p50": median_stages["total"]["p50"],
         },
-        # NFR-02: do lech giua cac phien
         "session_p50_spread_percent": round(spread, 2),
         "resources": res,
         "idle_before_load": idle,
@@ -264,18 +243,12 @@ def main() -> int:
                          "first": images[0].name, "last": images[-1].name}
     payload["benchmarked_utc"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
 
-    # Ham nong OpenCV TRUOC khi do backend dau tien: lan resize dau tien phai
-    # nap nhan SIMD va dung thread pool. Khong lam viec nay thi chi phi do roi
-    # het vao backend duoc do dau tien va bang so sanh mat cong bang.
     _warm_opencv()
 
     for model in models:
         for backend in backends:
             key = f"{model}|{backend}"
             print(f"\n[bench] === {model} / {backend} ===")
-            # Chan ghi de mot phep do DAY DU HON bang mot phep do thu nhanh.
-            # Da xay ra that: 'make bench-quick' (20 anh, 1 phien) ghi de len ket
-            # qua 'make bench' (270 anh, 3 phien) va lam mat 30 phut do dac.
             old = payload["runs"].get(key)
             if old and not old.get("skipped") and not a.force:
                 old_n = old.get("sessions", [{}])[0].get("n_images", 0)

@@ -1,21 +1,4 @@
 #!/usr/bin/env bash
-# =============================================================================
-# IVID — KIEM CHUNG BO DO, TRUOC KHI TRAIN
-#
-# Chay ca ba runner + latency.py + report.py bang model yolov8n PRETRAINED
-# (chua fine-tune) ma smoke_tensorrt.sh da sinh ra.
-#
-# Detection sinh ra se vo nghia — model COCO nhin anh thep se doan lung tung.
-# KHONG SAO: thu can kiem tra o day la BO DO co chay dung khong:
-#   - ba runner nap duoc model va tra ve tensor dung hinh dang
-#   - tien/hau xu ly dung chung khong lam vo cai nao
-#   - latency.py do va tach duoc ba giai doan
-#   - report.py sinh duoc bang va bieu do
-#
-# Phat hien loi o day ton 10 phut. Phat hien sau khi train xong ton mot ngay.
-#
-#   bash scripts/smoke_pipeline.sh
-# =============================================================================
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -27,10 +10,8 @@ log()  { printf '\033[1;34m[ivid]\033[0m %s\n' "$*"; }
 bad()  { printf '\033[1;31m[loi]\033[0m %s\n' "$*" >&2; }
 
 [[ -d "$ROOT/.venv" ]] && source "$ROOT/.venv/bin/activate"
-# Jetson chay locale C -> Python mac dinh ascii cho stdout
 export PYTHONUTF8=1 PYTHONIOENCODING=utf-8
 
-# --- 1. gom san pham cua smoke test R1 thanh mot "model" gia ---
 OPSET="${OPSET:-17}"
 mkdir -p "$DEST"
 cp -f "$SMOKE/yolov8n.pt"                  "$DEST/best.pt"      2>/dev/null
@@ -50,13 +31,11 @@ if [[ $missing -eq 1 ]]; then
   exit 1
 fi
 
-# --- 2. can co dataset da chuan bi de lay anh do ---
 if [[ ! -f "$ROOT/data/processed/data.yaml" ]]; then
   log "Chua co dataset — chay 'make data' truoc"
   exit 1
 fi
 
-# --- 3. do nhanh: 1 phien, 30 anh, khong cho on dinh nhiet ---
 log "Do thu ba runner (nc=80 vi day la model COCO pretrained)..."
 PYTHONPATH="$ROOT/src" python -m ivid.benchmark.latency \
   --models _smoke \
@@ -71,7 +50,6 @@ if [[ $rc -ne 0 ]]; then
   exit $rc
 fi
 
-# --- 4. sinh bao cao thu (khong dung mAP vi model chua fine-tune) ---
 log "Sinh bao cao thu..."
 PYTHONPATH="$ROOT/src" python -m ivid.benchmark.report \
   --input results/smoke_pipeline.json \

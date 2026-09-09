@@ -1,9 +1,3 @@
-"""Test phan ve hinh minh hoa (ivid.visualize).
-
-Khong can model: cac ham o day thuan tuy nhan mang detection va tra ve anh.
-Diem can canh la tinh TAT DINH cua viec chon anh — neu no doi theo may thi moi
-lan chay lai se sinh mot file PNG khac va git bao thay doi vo co.
-"""
 from __future__ import annotations
 
 import sys
@@ -40,10 +34,9 @@ def test_bo_qua_detection_duoi_nguong():
 
 
 def test_nhan_lat_xuong_duoi_khi_hop_sat_mep_tren():
-    """Hop o y=0 thi nhan phai nam trong anh, khong bi cat mat."""
     det = np.array([[10, 0, 60, 40, 0.9, 1]], np.float32)
     out = draw_detections(anh(), det, NAMES)
-    assert out.shape == (200, 200, 3)          # khong tran ra ngoai
+    assert out.shape == (200, 200, 3)
     assert not np.array_equal(out, anh())
 
 
@@ -64,9 +57,9 @@ def test_luoi_hang_cuoi_thieu_o_van_ghep_duoc():
 
 def test_chon_anh_uu_tien_anh_chi_co_mot_lop():
     gts = [
-        np.array([[0, 0, 10, 10, 0], [0, 0, 10, 10, 1]], np.float32),  # tron 2 lop
-        np.array([[0, 0, 10, 10, 0]], np.float32),                     # chi lop 0
-        np.array([[0, 0, 10, 10, 1]], np.float32),                     # chi lop 1
+        np.array([[0, 0, 10, 10, 0], [0, 0, 10, 10, 1]], np.float32),
+        np.array([[0, 0, 10, 10, 0]], np.float32),
+        np.array([[0, 0, 10, 10, 1]], np.float32),
     ]
     imgs = [Path(f"{i}.jpg") for i in range(3)]
     assert chon_anh_moi_lop(imgs, gts, nc=2) == [1, 2]
@@ -88,10 +81,7 @@ def test_chon_anh_bo_qua_anh_khong_co_nhan():
     assert chon_anh_moi_lop([Path("a.jpg"), Path("b.jpg")], gts, nc=1) == [1]
 
 
-# ------------------------------------------------ chu tren anh: chi ASCII moi ve duoc
 def test_nhan_o_chi_dung_ascii():
-    """Font Hershey cua OpenCV khong ve duoc ky tu ngoai ASCII: no thay bang '?'.
-    Dau gach ngang em tung lam tieu de hien 'crazing ??? 2 hop / 3 that'."""
     from ivid.visualize import nhan_o
 
     t = nhan_o("rolled-in_scale", 2, 3)
@@ -100,13 +90,10 @@ def test_nhan_o_chi_dung_ascii():
 
 
 def test_nhan_khong_tran_qua_mep_phai():
-    """Hop sat mep phai thi nhan phai duoc keo vao trong, khong bi cat cut."""
     img = anh(200, 200)
-    det = np.array([[190, 100, 199, 150, 0.87, 3]], np.float32)   # sat mep phai
+    det = np.array([[190, 100, 199, 150, 0.87, 3]], np.float32)
     out = draw_detections(img, det, NAMES)
     assert out.shape == img.shape
-    # cot ngoai cung ben phai phai co diem anh cua nen nhan (mau lop), tuc chu
-    # da duoc keo vao trong thay vi ve tran ra ngoai bien roi mat
     assert not np.array_equal(out, img)
 
 
@@ -117,9 +104,7 @@ def test_nhan_o_ghi_ro_dau_la_du_doan_dau_la_that():
     assert "du doan" in t and "that" in t
 
 
-# ----------------------------------------------- tieu de phai vua be ngang o anh
 def test_co_chu_tu_thu_nho_de_chu_dai_van_vua():
-    """Ten lop dai ngan khac nhau; co chu co dinh se lam o nao chu dai bi cat."""
     import cv2
 
     from ivid.visualize import co_chu_vua, nhan_o
