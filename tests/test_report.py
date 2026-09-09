@@ -29,9 +29,14 @@ def make_run(p50: float, size: float = 6.2, gpu: float = 400) -> dict:
 
 
 def make_acc(m50: float) -> dict:
-    return {"skipped": False,
-            "overall": {"mAP50": m50, "mAP50_95": round(m50 * 0.54, 4),
-                        "precision": m50 - 0.05, "recall": m50 - 0.09}}
+    """Dang tra ve cua ivid.benchmark.accuracy sau khi bo ultralytics.val():
+    mAP nam o cap cao nhat, per_class danh so theo CHI SO lop."""
+    return {"skipped": False, "mAP50": m50, "mAP50_95": round(m50 * 0.54, 4),
+            "precision": round(m50 - 0.05, 4), "recall": round(m50 - 0.09, 4),
+            "class_names": ["crazing", "inclusion", "patches",
+                            "pitted_surface", "rolled-in_scale", "scratches"],
+            "per_class": {i: {"mAP50": round(m50 + (i - 3) * 0.05, 4), "n_gt": 100}
+                          for i in range(6)}}
 
 
 BASE = {

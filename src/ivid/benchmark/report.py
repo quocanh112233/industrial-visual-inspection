@@ -48,9 +48,15 @@ def rows_from(payload: dict) -> list[dict]:
         else:
             row["latency_missing"] = (r or {}).get("reason", "chua do")
         if an and not an.get("skipped"):
-            row.update(map50=an["overall"]["mAP50"], map5095=an["overall"]["mAP50_95"],
-                       precision=an["overall"]["precision"], recall=an["overall"]["recall"],
-                       per_class=an.get("per_class", {}))
+            # accuracy.py moi tra ve mAP o cap cao nhat (khong con boc trong "overall"),
+            # va per_class danh so theo CHI SO lop. Doi sang ten lop de bang doc duoc.
+            names = an.get("class_names") or []
+            pc = {}
+            for cid, v in (an.get("per_class") or {}).items():
+                label = names[int(cid)] if int(cid) < len(names) else str(cid)
+                pc[label] = v
+            row.update(map50=an["mAP50"], map5095=an["mAP50_95"],
+                       precision=an["precision"], recall=an["recall"], per_class=pc)
         else:
             row["accuracy_missing"] = (an or {}).get("reason", "chua do")
         out.append(row)
