@@ -1,22 +1,26 @@
-# --- data & models (khong bao gio commit) ---
-data/
-datasets/
-models/**/*.pt
-models/**/*.onnx
-models/**/*.engine
-models/**/*.plan
+# --- du lieu & trong so (khong bao gio commit) ---
+# LUU Y: phai co dau '/' o dau. Viet 'data/' khong thoi se khop MOI thu muc
+# ten 'data' o moi do sau — ke ca src/ivid/data/ (ma do la ma nguon).
+/data/
+/datasets/
+/runs/
+/models/**/*.pt
+/models/**/*.onnx
+/models/**/*.engine
+/models/**/*.plan
+/models/_smoke/
 *.pt
 *.onnx
 *.engine
-!models/.gitkeep
+!/models/.gitkeep
 
-# --- ket qua chay (giu json, bo log nang) ---
-runs/
+# --- ket qua chay ---
 *.log
-results/**/*.csv
+/results/**/*.csv
+/results/smoke_images/
 
 # --- SRS (theo yeu cau: khong dua vao repo) ---
-docs/SRS*.md
+/docs/SRS*.md
 
 # --- python ---
 __pycache__/
@@ -33,4 +37,3 @@ env/
 .DS_Store
 .idea/
 .vscode/
-models/_smoke/

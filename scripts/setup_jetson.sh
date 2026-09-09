@@ -67,14 +67,16 @@ PY
 log "Don dep onnxruntime o user-site (~/.local) bang python he thong..."
 /usr/bin/python3 -m pip uninstall -y onnxruntime onnxruntime-gpu 2>/dev/null || true
 
-# Ghim numpy TRUOC: neu de pip tu chon, no keo numpy 2.x moi nhat vao venv va
-# de len ban 1.26.4 ma torch/opencv/ultralytics cua L4T duoc build cung. Cac goi
-# do van import duoc nhung co the no khi truyen mang qua lai.
-SYS_NUMPY="$(/usr/bin/python3 -c 'import numpy; print(numpy.__version__)' 2>/dev/null || echo '')"
-if [[ -n "$SYS_NUMPY" ]]; then
-  log "Ghim numpy==$SYS_NUMPY cho khop voi ban he thong..."
-  python -m pip install "numpy==$SYS_NUMPY"
-fi
+# Ghim numpy TRUOC khi cai onnxruntime-gpu. Khong ghim thi pip tu chon ban moi
+# nhat, va moi lan chay script lai ra mot phien ban khac — mat tinh tai lap.
+#
+# Ban duoi day DA DUOC KIEM CHUNG tren Jetson (scripts/check_stack.sh: torch
+# 2.10 <-> numpy, cv2, ORT 1.24 deu qua). L4T cai san numpy 1.26.4, nhung 2.2.6
+# van lam viec voi ca torch, opencv va ultralytics — nen khong can ha xuong.
+# Doi so nay thi PHAI chay lai check_stack.sh de xac nhan.
+NUMPY_PIN="${NUMPY_PIN:-2.2.6}"
+log "Ghim numpy==$NUMPY_PIN (ban da kiem chung tren Jetson)..."
+python -m pip install "numpy==$NUMPY_PIN"
 
 log "Cai onnxruntime-gpu vao venv cho JetPack 6 / CUDA 12.6..."
 python -m pip uninstall -y onnxruntime onnxruntime-gpu 2>/dev/null || true
