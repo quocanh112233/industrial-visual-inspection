@@ -1,0 +1,110 @@
+{
+  "accuracy": {
+    "yolov8n|pytorch": {
+      "mAP50": 0.773,
+      "mAP50_95": 0.4421,
+      "precision": 0.758,
+      "recall": 0.7109,
+      "per_class": {
+        "0": {
+          "mAP50": 0.4547,
+          "mAP50_95": 0.1862,
+          "precision": 0.5109,
+          "recall": 0.4352,
+          "n_gt": 108
+        },
+        "1": {
+          "mAP50": 0.8035,
+          "mAP50_95": 0.4229,
+          "precision": 0.7481,
+          "recall": 0.7372,
+          "n_gt": 137
+        },
+        "2": {
+          "mAP50": 0.9519,
+          "mAP50_95": 0.6507,
+          "precision": 0.9274,
+          "recall": 0.8846,
+          "n_gt": 130
+        },
+        "3": {
+          "mAP50": 0.8534,
+          "mAP50_95": 0.544,
+          "precision": 0.8654,
+          "recall": 0.75,
+          "n_gt": 60
+        },
+        "4": {
+          "mAP50": 0.6259,
+          "mAP50_95": 0.2927,
+          "precision": 0.6044,
+          "recall": 0.567,
+          "n_gt": 97
+        },
+        "5": {
+          "mAP50": 0.9489,
+          "mAP50_95": 0.5564,
+          "precision": 0.8916,
+          "recall": 0.8916,
+          "n_gt": 83
+        }
+      },
+      "n_images": 270,
+      "n_detections": 11543,
+      "n_ground_truth": 615,
+      "iou_thresholds": [
+        0.5,
+        0.55,
+        0.6,
+        0.65,
+        0.7,
+        0.75,
+        0.8,
+        0.85,
+        0.9,
+        0.95
+      ],
+      "skipped": false,
+      "model": "yolov8n",
+      "backend": "pytorch",
+      "class_names": [
+        "crazing",
+        "inclusion",
+        "patches",
+        "pitted_surface",
+        "rolled-in_scale",
+        "scratches"
+      ],
+      "backend_label": "PyTorch",
+      "conf": 0.001,
+      "iou": 0.7,
+      "imgsz": 704,
+      "resize_to": 640,
+      "wall_seconds": 10.05,
+      "backend_info": {
+        "runner": "pytorch",
+        "weights": "models/yolov8n/best.pt",
+        "model_size_mb": 6.26,
+        "imgsz": 704,
+        "conf": 0.001,
+        "iou": 0.7,
+        "scaleup": true,
+        "resize_to": 640,
+        "multi_label": false,
+        "framework": "torch 2.10.0",
+        "device": "cuda",
+        "gpu": "Orin",
+        "precision": "fp32"
+      }
+    }
+  },
+  "accuracy_method": {
+    "cach_do": "runner cua du an (ivid.preprocess + ivid.postprocess dung chung) + ivid.benchmark.metrics.compute_map",
+    "vi_sao_khong_dung_ultralytics_val": "ultralytics.val() doi pipeline danh gia tuy theo dinh dang model, nen no do ca su khac biet cua pipeline lan cua runtime. Xem docstring ivid/benchmark/accuracy.py va results/parity_conf001.json.",
+    "conf": 0.001,
+    "iou_nms": 0.7,
+    "imgsz": 704,
+    "resize_to": 640,
+    "cong_thuc_AP": "noi suy 101 diem, khop voi ultralytics compute_ap(method='interp')"
+  }
+}

@@ -13,12 +13,12 @@ nhiêu độ chính xác lấy tốc độ, và có kịp nhịp sản xuất kh
 <!-- IVID_TABLE_START -->
 | Model | Runtime | mAP@0.5 | mAP@0.5:0.95 | p50 (ms) | p95 (ms) | FPS | Model size | RAM tiến trình | Nạp (s) |
 |---|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| yolov8n | PyTorch | 0.7317 | 0.3547 | 34.27 | 34.69 | 29.2 | 6.3 MB | 909 MB | 3.0 |
-| yolov8n | ONNX Runtime | 0.7356 | 0.3549 | 18.51 | 18.70 | 54.0 | 12.3 MB | 1856 MB | 100.5 |
-| yolov8n | TensorRT FP16 | 0.7357 | 0.3553 | 14.19 | 14.51 | 70.5 | 9.0 MB | 301 MB | 0.3 |
-| yolov8s | PyTorch | 0.7270 | 0.3335 | 42.79 | 43.04 | 23.4 | 22.5 MB | 947 MB | 3.0 |
-| yolov8s | ONNX Runtime | 0.7271 | 0.3331 | 28.36 | 28.58 | 35.3 | 44.8 MB | 2038 MB | 166.0 |
-| yolov8s | TensorRT FP16 | 0.7270 | 0.3332 | 18.36 | 18.83 | 54.5 | 25.6 MB | 328 MB | 0.3 |
+| yolov8n | PyTorch | 0.7648 | 0.4401 | 35.11 | 35.47 | 28.5 | 6.3 MB | 892 MB | 3.2 |
+| yolov8n | ONNX Runtime | 0.7645 | 0.4405 | 19.95 | 20.15 | 50.1 | 12.3 MB | 1846 MB | 115.4 |
+| yolov8n | TensorRT FP16 | 0.7644 | 0.4405 | 15.04 | 15.26 | 66.5 | 9.1 MB | 302 MB | 0.3 |
+| yolov8s | PyTorch | 0.7694 | 0.4366 | 48.28 | 48.47 | 20.7 | 22.5 MB | 945 MB | 3.1 |
+| yolov8s | ONNX Runtime | 0.7707 | 0.4370 | 29.94 | 30.16 | 33.4 | 44.8 MB | 2032 MB | 179.8 |
+| yolov8s | TensorRT FP16 | 0.7705 | 0.4376 | 19.45 | 19.68 | 51.4 | 25.6 MB | 326 MB | 0.4 |
 
 ![latency](docs/images/latency_comparison.png)
 <!-- IVID_TABLE_END -->

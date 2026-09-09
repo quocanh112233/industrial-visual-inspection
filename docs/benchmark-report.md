@@ -1,6 +1,6 @@
 # Báo cáo benchmark — ba định dạng runtime trên Jetson Orin Nano
 
-*Sinh tự động bởi `ivid.benchmark.report` từ `results/benchmark.json`. Số liệu đo lúc 2026-09-09T13:23:18+00:00. Mọi con số đều truy được về file JSON đó.*
+*Sinh tự động bởi `ivid.benchmark.report` từ `results/benchmark.json`. Số liệu đo lúc 2026-09-09T15:07:43+00:00. Mọi con số đều truy được về file JSON đó.*
 
 ## Điều kiện đo (FR-14)
 
@@ -13,7 +13,7 @@
 | PyTorch | 2.10.0 |
 | ONNX Runtime | 1.24.0 |
 | Chế độ nguồn | **15W** (id=0), các chế độ có sẵn: 15W, 25W, MAXN_SUPER |
-| Nhiệt độ trung bình trước khi đo | 59.6 °C |
+| Nhiệt độ trung bình trước khi đo | 59.9 °C |
 | Warm-up / số phiên | 20 lần / 3 phiên |
 | Tập đo | 270 ảnh (test), cùng thứ tự cho mọi định dạng |
 
@@ -23,23 +23,23 @@
 
 | Model | Runtime | mAP@0.5 | mAP@0.5:0.95 | p50 (ms) | p95 (ms) | FPS | Model size | RAM tiến trình | Nạp (s) |
 |---|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| yolov8n | PyTorch | 0.7317 | 0.3547 | 34.27 | 34.69 | 29.2 | 6.3 MB | 909 MB | 3.0 |
-| yolov8n | ONNX Runtime | 0.7356 | 0.3549 | 18.51 | 18.70 | 54.0 | 12.3 MB | 1856 MB | 100.5 |
-| yolov8n | TensorRT FP16 | 0.7357 | 0.3553 | 14.19 | 14.51 | 70.5 | 9.0 MB | 301 MB | 0.3 |
-| yolov8s | PyTorch | 0.7270 | 0.3335 | 42.79 | 43.04 | 23.4 | 22.5 MB | 947 MB | 3.0 |
-| yolov8s | ONNX Runtime | 0.7271 | 0.3331 | 28.36 | 28.58 | 35.3 | 44.8 MB | 2038 MB | 166.0 |
-| yolov8s | TensorRT FP16 | 0.7270 | 0.3332 | 18.36 | 18.83 | 54.5 | 25.6 MB | 328 MB | 0.3 |
+| yolov8n | PyTorch | 0.7648 | 0.4401 | 35.11 | 35.47 | 28.5 | 6.3 MB | 892 MB | 3.2 |
+| yolov8n | ONNX Runtime | 0.7645 | 0.4405 | 19.95 | 20.15 | 50.1 | 12.3 MB | 1846 MB | 115.4 |
+| yolov8n | TensorRT FP16 | 0.7644 | 0.4405 | 15.04 | 15.26 | 66.5 | 9.1 MB | 302 MB | 0.3 |
+| yolov8s | PyTorch | 0.7694 | 0.4366 | 48.28 | 48.47 | 20.7 | 22.5 MB | 945 MB | 3.1 |
+| yolov8s | ONNX Runtime | 0.7707 | 0.4370 | 29.94 | 30.16 | 33.4 | 44.8 MB | 2032 MB | 179.8 |
+| yolov8s | TensorRT FP16 | 0.7705 | 0.4376 | 19.45 | 19.68 | 51.4 | 25.6 MB | 326 MB | 0.4 |
 
 ## Thời gian đi đâu (FR-11)
 
 | Model | Runtime | Tiền xử lý | Inference | Hậu xử lý (NMS) | Tổng | Inference chiếm |
 |---|---|---:|---:|---:|---:|---:|
-| yolov8n | PyTorch | 5.63 | 27.57 | 1.06 | 34.27 | 80% |
-| yolov8n | ONNX Runtime | 5.66 | 11.81 | 1.04 | 18.51 | 64% |
-| yolov8n | TensorRT FP16 | 5.79 | 7.16 | 1.23 | 14.19 | 50% |
-| yolov8s | PyTorch | 5.78 | 35.66 | 1.33 | 42.79 | 83% |
-| yolov8s | ONNX Runtime | 5.67 | 21.56 | 1.11 | 28.36 | 76% |
-| yolov8s | TensorRT FP16 | 5.83 | 11.32 | 1.20 | 18.36 | 62% |
+| yolov8n | PyTorch | 5.94 | 28.05 | 1.09 | 35.11 | 80% |
+| yolov8n | ONNX Runtime | 6.02 | 12.82 | 1.12 | 19.95 | 64% |
+| yolov8n | TensorRT FP16 | 6.12 | 7.66 | 1.26 | 15.04 | 51% |
+| yolov8s | PyTorch | 6.15 | 40.73 | 1.39 | 48.28 | 84% |
+| yolov8s | ONNX Runtime | 6.03 | 22.76 | 1.14 | 29.94 | 76% |
+| yolov8s | TensorRT FP16 | 6.15 | 12.04 | 1.24 | 19.45 | 62% |
 
 > Tiền xử lý và hậu xử lý dùng **cùng một hàm NumPy** cho cả ba định dạng (`ivid.preprocess`, `ivid.postprocess`). Nhờ vậy chênh lệch giữa các dòng chỉ đến từ bước inference — đúng mục đích của bảng này.
 
@@ -47,12 +47,12 @@
 
 | Model | Runtime | Model size | RAM tiến trình | Thời gian nạp |
 |---|---|---:|---:|---:|
-| yolov8n | PyTorch | 6.3 MB | 909 MB | 3.0 s |
-| yolov8n | ONNX Runtime | 12.3 MB | 1856 MB | 100.5 s |
-| yolov8n | TensorRT FP16 | 9.0 MB | 301 MB | 0.3 s |
-| yolov8s | PyTorch | 22.5 MB | 947 MB | 3.0 s |
-| yolov8s | ONNX Runtime | 44.8 MB | 2038 MB | 166.0 s |
-| yolov8s | TensorRT FP16 | 25.6 MB | 328 MB | 0.3 s |
+| yolov8n | PyTorch | 6.3 MB | 892 MB | 3.2 s |
+| yolov8n | ONNX Runtime | 12.3 MB | 1846 MB | 115.4 s |
+| yolov8n | TensorRT FP16 | 9.1 MB | 302 MB | 0.3 s |
+| yolov8s | PyTorch | 22.5 MB | 945 MB | 3.1 s |
+| yolov8s | ONNX Runtime | 44.8 MB | 2032 MB | 179.8 s |
+| yolov8s | TensorRT FP16 | 25.6 MB | 326 MB | 0.4 s |
 
 > **Con số này đo thế nào.** Mỗi runtime chạy trong một **tiến trình riêng** (`ivid.benchmark.memprobe`); giá trị là RSS đỉnh trừ RSS lúc tiến trình vừa khởi động, nên nó **bao gồm cả chi phí nạp thư viện**. Đó là chủ ý: câu hỏi triển khai là *chạy runtime này trên Jetson 8 GB tốn bao nhiêu RAM*, chứ không phải *engine chiếm bao nhiêu byte*. Jetson dùng bộ nhớ hợp nhất — CPU và GPU chia nhau cùng 8 GB DRAM, không có VRAM rời — nên đây là toàn bộ chi phí, không phải một nửa.
 >
@@ -62,12 +62,12 @@
 
 | Model | Runtime | Độ lệch p50 giữa các phiên | Đạt ≤ 10%? |
 |---|---|---:|:---:|
-| yolov8n | PyTorch | 0.93% | ✅ |
-| yolov8n | ONNX Runtime | 0.05% | ✅ |
-| yolov8n | TensorRT FP16 | 0.27% | ✅ |
-| yolov8s | PyTorch | 0.10% | ✅ |
-| yolov8s | ONNX Runtime | 0.06% | ✅ |
-| yolov8s | TensorRT FP16 | 0.18% | ✅ |
+| yolov8n | PyTorch | 0.30% | ✅ |
+| yolov8n | ONNX Runtime | 0.40% | ✅ |
+| yolov8n | TensorRT FP16 | 0.05% | ✅ |
+| yolov8s | PyTorch | 0.04% | ✅ |
+| yolov8s | ONNX Runtime | 0.25% | ✅ |
+| yolov8s | TensorRT FP16 | 0.07% | ✅ |
 
 ## Biểu đồ
 
@@ -81,8 +81,8 @@
 
 ### 0. Chi phí khởi động — chỗ bảng độ trễ không nhìn thấy
 
-- **yolov8n**: ONNX Runtime mất **100 s** để nạp, TensorRT chỉ **0.3 s** (335× lâu hơn), và tốn **1856 MB** RAM so với **301 MB**
-- **yolov8s**: ONNX Runtime mất **166 s** để nạp, TensorRT chỉ **0.3 s** (519× lâu hơn), và tốn **2038 MB** RAM so với **328 MB**
+- **yolov8n**: ONNX Runtime mất **115 s** để nạp, TensorRT chỉ **0.3 s** (340× lâu hơn), và tốn **1846 MB** RAM so với **302 MB**
+- **yolov8s**: ONNX Runtime mất **180 s** để nạp, TensorRT chỉ **0.4 s** (486× lâu hơn), và tốn **2032 MB** RAM so với **326 MB**
 
 ONNX Runtime ở đây chạy `TensorrtExecutionProvider`, nghĩa là nó **tự dựng engine TensorRT ngay lúc nạp model** — và dựng lại từ đầu mỗi lần tiến trình khởi động, vì bộ nhớ đệm engine chưa được bật. Trên dây chuyền, mỗi lần khởi động lại dịch vụ (mất điện, cập nhật, container bị lên lịch lại) là ngần ấy giây không kiểm được sản phẩm.
 
@@ -90,8 +90,8 @@ ONNX Runtime ở đây chạy `TensorrtExecutionProvider`, nghĩa là nó **tự
 
 ### 1. TensorRT FP16 nhanh hơn PyTorch bao nhiêu, đổi lấy bao nhiêu mAP?
 
-- **yolov8n**: nhanh hơn **2.41×** (34.27 ms → 14.19 ms), mAP@0.5 0.7317 → 0.7357 (**+0.0040**, +0.5%) — gần như không mất độ chính xác
-- **yolov8s**: nhanh hơn **2.33×** (42.79 ms → 18.36 ms), mAP@0.5 0.7270 → 0.7270 (**+0.0000**, +0.0%) — gần như không mất độ chính xác
+- **yolov8n**: nhanh hơn **2.33×** (35.11 ms → 15.04 ms), mAP@0.5 0.7648 → 0.7644 (**-0.0004**, -0.1%) — gần như không mất độ chính xác
+- **yolov8s**: nhanh hơn **2.48×** (48.28 ms → 19.45 ms), mAP@0.5 0.7694 → 0.7705 (**+0.0011**, +0.1%) — gần như không mất độ chính xác
 
 ### 2. Với nhịp dây chuyền 200 ms/sản phẩm, cấu hình nào đáp ứng?
 
@@ -99,31 +99,32 @@ Dùng **p95** chứ không phải p50: dây chuyền hỏng vì trường hợp 
 
 | Cấu hình | p95 (ms) | Đáp ứng? | Nhịp nhanh nhất chịu được |
 |---|---:|:---:|---:|
-| yolov8n / TensorRT FP16 | 14.51 | ✅ | 68.9 sp/giây (15 ms) |
-| yolov8n / ONNX Runtime | 18.70 | ✅ | 53.5 sp/giây (19 ms) |
-| yolov8s / TensorRT FP16 | 18.83 | ✅ | 53.1 sp/giây (19 ms) |
-| yolov8s / ONNX Runtime | 28.58 | ✅ | 35.0 sp/giây (29 ms) |
-| yolov8n / PyTorch | 34.69 | ✅ | 28.8 sp/giây (35 ms) |
-| yolov8s / PyTorch | 43.04 | ✅ | 23.2 sp/giây (43 ms) |
+| yolov8n / TensorRT FP16 | 15.26 | ✅ | 65.5 sp/giây (15 ms) |
+| yolov8s / TensorRT FP16 | 19.68 | ✅ | 50.8 sp/giây (20 ms) |
+| yolov8n / ONNX Runtime | 20.15 | ✅ | 49.6 sp/giây (20 ms) |
+| yolov8s / ONNX Runtime | 30.16 | ✅ | 33.2 sp/giây (30 ms) |
+| yolov8n / PyTorch | 35.47 | ✅ | 28.2 sp/giây (35 ms) |
+| yolov8s / PyTorch | 48.47 | ✅ | 20.6 sp/giây (48 ms) |
 
-**Khuyến nghị: `yolov8n / TensorRT FP16`** — mAP@0.5 0.7357, p95 14.51 ms, còn dư **185 ms** biên an toàn cho chụp ảnh, truyền dữ liệu và dao động tải.
-  Các cấu hình `yolov8n / PyTorch`, `yolov8n / ONNX Runtime` có mAP chênh dưới 0.005 so với cấu hình tốt nhất nhưng chậm hơn, nên không được chọn.
+**Khuyến nghị: `yolov8s / TensorRT FP16`** — mAP@0.5 0.7705, p95 19.68 ms, còn dư **180 ms** biên an toàn cho chụp ảnh, truyền dữ liệu và dao động tải.
+  Các cấu hình `yolov8s / PyTorch`, `yolov8s / ONNX Runtime` có mAP chênh dưới 0.005 so với cấu hình tốt nhất nhưng chậm hơn, nên không được chọn.
 
 ### 3. YOLOv8s có đáng đổi độ trễ lấy mAP không?
 
-- Trên TensorRT FP16: YOLOv8s chậm hơn **+4.17 ms** (+29%) và cho mAP@0.5 **-0.0087**.
-- **Không đáng — và chặt hơn thế: hai model không phân biệt được.** |-0.0087| nhỏ hơn ngưỡng nhiễu **0.0115** đo được từ hai lần train YOLOv8n *cùng seed* (`docs/reproducibility.md`). Chênh lệch nằm dưới mức mà chính quy trình train tái lập được, nên không thể quy cho model lớn hơn. YOLOv8s có **3.7× tham số** nhưng không mua được độ chính xác nào đo được — 1260 ảnh train là quá ít để 11.1M tham số phát huy.
+- Trên TensorRT FP16: YOLOv8s chậm hơn **+4.41 ms** (+29%) và cho mAP@0.5 **+0.0061**.
+- Đổi lại: mỗi **+0.001 mAP** tốn thêm **0.72 ms**.
+- **Không đáng — và chặt hơn thế: hai model không phân biệt được.** |+0.0061| nhỏ hơn ngưỡng nhiễu **0.0115** đo được từ hai lần train YOLOv8n *cùng seed* (`docs/reproducibility.md`). Chênh lệch nằm dưới mức mà chính quy trình train tái lập được, nên không thể quy cho model lớn hơn. YOLOv8s có **3.7× tham số** nhưng không mua được độ chính xác nào đo được — 1260 ảnh train là quá ít để 11.1M tham số phát huy.
 
 ## mAP theo lớp
 
 | Cấu hình | `crazing` | `inclusion` | `patches` | `pitted_surface` | `rolled-in_scale` | `scratches` |
 |---|---:|---:|---:|---:|---:|---:|
-| yolov8n / PyTorch | 0.464 | 0.735 | 0.952 | 0.806 | 0.599 | 0.835 |
-| yolov8n / ONNX Runtime | 0.463 | 0.734 | 0.952 | 0.804 | 0.599 | 0.862 |
-| yolov8n / TensorRT FP16 | 0.462 | 0.734 | 0.952 | 0.805 | 0.599 | 0.863 |
-| yolov8s / PyTorch | 0.416 | 0.718 | 0.939 | 0.837 | 0.588 | 0.864 |
-| yolov8s / ONNX Runtime | 0.417 | 0.716 | 0.939 | 0.839 | 0.588 | 0.864 |
-| yolov8s / TensorRT FP16 | 0.417 | 0.717 | 0.939 | 0.838 | 0.587 | 0.864 |
+| yolov8n / PyTorch | 0.458 | 0.807 | 0.956 | 0.817 | 0.601 | 0.950 |
+| yolov8n / ONNX Runtime | 0.451 | 0.807 | 0.956 | 0.820 | 0.603 | 0.950 |
+| yolov8n / TensorRT FP16 | 0.451 | 0.807 | 0.956 | 0.820 | 0.604 | 0.949 |
+| yolov8s / PyTorch | 0.421 | 0.833 | 0.957 | 0.826 | 0.623 | 0.957 |
+| yolov8s / ONNX Runtime | 0.429 | 0.835 | 0.957 | 0.826 | 0.621 | 0.957 |
+| yolov8s / TensorRT FP16 | 0.428 | 0.835 | 0.957 | 0.826 | 0.621 | 0.956 |
 
 > Lớp nào thấp hẳn thì xem `docs/dataset.md`: `pitted_surface` có khung phủ hơn nửa ảnh và `crazing` là dạng vết nứt lan toả không có biên rõ — mAP thấp ở các lớp này là đặc tính dataset, không phải lỗi pipeline.
 
