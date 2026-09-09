@@ -23,6 +23,15 @@ nhiêu độ chính xác lấy tốc độ, và có kịp nhịp sản xuất kh
 ![latency](docs/images/latency_comparison.png)
 <!-- IVID_TABLE_END -->
 
+> **TensorRT FP16 nhanh hơn PyTorch 2.33×, tốn 1/3 RAM, nạp nhanh hơn 340 lần — và không
+> mất độ chính xác đo được** (chênh lệch giữa ba runtime ≤ 0.0013 mAP). Riêng ONNX Runtime
+> mất **115 giây** để khởi động vì nó tự dựng engine lúc nạp: một chi tiết mà cột độ trễ
+> không hề cho thấy.
+>
+> Con số mAP ở trên cao hơn **0.085 mAP@0.5:0.95** so với bản đầu của dự án, và không phải
+> nhờ train lại — chỉ nhờ sửa cách đóng khung ảnh đầu vào:
+> **[docs/input-framing.md](docs/input-framing.md)**.
+
 **Đã kiểm chứng chuỗi export trên phần cứng thật** (YOLOv8n pretrained, 640×640, chỉ inference thuần, Jetson @15W):
 
 | ONNX opset | Engine | p50 | FPS |
@@ -172,11 +181,14 @@ vì không có mAP cao hơn để mà đổi.* Số liệu: `results/model_compa
 
 ## Trạng thái
 
-| Giai đoạn | Trạng thái |
-|---|---|
-| Dữ liệu (FR-01..03) | ✅ chạy thật, 0 bất thường |
-| Chuỗi export TensorRT | ✅ kiểm chứng trên Jetson |
-| Train + đánh giá (FR-04..06) | ✅ cả hai model; FR-06 kiểm chứng bằng 2 lần train |
-| Export + parity (FR-07..09) | ⏳ code xong, chờ có `best.pt` |
-| Benchmark (FR-10..15) | ⏳ code xong, chờ có engine |
-| Dịch vụ + Docker (FR-16..20) | ⏳ code xong, test API pass |
+Mọi hạng mục dưới đây đã chạy thật trên Jetson Orin Nano, không có mục nào chỉ dừng ở code.
+
+| Giai đoạn | Trạng thái | Bằng chứng |
+|---|---|---|
+| Dữ liệu (FR-01..03) | ✅ | 1800 ảnh, 4186 bbox sau khử trùng lặp, 0 bất thường — `results/data_report.md` |
+| Chuỗi export TensorRT | ✅ | rủi ro R1 loại bỏ ngày đầu — `results/r1_smoke.json` |
+| Train + đánh giá (FR-04..06) | ✅ | cả hai model; FR-06 đo bằng 2 lần train cùng seed, Δ 0.0115 |
+| Export + parity (FR-07..09) | ✅ | ONNX lệch điểm số 1.1e-06; parity 3 định dạng 97–100% — `results/parity_check.json` |
+| Benchmark (FR-10..15) | ✅ | 270 ảnh × 3 phiên × 6 cấu hình, lệch giữa phiên < 0.3% |
+| Dịch vụ + Docker (FR-16..20) | ✅ | container chạy engine TensorRT, `/health` → `loaded: true` |
+| Kiểm tra tự động | ✅ | 172 unit test |
