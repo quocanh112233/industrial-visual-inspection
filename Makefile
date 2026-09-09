@@ -11,7 +11,7 @@ PORT    ?= 8000
 
 .PHONY: help data prepare validate stats train train-jetson eval check-stack smoke-pipeline \
         export-onnx export-trt parity bench accuracy report all \
-        serve docker-build docker-up docker-down smoke test lint clean diag-map diag-rect
+        serve docker-build docker-up docker-down smoke test lint clean diag-map diag-rect demo-images
 
 help:
 	@grep -E '^[a-z-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*?## "}{printf "  \033[36m%-14s\033[0m %s\n", $$1, $$2}'
@@ -69,6 +69,9 @@ diag-rect: ## Kiem chung: ultralytics cham .pt o 672x672 con engine chay 640x640
 
 device-info: ## FR-14 in dieu kien do hien tai
 	$(PY) -m ivid.benchmark.device_info
+
+demo-images: ## Ve detection len anh test -> docs/images/sample_detections.png
+	$(PY) -m ivid.visualize --backend $(or $(BACKEND),tensorrt) --model $(or $(MODEL),yolov8n)
 
 report: ## FR-15 sinh bang + bieu do + docs/benchmark-report.md
 	$(PY) -m ivid.benchmark.report --update-readme

@@ -33,6 +33,14 @@ nhiêu độ chính xác lấy tốc độ, và có kịp nhịp sản xuất kh
 `.pt → .onnx → .engine (FP16)` chạy thông trên TensorRT 10.3 / CUDA 12.6 — rủi ro lớn nhất
 của dự án (xung đột phiên bản JetPack ↔ TensorRT ↔ ONNX opset) đã được loại bỏ từ ngày đầu.
 
+### Model nhìn thấy gì
+
+![Detection mẫu trên tập test](docs/images/sample_detections.png)
+
+Mỗi lớp một ảnh, chạy bằng engine TensorRT FP16. **Hộp màu** là dự đoán kèm điểm tin cậy,
+**hộp trắng mảnh** là nhãn thật. Sinh bằng `make demo-images` — ảnh được chọn tất định
+(ảnh test đầu tiên chỉ chứa đúng lớp đó) nên chạy lại trên máy khác cho ra đúng hình này.
+
 ## Phần cứng đích
 
 | | |
