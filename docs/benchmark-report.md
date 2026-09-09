@@ -45,18 +45,18 @@
 
 ## Tài nguyên (FR-12)
 
-| Model | Runtime | Model size | RSS đỉnh | RAM hệ thống tăng thêm | Bộ cấp phát của torch |
-|---|---|---:|---:|---:|---:|
-| yolov8n | PyTorch | 6.3 MB | 1138 MB | 7 MB | 37 MB |
-| yolov8n | ONNX Runtime | 12.3 MB | 2683 MB | 7 MB | 0 MB |
-| yolov8n | TensorRT FP16 | 9.0 MB | 2273 MB | 31 MB | 0 MB |
-| yolov8s | PyTorch | 22.5 MB | 2311 MB | 32 MB | 89 MB |
-| yolov8s | ONNX Runtime | 44.8 MB | 3116 MB | 6 MB | 0 MB |
-| yolov8s | TensorRT FP16 | 25.6 MB | 2659 MB | 15 MB | 0 MB |
+| Model | Runtime | Model size | RAM tiến trình | Thời gian nạp |
+|---|---|---:|---:|---:|
+| yolov8n | PyTorch | 6.3 MB | 909 MB | 3.0 s |
+| yolov8n | ONNX Runtime | 12.3 MB | 1856 MB | 100.5 s |
+| yolov8n | TensorRT FP16 | 9.0 MB | 301 MB | 0.3 s |
+| yolov8s | PyTorch | 22.5 MB | 947 MB | 3.0 s |
+| yolov8s | ONNX Runtime | 44.8 MB | 2038 MB | 166.0 s |
+| yolov8s | TensorRT FP16 | 25.6 MB | 328 MB | 0.3 s |
 
-> **Đọc hai cột cuối thế nào.** Jetson dùng *bộ nhớ hợp nhất*: CPU và GPU chia nhau cùng 8 GB DRAM, không có VRAM rời. Vì vậy **RAM hệ thống tăng thêm** mới là con số phản ánh chi phí bộ nhớ thật của mỗi runtime.
+> **Con số này đo thế nào.** Mỗi runtime chạy trong một **tiến trình riêng** (`ivid.benchmark.memprobe`); giá trị là RSS đỉnh trừ RSS lúc tiến trình vừa khởi động, nên nó **bao gồm cả chi phí nạp thư viện**. Đó là chủ ý: câu hỏi triển khai là *chạy runtime này trên Jetson 8 GB tốn bao nhiêu RAM*, chứ không phải *engine chiếm bao nhiêu byte*. Jetson dùng bộ nhớ hợp nhất — CPU và GPU chia nhau cùng 8 GB DRAM, không có VRAM rời — nên đây là toàn bộ chi phí, không phải một nửa.
 >
-> Cột cuối chỉ đếm phần do **chính PyTorch** cấp phát. Với ONNX Runtime nó gần bằng 0 vì ORT tự quản lý bộ nhớ GPU; với TensorRT nó chỉ đếm buffer vào/ra chứ không đếm bộ nhớ của engine. Cột này để chẩn đoán, **không dùng để so sánh giữa các runtime**.
+> **Hai cách đo trước đã bị loại bỏ, vì cả hai đều sai theo một kiểu riêng.** `torch.cuda.max_memory_allocated()` báo 0 MB cho ONNX Runtime (ORT tự cấp phát) và chỉ đếm buffer vào/ra cho TensorRT — ai đọc cũng sẽ kết luận *ONNX không tốn bộ nhớ GPU*, sai hoàn toàn. Cách thứ hai, đo mức tăng bộ nhớ của cả hệ thống, thì đếm luôn mọi tiến trình khác và cả bộ đệm trang: hai lần chạy cùng cấu hình cho **31.2 MB** và **0.0 MB**. Đó là nhiễu, không phải phép đo. Cả hai vẫn nằm trong `results/benchmark.json` để đối chiếu.
 
 ## Tính lặp lại (NFR-02)
 
@@ -112,7 +112,7 @@ Dùng **p95** chứ không phải p50: dây chuyền hỏng vì trường hợp 
 ### 3. YOLOv8s có đáng đổi độ trễ lấy mAP không?
 
 - Trên TensorRT FP16: YOLOv8s chậm hơn **+4.17 ms** (+29%) và cho mAP@0.5 **-0.0087**.
-- **Không đáng.** Chênh lệch mAP quá nhỏ so với chi phí độ trễ.
+- **Không đáng — và chặt hơn thế: hai model không phân biệt được.** |-0.0087| nhỏ hơn ngưỡng nhiễu **0.0115** đo được từ hai lần train YOLOv8n *cùng seed* (`docs/reproducibility.md`). Chênh lệch nằm dưới mức mà chính quy trình train tái lập được, nên không thể quy cho model lớn hơn. YOLOv8s có **3.7× tham số** nhưng không mua được độ chính xác nào đo được — 1260 ảnh train là quá ít để 11.1M tham số phát huy.
 
 ## mAP theo lớp
 
