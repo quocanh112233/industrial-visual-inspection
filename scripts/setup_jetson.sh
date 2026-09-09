@@ -67,15 +67,21 @@ PY
 log "Don dep onnxruntime o user-site (~/.local) bang python he thong..."
 /usr/bin/python3 -m pip uninstall -y onnxruntime onnxruntime-gpu 2>/dev/null || true
 
-# Ghim numpy TRUOC khi cai onnxruntime-gpu. Khong ghim thi pip tu chon ban moi
-# nhat, va moi lan chay script lai ra mot phien ban khac — mat tinh tai lap.
+# Ghim numpy TRUOC khi cai onnxruntime-gpu, va ghim dung ban ma L4T dung.
 #
-# Ban duoi day DA DUOC KIEM CHUNG tren Jetson (scripts/check_stack.sh: torch
-# 2.10 <-> numpy, cv2, ORT 1.24 deu qua). L4T cai san numpy 1.26.4, nhung 2.2.6
-# van lam viec voi ca torch, opencv va ultralytics — nen khong can ha xuong.
-# Doi so nay thi PHAI chay lai check_stack.sh de xac nhan.
-NUMPY_PIN="${NUMPY_PIN:-2.2.6}"
-log "Ghim numpy==$NUMPY_PIN (ban da kiem chung tren Jetson)..."
+# JetPack cai san mot bo thu vien da build KHOP VOI NHAU quanh numpy 1.26.4:
+# torch, torchvision, opencv, matplotlib, scipy, pandas. Cac goi nay bien dich
+# voi header numpy 1.x, nen khi numpy 2 co mat chung no ngay luc import:
+#     AttributeError: _ARRAY_API not found
+# Chieu nguoc lai thi an toan: wheel build voi header numpy 2 (nhu
+# onnxruntime-gpu 1.24) van chay duoc voi numpy 1.26 — day la thiet ke cua
+# numpy 2. Vi vay ha xuong 1.26.4 lam ca hai phia deu hoat dong, va khong phai
+# tai lai matplotlib/scipy/pandas qua mang cham cua Jetson.
+#
+# (Da thu numpy 2.2.6: torch/cv2/ORT van chay, nhung matplotlib cua he thong
+#  vo -> khong sinh duoc bieu do cho FR-15.)
+NUMPY_PIN="${NUMPY_PIN:-1.26.4}"
+log "Ghim numpy==$NUMPY_PIN (ban ma L4T build cac thu vien khac cung)..."
 python -m pip install "numpy==$NUMPY_PIN"
 
 log "Cai onnxruntime-gpu vao venv cho JetPack 6 / CUDA 12.6..."

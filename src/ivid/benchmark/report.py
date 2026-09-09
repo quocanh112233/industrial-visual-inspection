@@ -143,14 +143,22 @@ def make_charts(rows: list[dict], out_dir: Path) -> list[str]:
 
 
 def main_table(rows: list[dict]) -> list[str]:
-    L = ["| Model | Runtime | mAP@0.5 | mAP@0.5:0.95 | p50 (ms) | p95 (ms) | FPS | Model size | GPU mem |",
+    # Cot bo nho dung `system_used_delta_mb` chu KHONG dung so cua torch.
+    # torch.cuda.max_memory_allocated() chi thay phan do CHINH torch cap phat:
+    # voi ONNX Runtime no bao 0 MB (ORT tu cap phat), voi TensorRT no chi dem
+    # buffer vao/ra chu khong dem bo nho cua engine. Dat con so do vao bang
+    # chinh se khien nguoi doc ket luan "ONNX khong ton bo nho GPU" — sai hoan
+    # toan. Tren Jetson, CPU va GPU dung chung DRAM nen muc tang bo nho HE THONG
+    # moi la con so co nghia.
+    L = ["| Model | Runtime | mAP@0.5 | mAP@0.5:0.95 | p50 (ms) | p95 (ms) | FPS | "
+         "Model size | Bộ nhớ tăng thêm |",
          "|---|---|---:|---:|---:|---:|---:|---:|---:|"]
     for r in rows:
         L.append(
             f"| {r['model']} | {r['backend_label']} | {fmt(r.get('map50'), 4)} | "
             f"{fmt(r.get('map5095'), 4)} | {fmt(r.get('p50'))} | {fmt(r.get('p95'))} | "
             f"{fmt(r.get('fps'), 1)} | {fmt(r.get('size_mb'), 1)} MB | "
-            f"{fmt(r.get('gpu_mb'), 0)} MB |")
+            f"{fmt(r.get('sys_delta_mb'), 0)} MB |")
     return L
 
 
@@ -298,7 +306,8 @@ def build_report(payload: dict, rows: list[dict], charts: list[str], cycle_ms: f
              "chỉ đến từ bước inference — đúng mục đích của bảng này.\n")
 
     L.append("## Tài nguyên (FR-12)\n")
-    L.append("| Model | Runtime | Model size | RSS đỉnh | RAM hệ thống tăng thêm | GPU (torch) |")
+    L.append("| Model | Runtime | Model size | RSS đỉnh | RAM hệ thống tăng thêm | "
+             "Bộ cấp phát của torch |")
     L.append("|---|---|---:|---:|---:|---:|")
     for r in rows:
         if "p50" not in r:
@@ -307,8 +316,14 @@ def build_report(payload: dict, rows: list[dict], charts: list[str], cycle_ms: f
                  f"{fmt(r.get('rss_mb'), 0)} MB | {fmt(r.get('sys_delta_mb'), 0)} MB | "
                  f"{fmt(r.get('gpu_mb'), 0)} MB |")
     L.append("")
-    L.append("> Jetson dùng **bộ nhớ hợp nhất**: CPU và GPU chia nhau cùng 8 GB DRAM. "
-             "Cột GPU ở đây không phải VRAM rời như trên card PCIe.\n")
+    L.append("> **Đọc hai cột cuối thế nào.** Jetson dùng *bộ nhớ hợp nhất*: CPU và GPU chia "
+             "nhau cùng 8 GB DRAM, không có VRAM rời. Vì vậy **RAM hệ thống tăng thêm** mới là "
+             "con số phản ánh chi phí bộ nhớ thật của mỗi runtime.")
+    L.append(">")
+    L.append("> Cột cuối chỉ đếm phần do **chính PyTorch** cấp phát. Với ONNX Runtime nó gần "
+             "bằng 0 vì ORT tự quản lý bộ nhớ GPU; với TensorRT nó chỉ đếm buffer vào/ra chứ "
+             "không đếm bộ nhớ của engine. Cột này để chẩn đoán, **không dùng để so sánh "
+             "giữa các runtime**.\n")
 
     L.append("## Tính lặp lại (NFR-02)\n")
     L.append("| Model | Runtime | Độ lệch p50 giữa các phiên | Đạt ≤ 10%? |")

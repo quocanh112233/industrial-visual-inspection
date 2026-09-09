@@ -24,7 +24,7 @@ def make_run(p50: float, size: float = 6.2, gpu: float = 400) -> dict:
             "latency_p95_ms": round(p50 * 1.08, 3), "fps": round(1000 / p50, 1),
             "model_size_mb": size, "session_p50_spread_percent": 2.5,
             "resources": {"torch_gpu_peak_mb": gpu, "process_rss_peak_mb": 900,
-                          "system_used_delta_mb": 700},
+                          "system_used_delta_mb": 700 + gpu},
             "backend_info": {"model_size_mb": size, "running_on_gpu": True}}
 
 
@@ -49,8 +49,11 @@ def test_rows_giu_dung_thu_tu_runtime():
 def test_bang_chinh_co_du_cot():
     lines = main_table(rows_from(BASE))
     header = lines[0]
-    for col in ("mAP@0.5", "p50 (ms)", "p95 (ms)", "FPS", "Model size", "GPU mem"):
+    for col in ("mAP@0.5", "p50 (ms)", "p95 (ms)", "FPS", "Model size", "Bộ nhớ tăng thêm"):
         assert col in header
+    assert "GPU mem" not in header, (
+        "Cot bo nho chinh khong duoc lay so cua torch: no bao 0 MB cho ONNX "
+        "Runtime va bo qua bo nho engine cua TensorRT")
     assert len(lines) == 2 + 2          # header + separator + 2 dong
 
 

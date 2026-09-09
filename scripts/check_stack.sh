@@ -22,7 +22,11 @@ def check(name, fn):
 import numpy as np
 print(f"\n=== phien ban ===")
 print(f"  numpy        {np.__version__}  ({np.__file__})")
-for m in ("torch", "torchvision", "cv2", "onnxruntime", "tensorrt", "ultralytics", "onnx"):
+# matplotlib/scipy/pandas la cua HE THONG (build cung numpy cua L4T).
+# Chung khong duoc quen: ultralytics can pandas+scipy luc train/val, va
+# report.py can matplotlib cho FR-15. Chinh chung vo dau tien khi numpy lech.
+for m in ("torch", "torchvision", "cv2", "onnxruntime", "tensorrt", "ultralytics",
+          "onnx", "matplotlib", "scipy", "pandas"):
     try:
         mod = __import__(m)
         print(f"  {m:<12} {getattr(mod,'__version__','?')}")
@@ -48,6 +52,23 @@ import tensorrt as trt
 check("trt logger", lambda: type(trt.Logger(trt.Logger.ERROR)).__name__)
 
 check("ultralytics YOLO", lambda: __import__("ultralytics").YOLO.__name__)
+
+# Day la cac phep goi that su cham vao numpy C-API cua tung thu vien.
+# Import thanh cong khong du: numpy 1/2 lech ABI chi lo ra o day.
+def _mpl():
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    fig, ax = plt.subplots(figsize=(2, 2))
+    ax.plot(np.arange(5), np.arange(5) ** 2)
+    import io
+    buf = io.BytesIO(); fig.savefig(buf, format="png"); plt.close(fig)
+    return f"ve duoc bieu do ({buf.tell()} bytes)"
+check("matplotlib ve hinh", _mpl)
+
+check("scipy", lambda: __import__("scipy.ndimage", fromlist=["x"]).maximum_filter(
+    np.zeros((4, 4)), size=2).shape)
+check("pandas", lambda: __import__("pandas").DataFrame({"a": np.arange(3)}).sum()["a"])
 
 print()
 if ok:
