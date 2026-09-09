@@ -21,14 +21,14 @@
 
 ## Bảng kết quả chính
 
-| Model | Runtime | mAP@0.5 | mAP@0.5:0.95 | p50 (ms) | p95 (ms) | FPS | Model size | Bộ nhớ tăng thêm |
-|---|---|---:|---:|---:|---:|---:|---:|---:|
-| yolov8n | PyTorch | 0.7317 | 0.3547 | 34.27 | 34.69 | 29.2 | 6.3 MB | 7 MB |
-| yolov8n | ONNX Runtime | 0.7356 | 0.3549 | 18.51 | 18.70 | 54.0 | 12.3 MB | 7 MB |
-| yolov8n | TensorRT FP16 | 0.7357 | 0.3553 | 14.19 | 14.51 | 70.5 | 9.0 MB | 31 MB |
-| yolov8s | PyTorch | 0.7270 | 0.3335 | 42.79 | 43.04 | 23.4 | 22.5 MB | 32 MB |
-| yolov8s | ONNX Runtime | 0.7271 | 0.3331 | 28.36 | 28.58 | 35.3 | 44.8 MB | 6 MB |
-| yolov8s | TensorRT FP16 | 0.7270 | 0.3332 | 18.36 | 18.83 | 54.5 | 25.6 MB | 15 MB |
+| Model | Runtime | mAP@0.5 | mAP@0.5:0.95 | p50 (ms) | p95 (ms) | FPS | Model size | RAM tiến trình | Nạp (s) |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| yolov8n | PyTorch | 0.7317 | 0.3547 | 34.27 | 34.69 | 29.2 | 6.3 MB | 909 MB | 3.0 |
+| yolov8n | ONNX Runtime | 0.7356 | 0.3549 | 18.51 | 18.70 | 54.0 | 12.3 MB | 1856 MB | 100.5 |
+| yolov8n | TensorRT FP16 | 0.7357 | 0.3553 | 14.19 | 14.51 | 70.5 | 9.0 MB | 301 MB | 0.3 |
+| yolov8s | PyTorch | 0.7270 | 0.3335 | 42.79 | 43.04 | 23.4 | 22.5 MB | 947 MB | 3.0 |
+| yolov8s | ONNX Runtime | 0.7271 | 0.3331 | 28.36 | 28.58 | 35.3 | 44.8 MB | 2038 MB | 166.0 |
+| yolov8s | TensorRT FP16 | 0.7270 | 0.3332 | 18.36 | 18.83 | 54.5 | 25.6 MB | 328 MB | 0.3 |
 
 ## Thời gian đi đâu (FR-11)
 
@@ -78,6 +78,15 @@
 ![map_vs_latency.png](images/map_vs_latency.png)
 
 ## Kết luận (SRS §7.3)
+
+### 0. Chi phí khởi động — chỗ bảng độ trễ không nhìn thấy
+
+- **yolov8n**: ONNX Runtime mất **100 s** để nạp, TensorRT chỉ **0.3 s** (335× lâu hơn), và tốn **1856 MB** RAM so với **301 MB**
+- **yolov8s**: ONNX Runtime mất **166 s** để nạp, TensorRT chỉ **0.3 s** (519× lâu hơn), và tốn **2038 MB** RAM so với **328 MB**
+
+ONNX Runtime ở đây chạy `TensorrtExecutionProvider`, nghĩa là nó **tự dựng engine TensorRT ngay lúc nạp model** — và dựng lại từ đầu mỗi lần tiến trình khởi động, vì bộ nhớ đệm engine chưa được bật. Trên dây chuyền, mỗi lần khởi động lại dịch vụ (mất điện, cập nhật, container bị lên lịch lại) là ngần ấy giây không kiểm được sản phẩm.
+
+Đây là lý do chọn định dạng không thể chỉ nhìn cột p50: ba runtime có độ trễ cùng bậc, nhưng chi phí khởi động lệch nhau hai bậc. Muốn dùng ONNX Runtime thì phải bật `trt_engine_cache_enable` và nung sẵn bộ nhớ đệm lúc đóng gói image; còn engine `.plan` dựng sẵn thì nạp thẳng trong 0.3 s.
 
 ### 1. TensorRT FP16 nhanh hơn PyTorch bao nhiêu, đổi lấy bao nhiêu mAP?
 

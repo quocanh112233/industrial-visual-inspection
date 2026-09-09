@@ -2328,5 +2328,80 @@
       "delta_mAP50_95": 0.003,
       "khop": true
     }
-  }
+  },
+  "memory": {
+    "yolov8n|pytorch": {
+      "skipped": false,
+      "model": "yolov8n",
+      "backend": "pytorch",
+      "backend_label": "PyTorch",
+      "rss_khoi_dong_mb": 15.0,
+      "rss_sau_nap_mb": 556.4,
+      "rss_dinh_mb": 924.0,
+      "rss_delta_mb": 908.9,
+      "nap_giay": 3.0,
+      "n_anh": 30
+    },
+    "yolov8n|onnx": {
+      "skipped": false,
+      "model": "yolov8n",
+      "backend": "onnx",
+      "backend_label": "ONNX Runtime",
+      "rss_khoi_dong_mb": 15.0,
+      "rss_sau_nap_mb": 1832.4,
+      "rss_dinh_mb": 1870.6,
+      "rss_delta_mb": 1855.6,
+      "nap_giay": 100.48,
+      "n_anh": 30
+    },
+    "yolov8n|tensorrt": {
+      "skipped": false,
+      "model": "yolov8n",
+      "backend": "tensorrt",
+      "backend_label": "TensorRT FP16",
+      "rss_khoi_dong_mb": 15.0,
+      "rss_sau_nap_mb": 261.7,
+      "rss_dinh_mb": 316.3,
+      "rss_delta_mb": 301.3,
+      "nap_giay": 0.3,
+      "n_anh": 30
+    },
+    "yolov8s|pytorch": {
+      "skipped": false,
+      "model": "yolov8s",
+      "backend": "pytorch",
+      "backend_label": "PyTorch",
+      "rss_khoi_dong_mb": 15.0,
+      "rss_sau_nap_mb": 580.6,
+      "rss_dinh_mb": 962.2,
+      "rss_delta_mb": 947.2,
+      "nap_giay": 3.05,
+      "n_anh": 30
+    },
+    "yolov8s|onnx": {
+      "skipped": false,
+      "model": "yolov8s",
+      "backend": "onnx",
+      "backend_label": "ONNX Runtime",
+      "rss_khoi_dong_mb": 15.0,
+      "rss_sau_nap_mb": 2014.5,
+      "rss_dinh_mb": 2053.0,
+      "rss_delta_mb": 2037.9,
+      "nap_giay": 166.02,
+      "n_anh": 30
+    },
+    "yolov8s|tensorrt": {
+      "skipped": false,
+      "model": "yolov8s",
+      "backend": "tensorrt",
+      "backend_label": "TensorRT FP16",
+      "rss_khoi_dong_mb": 15.0,
+      "rss_sau_nap_mb": 288.4,
+      "rss_dinh_mb": 342.5,
+      "rss_delta_mb": 327.5,
+      "nap_giay": 0.32,
+      "n_anh": 30
+    }
+  },
+  "memory_method": "Moi cau hinh chay trong mot tien trinh rieng; con so la RSS dinh diem tru RSS luc tien trinh vua khoi dong, nen bao gom ca chi phi nap thu vien. Do chung mot tien trinh cho ca sau cau hinh se cho so cong don, khong so sanh duoc — xem docstring ivid/benchmark/memprobe.py."
 }
