@@ -6,7 +6,7 @@
 
 onnx:
   opset: 17           # smoke test: opset 17 nhanh hon opset 12 ~14% tren cung engine
-  imgsz: 640
+  imgsz: 672        # PHAI khop imgsz trong configs/benchmark.yaml — xem ghi chu o do
   batch: 1            # benchmark do tung anh mot, dung batch dong
   dynamic: false      # shape co dinh -> TensorRT toi uu duoc manh hon
   simplify: true

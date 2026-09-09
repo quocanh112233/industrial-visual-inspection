@@ -84,3 +84,31 @@ def test_config_data_va_export_co_thu_tu_lop_giong_nhau():
     names = [data["names"][i] for i in sorted(data["names"])]
     assert names == ["crazing", "inclusion", "patches", "pitted_surface",
                      "rolled-in_scale", "scratches"]
+
+
+# --------------------------- khung dau vao phai khop giua export va benchmark
+def test_imgsz_export_khop_imgsz_benchmark():
+    """Engine TensorRT co dau vao CO DINH, dung bang imgsz luc export ONNX. Neu
+    hai config lech nhau thi runner se bao loi luc nap — hoac te hon, neu ai do
+    noi long kiem tra thi so do se sai am tham."""
+    ex = yaml.safe_load((ROOT / "configs/export.yaml").read_text(encoding="utf-8"))
+    bm = yaml.safe_load((ROOT / "configs/benchmark.yaml").read_text(encoding="utf-8"))
+    assert int(ex["onnx"]["imgsz"]) == int(bm["imgsz"]), (
+        f"export.yaml imgsz={ex['onnx']['imgsz']} nhung benchmark.yaml imgsz={bm['imgsz']}. "
+        "Export lai ONNX va dung lai engine sau khi sua.")
+
+
+def test_resize_to_khong_lon_hon_khung():
+    bm = yaml.safe_load((ROOT / "configs/benchmark.yaml").read_text(encoding="utf-8"))
+    if bm.get("resize_to"):
+        assert int(bm["resize_to"]) <= int(bm["imgsz"])
+
+
+def test_docker_dung_cung_khung_voi_benchmark():
+    """Dich vu trong container phai chay dung che do da do, neu khong thi con so
+    trong bao cao khong noi gi ve thu dang chay that."""
+    bm = yaml.safe_load((ROOT / "configs/benchmark.yaml").read_text(encoding="utf-8"))
+    dc = (ROOT / "docker/docker-compose.yml").read_text(encoding="utf-8")
+    assert f"IVID_IMGSZ:-{bm['imgsz']}" in dc
+    if bm.get("resize_to"):
+        assert f"IVID_RESIZE_TO:-{bm['resize_to']}" in dc

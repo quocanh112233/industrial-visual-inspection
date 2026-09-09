@@ -151,6 +151,8 @@ def main() -> int:
     models = a.models or cfg["models"]
     backends = a.backends or cfg["backends"]
     imgsz = int(a.imgsz or cfg["imgsz"])
+    if a.resize_to is None and a.imgsz is None and cfg.get("resize_to"):
+        a.resize_to = int(cfg["resize_to"])      # chi lay tu config khi khong ghi de imgsz
     global NAMES
     NAMES = class_names(load_config(root / a.data_config))
     nc = len(NAMES)

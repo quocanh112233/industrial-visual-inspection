@@ -29,7 +29,9 @@ from ..data.common import repo_root
 class Settings:
     backend: str = os.getenv("IVID_BACKEND", "tensorrt").lower()
     model: str = os.getenv("IVID_MODEL", "yolov8n")
-    imgsz: int = int(os.getenv("IVID_IMGSZ", "640"))
+    imgsz: int = int(os.getenv("IVID_IMGSZ", "672"))
+    # Anh duoc thu ve co nay roi dem xam ra imgsz. Xem configs/benchmark.yaml.
+    resize_to: int | None = int(os.getenv("IVID_RESIZE_TO", "640")) or None
     conf: float = float(os.getenv("IVID_CONF", "0.25"))
     iou: float = float(os.getenv("IVID_IOU", "0.7"))
     device: str = os.getenv("IVID_DEVICE", "cuda")
@@ -110,7 +112,8 @@ class BackendHolder:
 
                     w = weights_for(repo_root() / "models" / s.model, s.backend)
                     self.runner = build_runner(s.backend, w, imgsz=s.imgsz,
-                                               conf=s.conf, iou=s.iou, device=s.device)
+                                               conf=s.conf, iou=s.iou, device=s.device,
+                                               resize_to=s.resize_to)
                     self.runner.warmup(5)
                 self.error = None
             except Exception as e:

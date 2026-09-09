@@ -46,6 +46,10 @@ def main() -> int:
     pc = cfg["parity"]
     n = a.n or int(pc["n_images_full"])
     imgsz = int(cfg["onnx"]["imgsz"])
+    # resize_to lay tu configs/benchmark.yaml de parity chay dung che do dang trien khai
+    bcfg_path = root / "configs/benchmark.yaml"
+    bcfg = yaml.safe_load(bcfg_path.read_text(encoding="utf-8")) if bcfg_path.exists() else {}
+    resize_to = int(bcfg["resize_to"]) if bcfg.get("resize_to") else None
     conf = a.conf if a.conf is not None else float(pc["conf"])
     iou = a.iou if a.iou is not None else float(pc["iou"])
 
@@ -64,7 +68,8 @@ def main() -> int:
             print(f"[parity] bo qua {b}: khong thay {w.name}")
             continue
         try:
-            runners[b] = build_runner(b, w, imgsz=imgsz, conf=conf, iou=iou)
+            runners[b] = build_runner(b, w, imgsz=imgsz, conf=conf, iou=iou,
+                                      resize_to=resize_to)
             print(f"[parity] nap {b}: {w.name}")
         except Exception as e:
             print(f"[parity] bo qua {b}: {type(e).__name__}: {e}")

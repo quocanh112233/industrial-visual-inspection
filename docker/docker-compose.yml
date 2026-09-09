@@ -42,7 +42,10 @@ services:
       # FR-17: doi mot dong nay la doi runtime, khong phai build lai image
       IVID_BACKEND: ${IVID_BACKEND:-tensorrt}
       IVID_MODEL: ${IVID_MODEL:-yolov8n}
-      IVID_IMGSZ: ${IVID_IMGSZ:-640}
+      # 672 la KHUNG dau vao model, 640 la co anh ben trong khung do — phan con lai
+      # la vien xam. Doi mot trong hai ma khong doi engine la sai. Xem configs/benchmark.yaml.
+      IVID_IMGSZ: ${IVID_IMGSZ:-672}
+      IVID_RESIZE_TO: ${IVID_RESIZE_TO:-640}
       IVID_CONF: ${IVID_CONF:-0.25}
       IVID_MAX_UPLOAD_MB: ${IVID_MAX_UPLOAD_MB:-10}
     volumes:

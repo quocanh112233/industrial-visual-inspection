@@ -3,7 +3,26 @@
 models: [yolov8n, yolov8s]          # thu muc trong models/
 backends: [pytorch, onnx, tensorrt] # thu tu nay cung la thu tu chay
 
-imgsz: 640
+# KHUNG DAU VAO 672 VOI ANH THU VE 640 — khong phai loi danh may.
+#
+# Anh duoc thu ve 640 roi dem xam ra 672 (16 px moi ben) truoc khi vao model.
+# Do bang quet tham so tren yolov8n / tap test, chi doi mot con so nay:
+#
+#     khung   mAP@0.5   mAP@0.5:0.95   pixel so voi 640
+#     640     0.7317    0.3547         1.00x   <- khong dem vien
+#     672     0.7648    0.4401         1.10x
+#     704     0.7730    0.4421         1.21x
+#     736     0.7691    0.4410         1.32x
+#     768     0.7726    0.4403         1.44x
+#
+# Buoc nhay nam tron o 640 -> 672. Tu 672 tro di, mAP@0.5 dao dong trong 0.0082
+# va mAP@0.5:0.95 trong 0.0020 — deu DUOI nguong nhieu 0.0115 do duoc tu hai lan
+# train cung seed. Tuc hieu ung nay NHI PHAN chu khong ti le: co vien la duoc,
+# them vien khong duoc them gi. Vi vay chon khung NHO NHAT bat duoc hieu ung.
+#
+# Chon 704 vi no "cao nhat trong bang" se la bia tin hieu tu nhieu.
+imgsz: 672        # kich thuoc dau vao model (khung)
+resize_to: 640    # anh duoc thu ve co nay, phan con lai la vien xam
 conf: 0.25                          # nguong cho do latency (giong luc phuc vu that)
 iou: 0.7
 

@@ -47,7 +47,7 @@ BACKEND_LABEL = {"pytorch": "PyTorch", "onnx": "ONNX Runtime", "tensorrt": "Tens
 
 
 def do_mot_cau_hinh(model: str, backend: str, imgsz: int, conf: float, iou: float,
-                    n_anh: int, root: Path) -> dict:
+                    n_anh: int, root: Path, resize_to: int | None = None) -> dict:
     """Chay trong tien trinh CON. Tra ve muc bo nho tang them cua rieng no."""
     nen = _rss_mb()                      # truoc khi nap bat cu thu vien nang nao
 
@@ -59,7 +59,7 @@ def do_mot_cau_hinh(model: str, backend: str, imgsz: int, conf: float, iou: floa
         return {"skipped": True, "reason": f"khong thay {w.name}"}
 
     t0 = time.perf_counter()
-    runner = build_runner(backend, w, imgsz=imgsz, conf=conf, iou=iou)
+    runner = build_runner(backend, w, imgsz=imgsz, conf=conf, iou=iou, resize_to=resize_to)
     giay_nap = time.perf_counter() - t0
     sau_nap = _rss_mb()
 
@@ -100,9 +100,10 @@ def main() -> int:
     root = repo_root()
     cfg = yaml.safe_load((root / a.config).read_text(encoding="utf-8"))
     imgsz, conf, iou = int(cfg["imgsz"]), float(cfg["conf"]), float(cfg["iou"])
+    resize_to = int(cfg["resize_to"]) if cfg.get("resize_to") else None
 
     if a.con:
-        r = do_mot_cau_hinh(a.model, a.backend, imgsz, conf, iou, a.n_anh, root)
+        r = do_mot_cau_hinh(a.model, a.backend, imgsz, conf, iou, a.n_anh, root, resize_to)
         print(json.dumps(r))
         return 0
 

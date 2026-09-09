@@ -61,7 +61,8 @@ VOLUME ["/app/models", "/app/data"]
 
 ENV IVID_BACKEND=tensorrt \
     IVID_MODEL=yolov8n \
-    IVID_IMGSZ=640 \
+    IVID_IMGSZ=672 \
+    IVID_RESIZE_TO=640 \
     IVID_DEVICE=cuda \
     IVID_MAX_UPLOAD_MB=10
 

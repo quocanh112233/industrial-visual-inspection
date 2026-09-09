@@ -91,7 +91,8 @@ def benchmark_backend(model: str, backend: str, images: list[Path], cfg: dict,
     if not weights.exists():
         return {"skipped": True, "reason": f"khong thay {weights.relative_to(root)}"}
 
-    kw = dict(imgsz=int(cfg["imgsz"]), conf=float(cfg["conf"]), iou=float(cfg["iou"]))
+    kw = dict(imgsz=int(cfg["imgsz"]), conf=float(cfg["conf"]), iou=float(cfg["iou"]),
+              resize_to=(int(cfg["resize_to"]) if cfg.get("resize_to") else None))
     if cfg.get("nc"):
         # Ghi de so lop. Can khi do thu bang model pretrained COCO (80 lop)
         # thay vi model da fine-tune cho NEU-DET (6 lop).
