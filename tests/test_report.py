@@ -54,7 +54,8 @@ def test_rows_giu_dung_thu_tu_runtime():
 def test_bang_chinh_co_du_cot():
     lines = main_table(rows_from(BASE))
     header = lines[0]
-    for col in ("mAP@0.5", "p50 (ms)", "p95 (ms)", "FPS", "Model size", "RAM tiến trình"):
+    for col in ("mAP@0.5", "p50 (ms)", "p95 (ms)", "FPS", "Model size",
+                "RAM tiến trình", "Nạp (s)"):
         assert col in header
     assert "GPU mem" not in header, (
         "Cot bo nho chinh khong duoc lay so cua torch: no bao 0 MB cho ONNX "
@@ -174,3 +175,37 @@ def test_cau_hinh_bi_bo_qua_khi_do_ram_khong_lam_hong_bang():
     payload["memory"] = {"yolov8n|pytorch": {"skipped": True, "reason": "khong thay best.pt"}}
     bang = main_table(rows_from(payload))
     assert "make mem" in next(x for x in bang if "PyTorch" in x)
+
+
+# ------------------------------------------- chi phi khoi dong (do thay tren Jetson)
+def _payload_co_thoi_gian_nap(nap_onnx: float, nap_trt: float = 0.3) -> dict:
+    d = {"runs": dict(BASE["runs"]), "accuracy": dict(BASE["accuracy"])}
+    d["runs"]["yolov8n|onnx"] = make_run(18.5, 12.3, 200)
+    d["accuracy"]["yolov8n|onnx"] = make_acc(0.7356)
+    d["memory"] = {
+        "yolov8n|pytorch": {"skipped": False, "rss_delta_mb": 909.0, "nap_giay": 3.0},
+        "yolov8n|onnx": {"skipped": False, "rss_delta_mb": 1856.0, "nap_giay": nap_onnx},
+        "yolov8n|tensorrt": {"skipped": False, "rss_delta_mb": 301.0, "nap_giay": nap_trt},
+    }
+    return d
+
+
+def test_bao_cao_neu_bat_duoc_chi_phi_khoi_dong_lon():
+    """ONNX Runtime chay TensorrtExecutionProvider tu dung engine luc nap: do
+    duoc 100s so voi 0.3s cua engine dung san. Cot p50 khong he thay dieu do."""
+    L = conclusions(rows_from(_payload_co_thoi_gian_nap(100.5)), cycle_ms=1000.0)
+    van_ban = "\n".join(L)
+    assert "Chi phí khởi động" in van_ban
+    assert "100 s" in van_ban and "335×" in van_ban
+    assert "trt_engine_cache_enable" in van_ban
+
+
+def test_khong_bia_ra_canh_bao_khi_thoi_gian_nap_tuong_duong():
+    L = conclusions(rows_from(_payload_co_thoi_gian_nap(0.9)), cycle_ms=1000.0)
+    assert "Chi phí khởi động" not in "\n".join(L)
+
+
+def test_thieu_so_lieu_nap_thi_khong_ket_luan():
+    d = _payload_co_thoi_gian_nap(100.5)
+    d["memory"]["yolov8n|onnx"].pop("nap_giay")
+    assert "Chi phí khởi động" not in "\n".join(conclusions(rows_from(d), cycle_ms=1000.0))

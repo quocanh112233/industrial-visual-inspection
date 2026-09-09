@@ -50,6 +50,7 @@ def rows_from(payload: dict) -> list[dict]:
             row["latency_missing"] = (r or {}).get("reason", "chua do")
         if mem and not mem.get("skipped"):
             row["mem_delta_mb"] = mem.get("rss_delta_mb")
+            row["load_s"] = mem.get("nap_giay")
         if an and not an.get("skipped"):
             # accuracy.py moi tra ve mAP o cap cao nhat (khong con boc trong "overall"),
             # va per_class danh so theo CHI SO lop. Doi sang ten lop de bang doc duoc.
@@ -161,15 +162,16 @@ def main_table(rows: list[dict]) -> list[str]:
     # memprobe chay moi runtime trong mot tien trinh RIENG va lay RSS dinh diem
     # tru RSS luc khoi dong, nen con so so sanh duoc giua ba runtime.
     L = ["| Model | Runtime | mAP@0.5 | mAP@0.5:0.95 | p50 (ms) | p95 (ms) | FPS | "
-         "Model size | RAM tiến trình |",
-         "|---|---|---:|---:|---:|---:|---:|---:|---:|"]
+         "Model size | RAM tiến trình | Nạp (s) |",
+         "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|"]
     for r in rows:
         ram = (f"{fmt(r.get('mem_delta_mb'), 0)} MB" if r.get("mem_delta_mb") is not None
                else "— *(`make mem`)*")
         L.append(
             f"| {r['model']} | {r['backend_label']} | {fmt(r.get('map50'), 4)} | "
             f"{fmt(r.get('map5095'), 4)} | {fmt(r.get('p50'))} | {fmt(r.get('p95'))} | "
-            f"{fmt(r.get('fps'), 1)} | {fmt(r.get('size_mb'), 1)} MB | {ram} |")
+            f"{fmt(r.get('fps'), 1)} | {fmt(r.get('size_mb'), 1)} MB | {ram} | "
+            f"{fmt(r.get('load_s'), 1) if r.get('load_s') is not None else '—'} |")
     return L
 
 
@@ -177,6 +179,34 @@ def conclusions(rows: list[dict], cycle_ms: float) -> list[str]:
     L: list[str] = []
     by = {(r["model"], r["backend"]): r for r in rows}
     models = sorted({r["model"] for r in rows})
+
+    # --- Chi phi khoi dong: chi hien khi co chenh lech lon that su ---
+    canh_bao_nap = []
+    for m in models:
+        trt, onx = by.get((m, "tensorrt")), by.get((m, "onnx"))
+        if not (trt and onx and trt.get("load_s") and onx.get("load_s")):
+            continue
+        if onx["load_s"] >= 10 * trt["load_s"]:
+            canh_bao_nap.append(
+                f"- **{m}**: ONNX Runtime mất **{onx['load_s']:.0f} s** để nạp, "
+                f"TensorRT chỉ **{trt['load_s']:.1f} s** ({onx['load_s'] / trt['load_s']:.0f}× lâu hơn), "
+                f"và tốn **{onx['mem_delta_mb']:.0f} MB** RAM so với "
+                f"**{trt['mem_delta_mb']:.0f} MB**")
+    if canh_bao_nap:
+        L.append("### 0. Chi phí khởi động — chỗ bảng độ trễ không nhìn thấy\n")
+        L.extend(canh_bao_nap)
+        L.append("")
+        L.append(
+            "ONNX Runtime ở đây chạy `TensorrtExecutionProvider`, nghĩa là nó **tự dựng "
+            "engine TensorRT ngay lúc nạp model** — và dựng lại từ đầu mỗi lần tiến trình "
+            "khởi động, vì bộ nhớ đệm engine chưa được bật. Trên dây chuyền, mỗi lần khởi "
+            "động lại dịch vụ (mất điện, cập nhật, container bị lên lịch lại) là ngần ấy "
+            "giây không kiểm được sản phẩm.\n")
+        L.append(
+            "Đây là lý do chọn định dạng không thể chỉ nhìn cột p50: ba runtime có độ trễ "
+            "cùng bậc, nhưng chi phí khởi động lệch nhau hai bậc. Muốn dùng ONNX Runtime "
+            "thì phải bật `trt_engine_cache_enable` và nung sẵn bộ nhớ đệm lúc đóng gói "
+            "image; còn engine `.plan` dựng sẵn thì nạp thẳng trong 0.3 s.\n")
 
     # --- Cau 1 ---
     L.append("### 1. TensorRT FP16 nhanh hơn PyTorch bao nhiêu, đổi lấy bao nhiêu mAP?\n")
