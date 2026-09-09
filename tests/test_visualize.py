@@ -115,3 +115,29 @@ def test_nhan_o_ghi_ro_dau_la_du_doan_dau_la_that():
 
     t = nhan_o("crazing", 2, 3)
     assert "du doan" in t and "that" in t
+
+
+# ----------------------------------------------- tieu de phai vua be ngang o anh
+def test_co_chu_tu_thu_nho_de_chu_dai_van_vua():
+    """Ten lop dai ngan khac nhau; co chu co dinh se lam o nao chu dai bi cat."""
+    import cv2
+
+    from ivid.visualize import co_chu_vua, nhan_o
+
+    for lop in ("crazing", "rolled-in_scale", "pitted_surface"):
+        t = nhan_o(lop, 5, 4)
+        co = co_chu_vua(t, 320)
+        (tw, _), _ = cv2.getTextSize(t, cv2.FONT_HERSHEY_SIMPLEX, co, 1)
+        assert tw <= 320 - 16, f"{lop}: chu rong {tw}px, khong vua o 320px"
+
+
+def test_chu_ngan_van_duoc_co_lon_nhat():
+    from ivid.visualize import co_chu_vua
+
+    assert co_chu_vua("a", 320) == 0.45
+
+
+def test_chu_qua_dai_thi_dung_o_co_nho_nhat_chu_khong_lap_vo_han():
+    from ivid.visualize import co_chu_vua
+
+    assert co_chu_vua("x" * 500, 320) == 0.28

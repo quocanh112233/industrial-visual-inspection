@@ -74,17 +74,37 @@ def nhan_o(lop: str, n_hop: int, n_that: int) -> str:
     dau '?'. Dung dau gach ngang em (—) o day tung lam tieu de hien ra
     'crazing ??? 2 hop / 3 that'.
     """
-    return f"{lop}  |  {n_hop} hop du doan / {n_that} hop that"
+    return f"{lop}  |  {n_hop} du doan / {n_that} that"
+
+
+def co_chu_vua(text: str, rong: int, lon_nhat: float = 0.45,
+               nho_nhat: float = 0.28, le: int = 16) -> float:
+    """Co chu lon nhat ma `text` van nam gon trong `rong` pixel.
+
+    Khong the co dinh mot co chu: ten lop dai ngan khac nhau (`crazing` so voi
+    `rolled-in_scale`), va tieu de con ghep them so lieu. Dat cung mot co thi o
+    nao chu dai se bi cat cut — da xay ra: 'rolled-in_scale | 1 du doan / 2' bi
+    mat chu cuoi.
+    """
+    import cv2
+
+    co = lon_nhat
+    while co > nho_nhat:
+        (tw, _), _ = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, co, 1)
+        if tw <= rong - le:
+            return round(co, 3)
+        co -= 0.01
+    return round(nho_nhat, 3)
 
 
 def add_caption(tile: np.ndarray, text: str, height: int = 30) -> np.ndarray:
-    """Dan mot dai chu den phia tren o anh."""
+    """Dan mot dai chu den phia tren o anh, tu co chu cho vua be ngang."""
     import cv2
 
     w = tile.shape[1]
     strip = np.zeros((height, w, 3), dtype=np.uint8)
     cv2.putText(strip, text, (8, height - 9), cv2.FONT_HERSHEY_SIMPLEX,
-                0.45, WHITE, 1, cv2.LINE_AA)
+                co_chu_vua(text, w), WHITE, 1, cv2.LINE_AA)
     return np.vstack([strip, tile])
 
 
