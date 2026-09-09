@@ -1,60 +1,57 @@
 # IVID — Industrial Visual Inspection & Deployment Benchmark
 
 Phát hiện lỗi bề mặt thép cán nóng (NEU-DET, 6 lớp) bằng YOLO, rồi **đo hiệu năng
-trên ba runtime** — PyTorch / ONNX Runtime / TensorRT FP16 — trên NVIDIA Jetson Orin Nano.
+trên ba runtime** — PyTorch / ONNX Runtime / TensorRT FP16 — trên NVIDIA Jetson Orin Nano,
+và đóng gói thành dịch vụ REST.
 
-> 🚧 Đang phát triển. Bảng benchmark sẽ nằm ở đây khi có số liệu.
+Phần lớn project dừng ở "train xong, mAP bao nhiêu". Cái đáng giá ở đây là câu trả lời cho
+câu hỏi của người triển khai: **chọn định dạng nào để chạy trên dây chuyền, đánh đổi bao
+nhiêu độ chính xác lấy tốc độ, và có kịp nhịp sản xuất không.**
 
-**Đã xong:** dữ liệu (FR-01→03) · kiểm chứng chuỗi export TensorRT trên Jetson (rủi ro R1)
-**Đang làm:** train YOLOv8n/s · export + benchmark ba runtime
+## Kết quả
+
+<!-- IVID_TABLE_START -->
+> 🚧 Bảng benchmark sẽ được `make report` chèn vào đây khi có số liệu thật.
+<!-- IVID_TABLE_END -->
+
+**Đã kiểm chứng chuỗi export trên phần cứng thật** (YOLOv8n pretrained, 640×640, chỉ inference thuần, Jetson @15W):
+
+| ONNX opset | Engine | p50 | FPS |
+|---|---:|---:|---:|
+| 12 | 9.0 MB | 7.13 ms | 140 |
+| 17 | 9.0 MB | **6.25 ms** | **160** |
+
+`.pt → .onnx → .engine (FP16)` chạy thông trên TensorRT 10.3 / CUDA 12.6 — rủi ro lớn nhất
+của dự án (xung đột phiên bản JetPack ↔ TensorRT ↔ ONNX opset) đã được loại bỏ từ ngày đầu.
 
 ## Phần cứng đích
 
 | | |
 |---|---|
 | Thiết bị | Jetson Orin Nano 8GB |
-| JetPack | 6.2 (L4T R36.5.2) |
-| CUDA / TensorRT | 12.6 / 10.3.0 |
+| JetPack / L4T | 6.2 / R36.5.2 |
+| CUDA / TensorRT | 12.6.68 / 10.3.0.30 |
+| PyTorch | 2.10.0 (bản NVIDIA, CUDA) |
 | Python | 3.10.12 |
+| Chế độ nguồn có sẵn | 15W · 25W · MAXN_SUPER |
 
 ## Quick start
 
 ```bash
-# --- trên Jetson ---
-bash scripts/check_jetson.sh              # kiểm tra môi trường
-bash scripts/setup_jetson.sh              # dựng venv (không phá torch CUDA)
-bash scripts/smoke_tensorrt.sh            # ★ chạy NGAY: kiểm chứng rủi ro R1
-bash scripts/download_dataset.sh          # tải NEU-DET
-make data                                 # chuẩn bị + kiểm tra + thống kê
+bash scripts/setup_jetson.sh      # dựng venv (không phá torch CUDA của NVIDIA)
+make data                         # tải NEU-DET + chuẩn bị + kiểm tra + thống kê
+make export-onnx && make export-trt
+make bench && make accuracy && make report
 ```
 
-**Kết quả smoke test R1** (Jetson Orin Nano @15W, YOLOv8n pretrained, 640×640, chỉ inference thuần):
+`make help` liệt kê toàn bộ lệnh. Train xem [docs/colab-training.md](docs/colab-training.md).
 
-| ONNX opset | Engine | Latency p50 | FPS |
-|---|---:|---:|---:|
-| 12 | 9.0 MB | 7.13 ms | 140 |
-| 17 | 9.0 MB | **6.25 ms** | **160** |
+## Dữ liệu
 
-Chuỗi `.pt → .onnx → .engine (FP16)` chạy thông trên TensorRT 10.3 / CUDA 12.6 — rủi ro R1 đã loại bỏ.
-
-Train: xem [docs/colab-training.md](docs/colab-training.md).
-
-## Tài liệu
-
-- [docs/colab-training.md](docs/colab-training.md) — train trên Colab (hoặc trên Jetson, Phụ lục B)
-- [docs/dataset.md](docs/dataset.md) — phân bố lớp, hình dạng bbox, nhận xét
-- `results/data_report.md` — báo cáo toàn vẹn dữ liệu (FR-02)
-- `docs/benchmark-report.md` — ★ báo cáo so sánh ba runtime *(sắp có)*
-- `docs/deployment.md` — dựng dịch vụ trên Jetson *(sắp có)*
-
-## Dataset
-
-NEU-DET — 1800 ảnh xám 200×200, 4189 bounding box, 6 loại lỗi bề mặt thép:
+NEU-DET — 1800 ảnh xám 200×200, 4189 bounding box, 6 loại lỗi:
 `crazing`, `inclusion`, `patches`, `pitted_surface`, `rolled-in_scale`, `scratches`.
 
-## Chia dữ liệu
-
-70/15/15 phân tầng theo lớp, seed `1337` — chạy lại cho kết quả giống hệt.
+Chia 70/15/15 phân tầng theo lớp, seed `1337`, chạy lại cho kết quả **giống hệt**:
 
 | Tập | Ảnh | Bbox | Mỗi lớp |
 |---|---:|---:|---:|
@@ -62,5 +59,69 @@ NEU-DET — 1800 ảnh xám 200×200, 4189 bounding box, 6 loại lỗi bề m�
 | val | 270 | 624 | 45 |
 | test | 270 | 615 | 45 |
 
-Kiểm tra toàn vẹn: **0 bất thường** (không có ảnh thiếu nhãn, bbox vượt biên,
-ảnh hỏng hay rò rỉ giữa các tập). 123/1800 ảnh chứa nhiều hơn một loại lỗi.
+Kiểm tra toàn vẹn: **0 bất thường**. 123/1800 ảnh chứa nhiều hơn một loại lỗi.
+Chi tiết: [docs/dataset.md](docs/dataset.md) · `results/data_report.md`
+
+## Thiết kế đáng chú ý
+
+**Ba runtime dùng chung tiền xử lý và hậu xử lý.** `ivid.preprocess` và `ivid.postprocess`
+(thuần NumPy) được cả ba runner gọi. Nếu mỗi định dạng tự resize và tự chạy NMS theo cách
+riêng, chênh lệch đo được sẽ lẫn giữa "khác biệt runtime" và "khác biệt cách xử lý" — và
+bảng benchmark mất ý nghĩa.
+
+**Một hàm chấm điểm cho cả ba định dạng.** `ivid.train.evaluate` nhận `.pt`, `.onnx` và
+`.engine`. Nếu mỗi định dạng được chấm bằng một hàm khác nhau, kết luận "TensorRT FP16 mất
+X điểm mAP" có thể chỉ là hệ quả của cách chấm.
+
+**ONNX Runtime báo rõ nó đang chạy trên đâu.** ORT im lặng bỏ qua execution provider không
+nạp được — session vẫn tạo thành công nhưng chạy trên CPU. Runner ghi lại provider **thực sự**
+được dùng và chèn cảnh báo vào báo cáo nếu nó rơi về CPU, thay vì để một con số chậm gấp
+20 lần đi thẳng vào bảng.
+
+**Điều kiện đo đi kèm mọi kết quả.** Chế độ `nvpmodel`, xung nhịp, nhiệt độ trước/sau mỗi
+phiên, phiên bản 8 thư viện — tất cả nằm trong `results/benchmark.json`.
+
+## Cấu trúc
+
+```
+scripts/       check_jetson · setup_jetson · download_dataset · smoke_tensorrt
+configs/       data · train_yolov8{n,s} · train_yolov8n_jetson · export · benchmark
+src/ivid/
+  preprocess.py  postprocess.py        dùng chung cho cả ba runtime
+  data/          prepare · validate · stats            FR-01..03
+  train/         train · evaluate                      FR-04..06
+  export/        to_onnx · to_tensorrt · verify_parity FR-07..09
+  benchmark/     latency · resources · accuracy · device_info · report  FR-10..15
+                 runners/{pytorch,onnx,tensorrt}_runner
+  serve/         app · backends · schemas              FR-16..20
+docker/        Dockerfile.jetson · docker-compose.yml  FR-19
+tests/         53 test, chạy được trên CI không cần GPU
+```
+
+## Dịch vụ
+
+```bash
+IVID_BACKEND=tensorrt make serve
+curl -F "file=@data/processed/test/images/scratches_10.jpg" localhost:8000/predict
+```
+
+Đổi `IVID_BACKEND` giữa `pytorch` / `onnx` / `tensorrt` không cần build lại;
+`GET /health` báo lại backend đang phục vụ. Docker: `make docker-up`.
+
+## Tài liệu
+
+- [docs/dataset.md](docs/dataset.md) — phân bố lớp, hình dạng bbox, nhận xét
+- [docs/deployment.md](docs/deployment.md) — dựng trên Jetson, Docker, sự cố thường gặp
+- [docs/colab-training.md](docs/colab-training.md) — train trên Colab cho người chưa dùng
+- `docs/benchmark-report.md` — ★ báo cáo so sánh ba runtime *(sinh bởi `make report`)*
+
+## Trạng thái
+
+| Giai đoạn | Trạng thái |
+|---|---|
+| Dữ liệu (FR-01..03) | ✅ chạy thật, 0 bất thường |
+| Chuỗi export TensorRT | ✅ kiểm chứng trên Jetson |
+| Train + đánh giá (FR-04..06) | ⏳ code xong, chờ chạy |
+| Export + parity (FR-07..09) | ⏳ code xong, chờ có `best.pt` |
+| Benchmark (FR-10..15) | ⏳ code xong, chờ có engine |
+| Dịch vụ + Docker (FR-16..20) | ⏳ code xong, test API pass |

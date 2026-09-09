@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"     # cung phien ban voi Jetson (JetPack 6.2)
+
+      # CI khong cai torch/ultralytics: nang, va khong can thiet — test o day
+      # tu sinh du lieu gia, khong dong toi model. Benchmark KHONG chay tren CI
+      # (phai chay tren Jetson that, rang buoc C1).
+      - name: Cai phu thuoc nhe
+        run: pip install pytest pyyaml numpy opencv-python-headless ruff
+
+      - name: Lint
+        run: ruff check src tests
+
+      - name: Test
+        run: PYTHONPATH=src pytest tests -q

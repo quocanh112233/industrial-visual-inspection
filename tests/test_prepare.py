@@ -124,3 +124,46 @@ def test_hash_khong_phu_thuoc_thu_tu(tmp_path: Path):
         p.write_text(body)
         files.append(p)
     assert sha256_of_files(files) == sha256_of_files(list(reversed(files)))
+
+
+# ------------------------------------------------------------------ preprocess
+def test_letterbox_giu_ti_le_va_ra_dung_kich_thuoc():
+    """Anh khong vuong phai duoc dem vien, khong bi keo gian."""
+    pytest.importorskip("cv2")
+    import numpy as np
+
+    from ivid.preprocess import letterbox
+
+    img = np.zeros((100, 200, 3), dtype=np.uint8)   # rong gap doi cao
+    out, r, (px, py) = letterbox(img, 640)
+    assert out.shape[:2] == (640, 640)
+    assert r == pytest.approx(3.2)                   # 640/200
+    assert px == 0 and py == 160                     # dem tren duoi, khong dem trai phai
+
+
+def test_preprocess_ra_dung_dinh_dang_model_can():
+    pytest.importorskip("cv2")
+    import numpy as np
+
+    from ivid.preprocess import preprocess
+
+    img = np.full((200, 200, 3), 255, dtype=np.uint8)
+    x, r, pad = preprocess(img, 640)
+    assert x.shape == (1, 3, 640, 640)
+    assert x.dtype == np.float32
+    assert x.min() >= 0.0 and x.max() <= 1.0
+    assert r == pytest.approx(3.2)
+
+
+def test_preprocess_doi_bgr_sang_rgb():
+    pytest.importorskip("cv2")
+    import numpy as np
+
+    from ivid.preprocess import preprocess
+
+    img = np.zeros((200, 200, 3), dtype=np.uint8)
+    img[:, :, 0] = 255                               # kenh B day
+    x, _, _ = preprocess(img, 640)
+    # sau khi doi sang RGB, kenh 2 (B) moi la kenh day
+    assert x[0, 2].mean() == pytest.approx(1.0, abs=1e-3)
+    assert x[0, 0].mean() == pytest.approx(0.0, abs=1e-3)

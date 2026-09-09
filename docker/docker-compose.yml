@@ -1,0 +1,32 @@
+# FR-19 — mot lenh la co API chay:  docker compose -f docker/docker-compose.yml up
+#
+# Yeu cau tren Jetson: Docker phai co nvidia runtime.
+#   docker info | grep -i 'default runtime'      # phai la 'nvidia'
+# Neu chua, sua /etc/docker/daemon.json roi: sudo systemctl restart docker
+
+services:
+  ivid:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.jetson
+      args:
+        L4T_TAG: ${L4T_TAG:-r36.4.0}
+    image: ivid:jetson
+    container_name: ivid
+    runtime: nvidia
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      # FR-17: doi mot dong nay la doi runtime, khong phai build lai image
+      IVID_BACKEND: ${IVID_BACKEND:-tensorrt}
+      IVID_MODEL: ${IVID_MODEL:-yolov8n}
+      IVID_IMGSZ: ${IVID_IMGSZ:-640}
+      IVID_CONF: ${IVID_CONF:-0.25}
+      IVID_MAX_UPLOAD_MB: ${IVID_MAX_UPLOAD_MB:-10}
+    volumes:
+      # trong so mount tu host: engine phai build tren chinh may nay
+      - ../models:/app/models:ro
+      - ../data/processed:/app/data/processed:ro
+    # Jetson 8GB: gioi han de dich vu khong an het bo nho cua he thong
+    mem_limit: 4g

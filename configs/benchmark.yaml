@@ -1,0 +1,23 @@
+# FR-10..15 — Cau hinh phien do hieu nang. PHAI chay tren Jetson (rang buoc C1).
+
+models: [yolov8n, yolov8s]          # thu muc trong models/
+backends: [pytorch, onnx, tensorrt] # thu tu nay cung la thu tu chay
+
+imgsz: 640
+conf: 0.25                          # nguong cho do latency (giong luc phuc vu that)
+iou: 0.7
+
+warmup: 20                          # SRS §7.1 — bo 20 lan dau, chi phi nap engine
+sessions: 3                         # lap ca phien 3 lan, bao cao trung vi
+cooldown_seconds: 60                # de nguoi giua cac phien, tranh throttling (R3)
+settle_seconds: 300                 # cho on dinh nhiet truoc phien dau (SRS §7.1 buoc 1)
+
+split: test                         # do tren toan bo tap test, cung thu tu cho moi dinh dang
+max_images: null                    # null = dung het; dat so nho de chay thu nhanh
+
+# Cho phep ONNX Runtime roi ve CPU neu khong co GPU provider.
+# De true thi van chay duoc va bao cao se GHI RO la do tren CPU;
+# de false thi dung han, buoc phai sua moi truong truoc.
+allow_onnx_cpu_fallback: true
+
+percentiles: [50, 95, 99]

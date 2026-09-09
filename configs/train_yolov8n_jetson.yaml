@@ -1,0 +1,41 @@
+# FR-04 — Bien the de train NGAY TREN Jetson Orin Nano 8GB.
+#
+# Khac ban Colab o cho: Jetson chi co ~5GB RAM kha dung va chia se bo nho voi GPU.
+# Cac gia tri duoi day da ha xuong de khong bi OOM giua chung. Doi lai, ket qua
+# mAP se hoi khac ban 640px — PHAI ghi ro trong bao cao neu dung file nay,
+# vi so sanh mAP giua hai cau hinh train khac nhau la so sanh sai.
+
+name: yolov8n_jetson
+model: yolov8n.pt
+data: data/processed/data.yaml
+seed: 1337
+
+train:
+  epochs: 100
+  patience: 30
+  imgsz: 512                        # ha tu 640 -> giam ~40% bo nho kich hoat
+  batch: 8
+  workers: 2                        # 6 nhan CPU, de danh cho dataloader vua du
+  optimizer: auto
+  lr0: 0.01
+  lrf: 0.01
+  cos_lr: true
+  warmup_epochs: 3
+  amp: true
+  cache: false                      # cache=ram se an het RAM con lai
+  deterministic: true
+  val: true
+  plots: true
+
+  hsv_h: 0.0
+  hsv_s: 0.0
+  hsv_v: 0.3
+  degrees: 10.0
+  translate: 0.1
+  scale: 0.5
+  flipud: 0.5
+  fliplr: 0.5
+  mosaic: 1.0
+  close_mosaic: 10
+  mixup: 0.0
+  copy_paste: 0.0

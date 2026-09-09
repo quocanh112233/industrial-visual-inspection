@@ -1,0 +1,60 @@
+# FR-19 — Anh Docker cho Jetson (base L4T).
+#
+# QUAN TRONG ve phien ban: engine TensorRT gan chat voi phien ban TensorRT da
+# build ra no. Neu TensorRT trong container khac voi ban tren host, file
+# best.engine build o host se KHONG nap duoc trong container. Hai cach xu ly:
+#   (a) chon tag l4t-jetpack co TensorRT trung voi host  (khuyen nghi)
+#   (b) build lai engine BEN TRONG container: make export-trt
+# Host hien tai: L4T R36.5.2 / JetPack 6.2 / TensorRT 10.3.0 / CUDA 12.6.
+#
+# Kiem tra sau khi build:
+#   docker run --rm --runtime nvidia ivid:jetson python3 -c "import tensorrt;print(tensorrt.__version__)"
+
+ARG L4T_TAG=r36.4.0
+FROM nvcr.io/nvidia/l4t-jetpack:${L4T_TAG}
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PYTHONPATH=/app/src
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        python3-pip python3-dev \
+        libgl1 libglib2.0-0 \
+        curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Wheel onnxruntime-gpu cho aarch64 + CUDA 12.6. Ban tren PyPI chi co CPU.
+ARG JETSON_INDEX=https://pypi.jetson-ai-lab.io/jp6/cu126
+RUN python3 -m pip install --upgrade pip \
+ && python3 -m pip install --index-url ${JETSON_INDEX} onnxruntime-gpu || \
+    echo "CANH BAO: khong tai duoc onnxruntime-gpu, backend onnx se chay CPU"
+
+# ultralytics KHONG duoc keo torch tu PyPI: no se ghi de ban CUDA cua L4T.
+RUN python3 -m pip install --no-deps ultralytics ultralytics-thop \
+ && python3 -m pip install \
+        "numpy<2.3" opencv-python-headless pillow pyyaml requests \
+        fastapi "uvicorn[standard]" python-multipart "pydantic>=2"
+
+COPY src/ /app/src/
+COPY configs/ /app/configs/
+
+# models/ KHONG copy vao image (file lon, va engine phai build tren dung may).
+# Mount tu ngoai vao qua docker-compose.
+VOLUME ["/app/models", "/app/data"]
+
+ENV IVID_BACKEND=tensorrt \
+    IVID_MODEL=yolov8n \
+    IVID_IMGSZ=640 \
+    IVID_DEVICE=cuda \
+    IVID_MAX_UPLOAD_MB=10
+
+EXPOSE 8000
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
+    CMD curl -fsS http://localhost:8000/health || exit 1
+
+CMD ["python3", "-m", "uvicorn", "ivid.serve.app:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -1,0 +1,15 @@
+[tool.ruff]
+line-length = 110
+target-version = "py310"
+exclude = [".venv", "data", "models", "runs"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM"]
+ignore = [
+  "E501",   # do dai dong da do line-length lo
+  "B008",   # goi ham trong tham so mac dinh — argparse dung nhieu
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
