@@ -57,10 +57,24 @@ def draw_detections(img_bgr: np.ndarray, det: np.ndarray, names: list[str],
         (tw, th), _ = cv2.getTextSize(nhan, cv2.FONT_HERSHEY_SIMPLEX, fs, thick)
         # nhan nam tren hop, nhung neu hop sat mep tren thi lat xuong duoi
         ty = p1[1] - 4 if p1[1] - th - 6 >= 0 else p1[1] + th + 6
-        cv2.rectangle(out, (p1[0], ty - th - 4), (p1[0] + tw + 4, ty + 2), color, -1)
-        cv2.putText(out, nhan, (p1[0] + 2, ty - 2), cv2.FONT_HERSHEY_SIMPLEX,
+        # ...va keo vao trong neu no se tran qua mep phai (hop sat mep la chuyen
+        # thuong voi anh NEU-DET, nhieu loi chay ra tan bien anh)
+        tx = min(p1[0], out.shape[1] - tw - 6)
+        tx = max(tx, 0)
+        cv2.rectangle(out, (tx, ty - th - 4), (tx + tw + 4, ty + 2), color, -1)
+        cv2.putText(out, nhan, (tx + 2, ty - 2), cv2.FONT_HERSHEY_SIMPLEX,
                     fs, (255, 255, 255), thick, cv2.LINE_AA)
     return out
+
+
+def nhan_o(lop: str, n_hop: int, n_that: int) -> str:
+    """Tieu de mot o anh. CHI DUNG ASCII.
+
+    cv2.putText voi font Hershey khong ve duoc ky tu ngoai ASCII — no thay bang
+    dau '?'. Dung dau gach ngang em (—) o day tung lam tieu de hien ra
+    'crazing ??? 2 hop / 3 that'.
+    """
+    return f"{lop}  |  {n_hop} hop du doan / {n_that} hop that"
 
 
 def add_caption(tile: np.ndarray, text: str, height: int = 30) -> np.ndarray:
@@ -178,7 +192,7 @@ def main() -> int:
         ve = draw_detections(big, det_s, names, gt_s, conf_thres=a.conf, scale=r)
         n_hop = int((det[:, 4] >= a.conf).sum()) if len(det) else 0
         lop_that = names[int(gts[i][0, 4])] if len(gts[i]) else "?"
-        tiles.append(add_caption(ve, f"{lop_that}  —  {n_hop} hop / {len(gts[i])} that"))
+        tiles.append(add_caption(ve, nhan_o(lop_that, n_hop, len(gts[i]))))
     runner.close()
 
     grid = build_grid(tiles, cols=a.cols)

@@ -86,3 +86,32 @@ def test_chon_anh_khong_lay_trung_mot_anh_hai_lan():
 def test_chon_anh_bo_qua_anh_khong_co_nhan():
     gts = [np.zeros((0, 5), np.float32), np.array([[0, 0, 10, 10, 0]], np.float32)]
     assert chon_anh_moi_lop([Path("a.jpg"), Path("b.jpg")], gts, nc=1) == [1]
+
+
+# ------------------------------------------------ chu tren anh: chi ASCII moi ve duoc
+def test_nhan_o_chi_dung_ascii():
+    """Font Hershey cua OpenCV khong ve duoc ky tu ngoai ASCII: no thay bang '?'.
+    Dau gach ngang em tung lam tieu de hien 'crazing ??? 2 hop / 3 that'."""
+    from ivid.visualize import nhan_o
+
+    t = nhan_o("rolled-in_scale", 2, 3)
+    assert t.isascii(), f"tieu de co ky tu ngoai ASCII: {t!r}"
+    assert "2" in t and "3" in t
+
+
+def test_nhan_khong_tran_qua_mep_phai():
+    """Hop sat mep phai thi nhan phai duoc keo vao trong, khong bi cat cut."""
+    img = anh(200, 200)
+    det = np.array([[190, 100, 199, 150, 0.87, 3]], np.float32)   # sat mep phai
+    out = draw_detections(img, det, NAMES)
+    assert out.shape == img.shape
+    # cot ngoai cung ben phai phai co diem anh cua nen nhan (mau lop), tuc chu
+    # da duoc keo vao trong thay vi ve tran ra ngoai bien roi mat
+    assert not np.array_equal(out, img)
+
+
+def test_nhan_o_ghi_ro_dau_la_du_doan_dau_la_that():
+    from ivid.visualize import nhan_o
+
+    t = nhan_o("crazing", 2, 3)
+    assert "du doan" in t and "that" in t
