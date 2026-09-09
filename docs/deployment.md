@@ -167,6 +167,8 @@ curl http://localhost:8000/health
 | `docker: unknown runtime nvidia` | Docker chưa cấu hình nvidia runtime | sửa `/etc/docker/daemon.json` như mục 4 |
 | `permission denied ... /var/run/docker.sock` | tài khoản chưa thuộc nhóm `docker` | `sudo usermod -aG docker $USER` rồi `newgrp docker` (nhớ `source .venv/bin/activate` lại) |
 | `failed to add the host (veth…) <=> sandbox (veth…) pair interfaces: operation not supported` | kernel Jetson **không có module `veth`**, nên mạng cầu của Docker không dùng được | đã xử lý sẵn: `docker-compose.yml` dùng `network: host` khi build và `network_mode: host` khi chạy |
+| `/health` trả `"loaded": false, "error": "ModuleNotFoundError: No module named 'torch'"` | image L4T không có PyTorch, và runner TensorRT (bản cũ) cấp phát bộ nhớ GPU bằng torch | đã xử lý: runner dùng `cuda-python` thay cho torch. Trên host nhớ `pip install cuda-python` |
+| `IVID_BACKEND=pytorch` không chạy trong container | **cố ý** — image triển khai không cài torch/ultralytics | dùng `tensorrt` (khuyến nghị) hoặc `onnx`; muốn PyTorch thì chạy `make serve` ngoài container |
 
 Về `veth`: kiểm chứng bằng
 

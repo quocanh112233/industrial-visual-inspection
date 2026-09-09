@@ -54,11 +54,25 @@ class MockRunner:
         self.weights = Path("mock")
 
     def run_array(self, img_bgr: np.ndarray):
+        """Tra ve mot detection co dinh, va thoi gian DO THAT chu khong bia ra.
+
+        Truoc day ham nay tra ve Timing(0.5, 1.0, 0.2) — nhung con so bia. Hai
+        cai hai: (1) /predict bao "inference_ms": 1.0 trong khi khong co gi ton
+        1 ms, ai do do hieu nang qua mock se nhan so vo nghia; (2) no pha vo bat
+        bien total_ms >= inference_ms, vi total_ms la thoi gian THAT cua ca yeu
+        cau va o mock thi no nho hon 1 ms. Test tung do do gay ra loi phu thuoc
+        thu tu chay: chi hong khi may du nhanh.
+        """
+        import time
+
         from ..benchmark.runners.base import RunOutput, Timing
 
+        t0 = time.perf_counter()
         h, w = img_bgr.shape[:2]
         det = np.array([[w * 0.2, h * 0.2, w * 0.6, h * 0.7, 0.87, 1]], dtype=np.float32)
-        return RunOutput(det, Timing(0.5, 1.0, 0.2))
+        return RunOutput(det, Timing(preprocess_ms=0.0,
+                                     inference_ms=(time.perf_counter() - t0) * 1000,
+                                     postprocess_ms=0.0))
 
     def warmup(self, n: int = 1) -> None:
         pass

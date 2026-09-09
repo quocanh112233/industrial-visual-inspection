@@ -92,6 +92,10 @@ python -m pip install --force-reinstall --no-cache-dir \
 
 # --- 3. ultralytics KHONG keo theo torch ------------------------------------
 log "Cai ultralytics (--no-deps) + cac phu thuoc an toan..."
+# cuda-python: runner TensorRT cap phat bo nho GPU qua cudart thay vi torch,
+# de anh Docker khong phai keo ca torch ve chi de chay mot engine 9 MB.
+python -m pip install cuda-python
+
 python -m pip install --no-deps ultralytics
 python -m pip install \
   opencv-python-headless pillow pyyaml requests scipy \

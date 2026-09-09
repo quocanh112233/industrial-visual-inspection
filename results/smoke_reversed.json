@@ -6,7 +6,7 @@
       "backend": "tensorrt",
       "backend_info": {
         "runner": "tensorrt",
-        "weights": "/home/jetson/quoc_anh/industrial-visual-inspection/models/_smoke/best.engine",
+        "weights": "models/_smoke/best.engine",
         "model_size_mb": 9.39,
         "imgsz": 640,
         "conf": 0.25,
@@ -164,7 +164,7 @@
       "backend": "onnx",
       "backend_info": {
         "runner": "onnx",
-        "weights": "/home/jetson/quoc_anh/industrial-visual-inspection/models/_smoke/best.onnx",
+        "weights": "models/_smoke/best.onnx",
         "model_size_mb": 12.85,
         "imgsz": 640,
         "conf": 0.25,
@@ -306,7 +306,7 @@
       "backend": "pytorch",
       "backend_info": {
         "runner": "pytorch",
-        "weights": "/home/jetson/quoc_anh/industrial-visual-inspection/models/_smoke/best.pt",
+        "weights": "models/_smoke/best.pt",
         "model_size_mb": 6.55,
         "imgsz": 640,
         "conf": 0.25,

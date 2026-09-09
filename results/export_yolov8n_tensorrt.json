@@ -20,7 +20,7 @@
   "engine_size_mb": 8.98,
   "trtexec_reported_build_sec": 410.035,
   "load_check": {
-    "engine": "/home/jetson/quoc_anh/industrial-visual-inspection/models/yolov8n/best.engine",
+    "engine": "models/yolov8n/best.engine",
     "engine_size_mb": 8.98,
     "tensorrt": "10.3.0",
     "torch": "2.10.0",

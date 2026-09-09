@@ -33,9 +33,19 @@ RUN python3 -m pip install --upgrade pip \
  && python3 -m pip install --index-url ${JETSON_INDEX} onnxruntime-gpu || \
     echo "CANH BAO: khong tai duoc onnxruntime-gpu, backend onnx se chay CPU"
 
-# ultralytics KHONG duoc keo torch tu PyPI: no se ghi de ban CUDA cua L4T.
-RUN python3 -m pip install --no-deps ultralytics ultralytics-thop \
- && python3 -m pip install \
+# KHONG cai torch va ultralytics vao anh trien khai.
+#
+# Anh nay chi chay SUY LUAN. Runner TensorRT cap phat bo nho GPU bang
+# cuda-python chu khong bang torch (xem docstring tensorrt_runner.py), con
+# runner ONNX chi can onnxruntime-gpu. Ca hai deu khong can framework huan
+# luyen. Nho vay anh nho hon vai GB.
+#
+# Hau qua can biet: IVID_BACKEND=pytorch KHONG chay duoc trong container nay —
+# co y nhu vay. Bang benchmark cua chinh du an khuyen nghi TensorRT FP16
+# (14.6 ms, 68 FPS) chu khong phai PyTorch (34.7 ms), nen dinh dang duy nhat
+# khong nen dung lai la dinh dang duy nhat bi bo ra.
+RUN python3 -m pip install \
+        cuda-python \
         "numpy<2.3" opencv-python-headless pillow pyyaml requests \
         fastapi "uvicorn[standard]" python-multipart "pydantic>=2"
 

@@ -17,6 +17,8 @@ import sys
 import time
 from pathlib import Path
 
+from ..data.common import rel_to_root
+
 
 def load_engine(path: Path):
     import tensorrt as trt
@@ -81,7 +83,7 @@ def run(engine_path: Path, iters: int = 100, warmup: int = 20) -> dict:
 
     lat.sort()
     return {
-        "engine": str(engine_path),
+        "engine": rel_to_root(engine_path),
         "engine_size_mb": round(engine_path.stat().st_size / 1e6, 2),
         "tensorrt": trt.__version__,
         "torch": torch.__version__,

@@ -6,6 +6,7 @@ torch>=2.2
 torchvision
 onnx>=1.16
 onnxruntime>=1.18
+cuda-python
 numpy<2.3
 opencv-python-headless
 pillow

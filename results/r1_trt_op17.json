@@ -1,5 +1,5 @@
 {
-  "engine": "/home/jetson/quoc_anh/industrial-visual-inspection/models/smoke/yolov8n_op17.engine",
+  "engine": "models/smoke/yolov8n_op17.engine",
   "engine_size_mb": 9.39,
   "tensorrt": "10.3.0",
   "torch": "2.10.0",
