@@ -1,5 +1,5 @@
 {
-  "model": "yolov8n",
+  "model": "yolov8s",
   "n_images": 50,
   "iou_match": 0.5,
   "conf": 0.25,
@@ -10,58 +10,62 @@
     "tensorrt"
   ],
   "total_detections": {
-    "pytorch": 93,
-    "onnx": 93,
-    "tensorrt": 92
+    "pytorch": 96,
+    "onnx": 96,
+    "tensorrt": 95
   },
   "pairs": {
     "pytorch_vs_onnx": {
       "n_images": 50,
       "detections": {
-        "pytorch": 93,
-        "onnx": 93
+        "pytorch": 96,
+        "onnx": 96
       },
-      "matched": 93,
+      "matched": 96,
       "only_pytorch": 0,
       "only_onnx": 0,
       "match_rate": 1.0,
       "images_with_difference": 0,
-      "mean_iou_of_matched": 0.9991,
-      "max_conf_diff": 0.0032,
+      "mean_iou_of_matched": 0.9989,
+      "max_conf_diff": 0.0075,
       "examples_differing": []
     },
     "pytorch_vs_tensorrt": {
       "n_images": 50,
       "detections": {
-        "pytorch": 93,
-        "tensorrt": 92
+        "pytorch": 96,
+        "tensorrt": 95
       },
-      "matched": 92,
-      "only_pytorch": 1,
-      "only_tensorrt": 0,
-      "match_rate": 0.9892,
-      "images_with_difference": 1,
-      "mean_iou_of_matched": 0.9988,
-      "max_conf_diff": 0.005,
+      "matched": 94,
+      "only_pytorch": 2,
+      "only_tensorrt": 1,
+      "match_rate": 0.9691,
+      "images_with_difference": 3,
+      "mean_iou_of_matched": 0.9984,
+      "max_conf_diff": 0.0066,
       "examples_differing": [
-        "crazing_193.jpg"
+        "crazing_193.jpg",
+        "crazing_261.jpg",
+        "crazing_75.jpg"
       ]
     },
     "onnx_vs_tensorrt": {
       "n_images": 50,
       "detections": {
-        "onnx": 93,
-        "tensorrt": 92
+        "onnx": 96,
+        "tensorrt": 95
       },
-      "matched": 92,
-      "only_onnx": 1,
-      "only_tensorrt": 0,
-      "match_rate": 0.9892,
-      "images_with_difference": 1,
-      "mean_iou_of_matched": 0.9992,
-      "max_conf_diff": 0.0047,
+      "matched": 94,
+      "only_onnx": 2,
+      "only_tensorrt": 1,
+      "match_rate": 0.9691,
+      "images_with_difference": 3,
+      "mean_iou_of_matched": 0.999,
+      "max_conf_diff": 0.0034,
       "examples_differing": [
-        "crazing_193.jpg"
+        "crazing_193.jpg",
+        "crazing_261.jpg",
+        "crazing_75.jpg"
       ]
     }
   }

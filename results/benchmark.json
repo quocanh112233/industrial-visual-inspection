@@ -11,6 +11,8 @@
         "imgsz": 640,
         "conf": 0.25,
         "iou": 0.7,
+        "scaleup": true,
+        "multi_label": false,
         "framework": "torch 2.10.0",
         "device": "cuda",
         "gpu": "Orin",
@@ -21,218 +23,218 @@
       "sessions": [
         {
           "session": 1,
-          "wall_seconds": 9.4,
+          "wall_seconds": 9.34,
           "n_images": 270,
           "n_detections": 730,
-          "fps_wall": 28.73,
+          "fps_wall": 28.91,
           "stages": {
             "preprocess": {
-              "p50": 5.622,
-              "p95": 5.654,
-              "p99": 5.674,
-              "min": 5.595,
-              "max": 5.844,
-              "mean": 5.627,
-              "std": 0.025,
+              "p50": 5.63,
+              "p95": 5.715,
+              "p99": 5.866,
+              "min": 5.59,
+              "max": 5.964,
+              "mean": 5.642,
+              "std": 0.05,
               "n": 270
             },
             "inference": {
-              "p50": 28.006,
-              "p95": 28.445,
-              "p99": 28.538,
-              "min": 27.788,
-              "max": 28.725,
-              "mean": 28.054,
-              "std": 0.167,
+              "p50": 27.786,
+              "p95": 28.217,
+              "p99": 28.846,
+              "min": 27.432,
+              "max": 29.911,
+              "mean": 27.836,
+              "std": 0.28,
               "n": 270
             },
             "postprocess": {
-              "p50": 1.077,
+              "p50": 1.061,
               "p95": 1.254,
-              "p99": 1.401,
-              "min": 0.49,
-              "max": 1.41,
-              "mean": 1.085,
+              "p99": 1.383,
+              "min": 0.473,
+              "max": 1.434,
+              "mean": 1.068,
+              "std": 0.124,
+              "n": 270
+            },
+            "total": {
+              "p50": 34.501,
+              "p95": 34.967,
+              "p99": 35.776,
+              "min": 33.697,
+              "max": 36.758,
+              "mean": 34.546,
+              "std": 0.32,
+              "n": 270
+            }
+          },
+          "temp_before_mean_c": 59.3,
+          "temp_after_mean_c": 60.1
+        },
+        {
+          "session": 2,
+          "wall_seconds": 9.27,
+          "n_images": 270,
+          "n_detections": 730,
+          "fps_wall": 29.12,
+          "stages": {
+            "preprocess": {
+              "p50": 5.623,
+              "p95": 5.68,
+              "p99": 5.842,
+              "min": 5.582,
+              "max": 5.94,
+              "mean": 5.631,
+              "std": 0.047,
+              "n": 270
+            },
+            "inference": {
+              "p50": 27.571,
+              "p95": 27.873,
+              "p99": 28.128,
+              "min": 27.234,
+              "max": 28.425,
+              "mean": 27.607,
+              "std": 0.165,
+              "n": 270
+            },
+            "postprocess": {
+              "p50": 1.056,
+              "p95": 1.233,
+              "p99": 1.35,
+              "min": 0.471,
+              "max": 1.513,
+              "mean": 1.059,
               "std": 0.122,
               "n": 270
             },
             "total": {
-              "p50": 34.743,
-              "p95": 35.163,
-              "p99": 35.363,
-              "min": 34.034,
-              "max": 35.404,
-              "mean": 34.765,
-              "std": 0.21,
+              "p50": 34.265,
+              "p95": 34.691,
+              "p99": 34.937,
+              "min": 33.541,
+              "max": 35.205,
+              "mean": 34.297,
+              "std": 0.224,
               "n": 270
             }
           },
-          "temp_before_mean_c": 58.7,
-          "temp_after_mean_c": 59.4
-        },
-        {
-          "session": 2,
-          "wall_seconds": 9.39,
-          "n_images": 270,
-          "n_detections": 730,
-          "fps_wall": 28.74,
-          "stages": {
-            "preprocess": {
-              "p50": 5.622,
-              "p95": 5.657,
-              "p99": 5.688,
-              "min": 5.594,
-              "max": 5.768,
-              "mean": 5.627,
-              "std": 0.02,
-              "n": 270
-            },
-            "inference": {
-              "p50": 27.998,
-              "p95": 28.395,
-              "p99": 28.513,
-              "min": 27.793,
-              "max": 28.745,
-              "mean": 28.04,
-              "std": 0.158,
-              "n": 270
-            },
-            "postprocess": {
-              "p50": 1.079,
-              "p95": 1.254,
-              "p99": 1.365,
-              "min": 0.486,
-              "max": 1.427,
-              "mean": 1.083,
-              "std": 0.121,
-              "n": 270
-            },
-            "total": {
-              "p50": 34.703,
-              "p95": 35.171,
-              "p99": 35.369,
-              "min": 34.077,
-              "max": 35.464,
-              "mean": 34.751,
-              "std": 0.204,
-              "n": 270
-            }
-          },
-          "temp_before_mean_c": 58.5,
-          "temp_after_mean_c": 59.5
+          "temp_before_mean_c": 59.0,
+          "temp_after_mean_c": 60.1
         },
         {
           "session": 3,
-          "wall_seconds": 9.4,
+          "wall_seconds": 9.24,
           "n_images": 270,
           "n_detections": 730,
-          "fps_wall": 28.73,
+          "fps_wall": 29.22,
           "stages": {
             "preprocess": {
-              "p50": 5.623,
-              "p95": 5.654,
-              "p99": 5.684,
-              "min": 5.593,
-              "max": 5.729,
-              "mean": 5.628,
-              "std": 0.018,
+              "p50": 5.645,
+              "p95": 5.674,
+              "p99": 5.686,
+              "min": 5.604,
+              "max": 5.772,
+              "mean": 5.646,
+              "std": 0.019,
               "n": 270
             },
             "inference": {
-              "p50": 28.002,
-              "p95": 28.445,
-              "p99": 28.521,
-              "min": 27.813,
-              "max": 28.653,
-              "mean": 28.047,
-              "std": 0.161,
+              "p50": 27.452,
+              "p95": 27.701,
+              "p99": 27.803,
+              "min": 27.255,
+              "max": 28.124,
+              "mean": 27.469,
+              "std": 0.123,
               "n": 270
             },
             "postprocess": {
-              "p50": 1.079,
-              "p95": 1.256,
-              "p99": 1.389,
-              "min": 0.486,
-              "max": 1.513,
-              "mean": 1.085,
-              "std": 0.125,
+              "p50": 1.068,
+              "p95": 1.231,
+              "p99": 1.347,
+              "min": 0.483,
+              "max": 1.363,
+              "mean": 1.071,
+              "std": 0.117,
               "n": 270
             },
             "total": {
-              "p50": 34.727,
-              "p95": 35.201,
-              "p99": 35.318,
-              "min": 33.974,
-              "max": 35.509,
-              "mean": 34.759,
-              "std": 0.208,
+              "p50": 34.182,
+              "p95": 34.487,
+              "p99": 34.556,
+              "min": 33.516,
+              "max": 34.871,
+              "mean": 34.186,
+              "std": 0.17,
               "n": 270
             }
           },
-          "temp_before_mean_c": 58.8,
-          "temp_after_mean_c": 59.7
+          "temp_before_mean_c": 59.1,
+          "temp_after_mean_c": 60.1
         }
       ],
       "median_stages": {
         "preprocess": {
-          "p50": 5.622,
-          "p95": 5.654,
-          "p99": 5.684,
-          "min": 5.594,
-          "max": 5.768,
-          "mean": 5.627,
-          "std": 0.02
+          "p50": 5.63,
+          "p95": 5.68,
+          "p99": 5.842,
+          "min": 5.59,
+          "max": 5.94,
+          "mean": 5.642,
+          "std": 0.047
         },
         "inference": {
-          "p50": 28.002,
-          "p95": 28.445,
-          "p99": 28.521,
-          "min": 27.793,
-          "max": 28.725,
-          "mean": 28.047,
-          "std": 0.161
+          "p50": 27.571,
+          "p95": 27.873,
+          "p99": 28.128,
+          "min": 27.255,
+          "max": 28.425,
+          "mean": 27.607,
+          "std": 0.165
         },
         "postprocess": {
-          "p50": 1.079,
-          "p95": 1.254,
-          "p99": 1.389,
-          "min": 0.486,
-          "max": 1.427,
-          "mean": 1.085,
+          "p50": 1.061,
+          "p95": 1.233,
+          "p99": 1.35,
+          "min": 0.473,
+          "max": 1.434,
+          "mean": 1.068,
           "std": 0.122
         },
         "total": {
-          "p50": 34.727,
-          "p95": 35.171,
-          "p99": 35.363,
-          "min": 34.034,
-          "max": 35.464,
-          "mean": 34.759,
-          "std": 0.208
+          "p50": 34.265,
+          "p95": 34.691,
+          "p99": 34.937,
+          "min": 33.541,
+          "max": 35.205,
+          "mean": 34.297,
+          "std": 0.224
         }
       },
-      "latency_p50_ms": 34.727,
-      "latency_p95_ms": 35.171,
-      "fps": 28.8,
+      "latency_p50_ms": 34.265,
+      "latency_p95_ms": 34.691,
+      "fps": 29.2,
       "stage_sum_check": {
-        "sum_of_parts_p50": 34.703,
-        "total_p50": 34.727
+        "sum_of_parts_p50": 34.262,
+        "total_p50": 34.265
       },
-      "session_p50_spread_percent": 0.12,
+      "session_p50_spread_percent": 0.93,
       "resources": {
-        "process_rss_peak_mb": 1131.8,
-        "process_rss_mean_mb": 1131.7,
-        "system_used_peak_mb": 2574.1,
-        "system_used_baseline_mb": 2572.5,
-        "system_used_delta_mb": 1.6,
+        "process_rss_peak_mb": 1137.5,
+        "process_rss_mean_mb": 1137.4,
+        "system_used_peak_mb": 3087.2,
+        "system_used_baseline_mb": 3079.8,
+        "system_used_delta_mb": 7.4,
         "torch_gpu_allocated_mb": 12.3,
         "torch_gpu_peak_mb": 37.0,
-        "n_samples": 740,
+        "n_samples": 739,
         "ghi_chu": "Tren Jetson, CPU va GPU dung chung DRAM — 'gpu_peak' nam trong cung tong bo nho he thong, khong phai VRAM roi."
       },
       "idle_before_load": {
-        "system_used_mb": 2210.0,
-        "process_rss_mb": 605.5
+        "system_used_mb": 2725.9,
+        "process_rss_mb": 608.9
       }
     },
     "yolov8n|onnx": {
@@ -246,6 +248,8 @@
         "imgsz": 640,
         "conf": 0.25,
         "iou": 0.7,
+        "scaleup": true,
+        "multi_label": false,
         "framework": "onnxruntime 1.24.0",
         "providers_available": [
           "TensorrtExecutionProvider",
@@ -260,223 +264,223 @@
         "running_on_gpu": true,
         "precision": "fp32"
       },
-      "load_seconds": 97.36,
+      "load_seconds": 97.15,
       "model_size_mb": 12.27,
       "sessions": [
         {
           "session": 1,
-          "wall_seconds": 5.06,
+          "wall_seconds": 5.01,
           "n_images": 270,
           "n_detections": 734,
-          "fps_wall": 53.34,
+          "fps_wall": 53.88,
           "stages": {
             "preprocess": {
-              "p50": 5.684,
-              "p95": 5.811,
-              "p99": 5.848,
-              "min": 5.63,
-              "max": 6.036,
-              "mean": 5.694,
-              "std": 0.051,
+              "p50": 5.667,
+              "p95": 5.72,
+              "p99": 5.735,
+              "min": 5.615,
+              "max": 5.763,
+              "mean": 5.673,
+              "std": 0.03,
               "n": 270
             },
             "inference": {
-              "p50": 11.886,
-              "p95": 11.943,
-              "p99": 12.03,
-              "min": 11.836,
-              "max": 12.221,
-              "mean": 11.894,
-              "std": 0.043,
+              "p50": 11.803,
+              "p95": 11.856,
+              "p99": 11.875,
+              "min": 11.749,
+              "max": 11.885,
+              "mean": 11.808,
+              "std": 0.029,
               "n": 270
             },
             "postprocess": {
-              "p50": 1.115,
-              "p95": 1.296,
-              "p99": 1.426,
-              "min": 0.497,
-              "max": 1.483,
-              "mean": 1.117,
-              "std": 0.126,
+              "p50": 1.038,
+              "p95": 1.205,
+              "p99": 1.327,
+              "min": 0.446,
+              "max": 1.407,
+              "mean": 1.041,
+              "std": 0.123,
               "n": 270
             },
             "total": {
-              "p50": 18.692,
-              "p95": 18.96,
-              "p99": 19.029,
-              "min": 18.022,
-              "max": 19.064,
-              "mean": 18.705,
-              "std": 0.147,
+              "p50": 18.518,
+              "p95": 18.697,
+              "p99": 18.828,
+              "min": 17.87,
+              "max": 18.958,
+              "mean": 18.522,
+              "std": 0.133,
               "n": 270
             }
           },
-          "temp_before_mean_c": 61.4,
+          "temp_before_mean_c": 61.7,
           "temp_after_mean_c": 61.9
         },
         {
           "session": 2,
-          "wall_seconds": 5.06,
+          "wall_seconds": 5.01,
           "n_images": 270,
           "n_detections": 734,
-          "fps_wall": 53.36,
+          "fps_wall": 53.91,
           "stages": {
             "preprocess": {
-              "p50": 5.679,
-              "p95": 5.769,
-              "p99": 5.887,
-              "min": 5.63,
-              "max": 6.123,
-              "mean": 5.69,
-              "std": 0.05,
+              "p50": 5.651,
+              "p95": 5.703,
+              "p99": 5.736,
+              "min": 5.597,
+              "max": 5.887,
+              "mean": 5.657,
+              "std": 0.031,
               "n": 270
             },
             "inference": {
-              "p50": 11.884,
-              "p95": 11.949,
-              "p99": 12.043,
-              "min": 11.836,
-              "max": 12.219,
-              "mean": 11.892,
-              "std": 0.04,
+              "p50": 11.806,
+              "p95": 11.864,
+              "p99": 11.893,
+              "min": 11.756,
+              "max": 12.13,
+              "mean": 11.811,
+              "std": 0.036,
               "n": 270
             },
             "postprocess": {
-              "p50": 1.114,
-              "p95": 1.305,
-              "p99": 1.393,
-              "min": 0.488,
-              "max": 1.458,
-              "mean": 1.116,
-              "std": 0.127,
+              "p50": 1.039,
+              "p95": 1.217,
+              "p99": 1.31,
+              "min": 0.454,
+              "max": 1.367,
+              "mean": 1.044,
+              "std": 0.12,
               "n": 270
             },
             "total": {
-              "p50": 18.694,
-              "p95": 18.93,
-              "p99": 19.041,
-              "min": 18.015,
-              "max": 19.369,
-              "mean": 18.698,
-              "std": 0.145,
+              "p50": 18.509,
+              "p95": 18.695,
+              "p99": 18.817,
+              "min": 17.92,
+              "max": 19.223,
+              "mean": 18.511,
+              "std": 0.131,
               "n": 270
             }
           },
-          "temp_before_mean_c": 60.0,
+          "temp_before_mean_c": 60.2,
           "temp_after_mean_c": 60.9
         },
         {
           "session": 3,
-          "wall_seconds": 5.03,
+          "wall_seconds": 5.01,
           "n_images": 270,
           "n_detections": 734,
-          "fps_wall": 53.69,
+          "fps_wall": 53.89,
           "stages": {
             "preprocess": {
-              "p50": 5.635,
-              "p95": 5.691,
-              "p99": 5.758,
-              "min": 5.586,
-              "max": 5.86,
-              "mean": 5.642,
+              "p50": 5.656,
+              "p95": 5.705,
+              "p99": 5.789,
+              "min": 5.604,
+              "max": 5.844,
+              "mean": 5.66,
               "std": 0.033,
               "n": 270
             },
             "inference": {
-              "p50": 11.855,
-              "p95": 11.91,
-              "p99": 11.944,
-              "min": 11.811,
-              "max": 12.14,
-              "mean": 11.86,
-              "std": 0.031,
+              "p50": 11.81,
+              "p95": 11.86,
+              "p99": 11.928,
+              "min": 11.759,
+              "max": 12.091,
+              "mean": 11.814,
+              "std": 0.034,
               "n": 270
             },
             "postprocess": {
-              "p50": 1.072,
-              "p95": 1.266,
-              "p99": 1.38,
-              "min": 0.471,
-              "max": 1.783,
-              "mean": 1.081,
-              "std": 0.132,
+              "p50": 1.034,
+              "p95": 1.209,
+              "p99": 1.35,
+              "min": 0.453,
+              "max": 1.391,
+              "mean": 1.042,
+              "std": 0.122,
               "n": 270
             },
             "total": {
-              "p50": 18.572,
-              "p95": 18.8,
-              "p99": 18.917,
-              "min": 17.926,
-              "max": 19.266,
-              "mean": 18.583,
-              "std": 0.141,
+              "p50": 18.51,
+              "p95": 18.705,
+              "p99": 18.855,
+              "min": 17.892,
+              "max": 19.143,
+              "mean": 18.516,
+              "std": 0.135,
               "n": 270
             }
           },
-          "temp_before_mean_c": 59.4,
-          "temp_after_mean_c": 60.2
+          "temp_before_mean_c": 59.7,
+          "temp_after_mean_c": 60.4
         }
       ],
       "median_stages": {
         "preprocess": {
-          "p50": 5.679,
-          "p95": 5.769,
-          "p99": 5.848,
-          "min": 5.63,
-          "max": 6.036,
-          "mean": 5.69,
-          "std": 0.05
+          "p50": 5.656,
+          "p95": 5.705,
+          "p99": 5.736,
+          "min": 5.604,
+          "max": 5.844,
+          "mean": 5.66,
+          "std": 0.031
         },
         "inference": {
-          "p50": 11.884,
-          "p95": 11.943,
-          "p99": 12.03,
-          "min": 11.836,
-          "max": 12.219,
-          "mean": 11.892,
-          "std": 0.04
+          "p50": 11.806,
+          "p95": 11.86,
+          "p99": 11.893,
+          "min": 11.756,
+          "max": 12.091,
+          "mean": 11.811,
+          "std": 0.034
         },
         "postprocess": {
-          "p50": 1.114,
-          "p95": 1.296,
-          "p99": 1.393,
-          "min": 0.488,
-          "max": 1.483,
-          "mean": 1.116,
-          "std": 0.127
+          "p50": 1.038,
+          "p95": 1.209,
+          "p99": 1.327,
+          "min": 0.453,
+          "max": 1.391,
+          "mean": 1.042,
+          "std": 0.122
         },
         "total": {
-          "p50": 18.692,
-          "p95": 18.93,
-          "p99": 19.029,
-          "min": 18.015,
-          "max": 19.266,
-          "mean": 18.698,
-          "std": 0.145
+          "p50": 18.51,
+          "p95": 18.697,
+          "p99": 18.828,
+          "min": 17.892,
+          "max": 19.143,
+          "mean": 18.516,
+          "std": 0.133
         }
       },
-      "latency_p50_ms": 18.692,
-      "latency_p95_ms": 18.93,
-      "fps": 53.5,
+      "latency_p50_ms": 18.51,
+      "latency_p95_ms": 18.697,
+      "fps": 54.0,
       "stage_sum_check": {
-        "sum_of_parts_p50": 18.677,
-        "total_p50": 18.692
+        "sum_of_parts_p50": 18.5,
+        "total_p50": 18.51
       },
-      "session_p50_spread_percent": 0.66,
+      "session_p50_spread_percent": 0.05,
       "resources": {
-        "process_rss_peak_mb": 2675.1,
-        "process_rss_mean_mb": 2675.0,
-        "system_used_peak_mb": 4660.1,
-        "system_used_baseline_mb": 4653.6,
-        "system_used_delta_mb": 6.5,
+        "process_rss_peak_mb": 2683.0,
+        "process_rss_mean_mb": 2683.0,
+        "system_used_peak_mb": 4657.2,
+        "system_used_baseline_mb": 4650.6,
+        "system_used_delta_mb": 6.6,
         "torch_gpu_allocated_mb": 0.0,
         "torch_gpu_peak_mb": 0.0,
         "n_samples": 675,
         "ghi_chu": "Tren Jetson, CPU va GPU dung chung DRAM — 'gpu_peak' nam trong cung tong bo nho he thong, khong phai VRAM roi."
       },
       "idle_before_load": {
-        "system_used_mb": 2573.9,
-        "process_rss_mb": 1131.8
+        "system_used_mb": 3085.7,
+        "process_rss_mb": 1137.6
       }
     },
     "yolov8n|tensorrt": {
@@ -490,8 +494,11 @@
         "imgsz": 640,
         "conf": 0.25,
         "iou": 0.7,
+        "scaleup": true,
+        "multi_label": false,
         "framework": "tensorrt 10.3.0",
         "gpu": "Orin",
+        "cap_phat": "cuda-python (cudart), khong dung torch",
         "io": [
           {
             "name": "images",
@@ -520,223 +527,223 @@
           "float32"
         ]
       },
-      "load_seconds": 0.06,
+      "load_seconds": 0.14,
       "model_size_mb": 8.98,
       "sessions": [
         {
           "session": 1,
-          "wall_seconds": 3.96,
+          "wall_seconds": 3.84,
           "n_images": 270,
           "n_detections": 732,
-          "fps_wall": 68.23,
+          "fps_wall": 70.37,
           "stages": {
             "preprocess": {
-              "p50": 5.76,
-              "p95": 5.835,
-              "p99": 5.94,
-              "min": 5.695,
-              "max": 6.122,
-              "mean": 5.769,
-              "std": 0.046,
+              "p50": 5.785,
+              "p95": 5.858,
+              "p99": 6.194,
+              "min": 5.69,
+              "max": 6.216,
+              "mean": 5.8,
+              "std": 0.068,
               "n": 270
             },
             "inference": {
-              "p50": 7.582,
-              "p95": 7.641,
-              "p99": 7.706,
-              "min": 7.516,
-              "max": 7.943,
-              "mean": 7.589,
-              "std": 0.042,
+              "p50": 7.147,
+              "p95": 7.211,
+              "p99": 7.333,
+              "min": 7.103,
+              "max": 7.373,
+              "mean": 7.158,
+              "std": 0.039,
               "n": 270
             },
             "postprocess": {
-              "p50": 1.248,
-              "p95": 1.429,
-              "p99": 1.537,
-              "min": 0.619,
-              "max": 1.566,
-              "mean": 1.253,
-              "std": 0.13,
+              "p50": 1.208,
+              "p95": 1.455,
+              "p99": 1.712,
+              "min": 0.599,
+              "max": 1.828,
+              "mean": 1.222,
+              "std": 0.145,
               "n": 270
             },
             "total": {
-              "p50": 14.61,
-              "p95": 14.809,
-              "p99": 14.931,
-              "min": 13.949,
-              "max": 15.069,
-              "mean": 14.61,
-              "std": 0.144,
+              "p50": 14.157,
+              "p95": 14.511,
+              "p99": 14.847,
+              "min": 13.518,
+              "max": 14.945,
+              "mean": 14.18,
+              "std": 0.178,
               "n": 270
             }
           },
-          "temp_before_mean_c": 60.0,
-          "temp_after_mean_c": 60.3
+          "temp_before_mean_c": 60.2,
+          "temp_after_mean_c": 60.4
         },
         {
           "session": 2,
-          "wall_seconds": 3.97,
+          "wall_seconds": 3.85,
           "n_images": 270,
           "n_detections": 732,
-          "fps_wall": 68.03,
+          "fps_wall": 70.11,
           "stages": {
             "preprocess": {
-              "p50": 5.765,
-              "p95": 5.928,
-              "p99": 6.049,
-              "min": 5.702,
-              "max": 6.169,
-              "mean": 5.782,
-              "std": 0.069,
+              "p50": 5.789,
+              "p95": 5.872,
+              "p99": 6.212,
+              "min": 5.701,
+              "max": 6.297,
+              "mean": 5.807,
+              "std": 0.086,
               "n": 270
             },
             "inference": {
-              "p50": 7.581,
-              "p95": 7.704,
-              "p99": 7.792,
-              "min": 7.516,
-              "max": 7.972,
-              "mean": 7.595,
-              "std": 0.056,
+              "p50": 7.158,
+              "p95": 7.233,
+              "p99": 7.458,
+              "min": 7.115,
+              "max": 7.547,
+              "mean": 7.174,
+              "std": 0.058,
               "n": 270
             },
             "postprocess": {
-              "p50": 1.258,
-              "p95": 1.528,
-              "p99": 1.774,
-              "min": 0.621,
-              "max": 1.862,
-              "mean": 1.273,
-              "std": 0.159,
+              "p50": 1.231,
+              "p95": 1.492,
+              "p99": 1.702,
+              "min": 0.626,
+              "max": 1.851,
+              "mean": 1.248,
+              "std": 0.147,
               "n": 270
             },
             "total": {
-              "p50": 14.622,
-              "p95": 15.027,
-              "p99": 15.231,
-              "min": 13.983,
-              "max": 15.898,
-              "mean": 14.651,
-              "std": 0.201,
+              "p50": 14.195,
+              "p95": 14.533,
+              "p99": 15.123,
+              "min": 13.59,
+              "max": 15.494,
+              "mean": 14.229,
+              "std": 0.221,
+              "n": 270
+            }
+          },
+          "temp_before_mean_c": 59.5,
+          "temp_after_mean_c": 60.0
+        },
+        {
+          "session": 3,
+          "wall_seconds": 3.84,
+          "n_images": 270,
+          "n_detections": 732,
+          "fps_wall": 70.28,
+          "stages": {
+            "preprocess": {
+              "p50": 5.792,
+              "p95": 5.847,
+              "p99": 5.871,
+              "min": 5.705,
+              "max": 6.203,
+              "mean": 5.798,
+              "std": 0.047,
+              "n": 270
+            },
+            "inference": {
+              "p50": 7.158,
+              "p95": 7.214,
+              "p99": 7.271,
+              "min": 7.107,
+              "max": 7.552,
+              "mean": 7.166,
+              "std": 0.039,
+              "n": 270
+            },
+            "postprocess": {
+              "p50": 1.23,
+              "p95": 1.399,
+              "p99": 1.519,
+              "min": 0.6,
+              "max": 1.798,
+              "mean": 1.233,
+              "std": 0.128,
+              "n": 270
+            },
+            "total": {
+              "p50": 14.189,
+              "p95": 14.391,
+              "p99": 14.558,
+              "min": 13.53,
+              "max": 15.532,
+              "mean": 14.196,
+              "std": 0.157,
               "n": 270
             }
           },
           "temp_before_mean_c": 59.2,
-          "temp_after_mean_c": 59.8
-        },
-        {
-          "session": 3,
-          "wall_seconds": 3.95,
-          "n_images": 270,
-          "n_detections": 732,
-          "fps_wall": 68.29,
-          "stages": {
-            "preprocess": {
-              "p50": 5.75,
-              "p95": 5.816,
-              "p99": 5.961,
-              "min": 5.676,
-              "max": 6.171,
-              "mean": 5.758,
-              "std": 0.051,
-              "n": 270
-            },
-            "inference": {
-              "p50": 7.575,
-              "p95": 7.644,
-              "p99": 7.736,
-              "min": 7.496,
-              "max": 7.969,
-              "mean": 7.584,
-              "std": 0.046,
-              "n": 270
-            },
-            "postprocess": {
-              "p50": 1.245,
-              "p95": 1.462,
-              "p99": 1.768,
-              "min": 0.622,
-              "max": 1.982,
-              "mean": 1.254,
-              "std": 0.151,
-              "n": 270
-            },
-            "total": {
-              "p50": 14.587,
-              "p95": 14.824,
-              "p99": 15.113,
-              "min": 13.931,
-              "max": 15.922,
-              "mean": 14.595,
-              "std": 0.18,
-              "n": 270
-            }
-          },
-          "temp_before_mean_c": 58.9,
-          "temp_after_mean_c": 59.5
+          "temp_after_mean_c": 59.7
         }
       ],
       "median_stages": {
         "preprocess": {
-          "p50": 5.76,
-          "p95": 5.835,
-          "p99": 5.961,
-          "min": 5.695,
-          "max": 6.169,
-          "mean": 5.769,
-          "std": 0.051
+          "p50": 5.789,
+          "p95": 5.858,
+          "p99": 6.194,
+          "min": 5.701,
+          "max": 6.216,
+          "mean": 5.8,
+          "std": 0.068
         },
         "inference": {
-          "p50": 7.581,
-          "p95": 7.644,
-          "p99": 7.736,
-          "min": 7.516,
-          "max": 7.969,
-          "mean": 7.589,
-          "std": 0.046
+          "p50": 7.158,
+          "p95": 7.214,
+          "p99": 7.333,
+          "min": 7.107,
+          "max": 7.547,
+          "mean": 7.166,
+          "std": 0.039
         },
         "postprocess": {
-          "p50": 1.248,
-          "p95": 1.462,
-          "p99": 1.768,
-          "min": 0.621,
-          "max": 1.862,
-          "mean": 1.254,
-          "std": 0.151
+          "p50": 1.23,
+          "p95": 1.455,
+          "p99": 1.702,
+          "min": 0.6,
+          "max": 1.828,
+          "mean": 1.233,
+          "std": 0.145
         },
         "total": {
-          "p50": 14.61,
-          "p95": 14.824,
-          "p99": 15.113,
-          "min": 13.949,
-          "max": 15.898,
-          "mean": 14.61,
-          "std": 0.18
+          "p50": 14.189,
+          "p95": 14.511,
+          "p99": 14.847,
+          "min": 13.53,
+          "max": 15.494,
+          "mean": 14.196,
+          "std": 0.178
         }
       },
-      "latency_p50_ms": 14.61,
-      "latency_p95_ms": 14.824,
-      "fps": 68.4,
+      "latency_p50_ms": 14.189,
+      "latency_p95_ms": 14.511,
+      "fps": 70.5,
       "stage_sum_check": {
-        "sum_of_parts_p50": 14.589,
-        "total_p50": 14.61
+        "sum_of_parts_p50": 14.177,
+        "total_p50": 14.189
       },
-      "session_p50_spread_percent": 0.24,
+      "session_p50_spread_percent": 0.27,
       "resources": {
-        "process_rss_peak_mb": 2256.9,
-        "process_rss_mean_mb": 2256.9,
-        "system_used_peak_mb": 4344.0,
-        "system_used_baseline_mb": 4342.5,
-        "system_used_delta_mb": 1.5,
-        "torch_gpu_allocated_mb": 5.3,
-        "torch_gpu_peak_mb": 5.6,
-        "n_samples": 659,
+        "process_rss_peak_mb": 2272.6,
+        "process_rss_mean_mb": 2272.4,
+        "system_used_peak_mb": 4369.1,
+        "system_used_baseline_mb": 4337.9,
+        "system_used_delta_mb": 31.2,
+        "torch_gpu_allocated_mb": 0.0,
+        "torch_gpu_peak_mb": 0.0,
+        "n_samples": 657,
         "ghi_chu": "Tren Jetson, CPU va GPU dung chung DRAM — 'gpu_peak' nam trong cung tong bo nho he thong, khong phai VRAM roi."
       },
       "idle_before_load": {
-        "system_used_mb": 4332.0,
-        "process_rss_mb": 2222.5
+        "system_used_mb": 4322.9,
+        "process_rss_mb": 2230.4
       }
     },
     "yolov8s|pytorch": {
@@ -750,228 +757,230 @@
         "imgsz": 640,
         "conf": 0.25,
         "iou": 0.7,
+        "scaleup": true,
+        "multi_label": false,
         "framework": "torch 2.10.0",
         "device": "cuda",
         "gpu": "Orin",
         "precision": "fp32"
       },
-      "load_seconds": 0.19,
+      "load_seconds": 0.43,
       "model_size_mb": 22.53,
       "sessions": [
         {
           "session": 1,
-          "wall_seconds": 11.61,
+          "wall_seconds": 11.56,
           "n_images": 270,
           "n_detections": 725,
-          "fps_wall": 23.25,
+          "fps_wall": 23.36,
           "stages": {
             "preprocess": {
-              "p50": 5.837,
-              "p95": 6.008,
-              "p99": 6.074,
-              "min": 5.762,
-              "max": 6.082,
-              "mean": 5.848,
-              "std": 0.059,
+              "p50": 5.779,
+              "p95": 5.837,
+              "p99": 5.942,
+              "min": 5.718,
+              "max": 6.009,
+              "mean": 5.785,
+              "std": 0.039,
               "n": 270
             },
             "inference": {
-              "p50": 35.753,
-              "p95": 35.864,
-              "p99": 35.921,
-              "min": 35.346,
-              "max": 35.956,
-              "mean": 35.731,
-              "std": 0.113,
+              "p50": 35.653,
+              "p95": 35.726,
+              "p99": 35.759,
+              "min": 35.55,
+              "max": 35.863,
+              "mean": 35.654,
+              "std": 0.045,
               "n": 270
             },
             "postprocess": {
-              "p50": 1.357,
-              "p95": 1.685,
-              "p99": 1.799,
-              "min": 0.696,
-              "max": 2.093,
-              "mean": 1.378,
-              "std": 0.152,
+              "p50": 1.323,
+              "p95": 1.522,
+              "p99": 1.678,
+              "min": 0.678,
+              "max": 2.046,
+              "mean": 1.334,
+              "std": 0.133,
               "n": 270
             },
             "total": {
-              "p50": 42.944,
-              "p95": 43.369,
-              "p99": 43.498,
-              "min": 41.928,
-              "max": 43.668,
-              "mean": 42.958,
-              "std": 0.222,
+              "p50": 42.761,
+              "p95": 42.998,
+              "p99": 43.19,
+              "min": 42.077,
+              "max": 43.492,
+              "mean": 42.772,
+              "std": 0.15,
+              "n": 270
+            }
+          },
+          "temp_before_mean_c": 60.0,
+          "temp_after_mean_c": 61.2
+        },
+        {
+          "session": 2,
+          "wall_seconds": 11.57,
+          "n_images": 270,
+          "n_detections": 725,
+          "fps_wall": 23.33,
+          "stages": {
+            "preprocess": {
+              "p50": 5.782,
+              "p95": 5.867,
+              "p99": 6.013,
+              "min": 5.717,
+              "max": 6.196,
+              "mean": 5.792,
+              "std": 0.058,
+              "n": 270
+            },
+            "inference": {
+              "p50": 35.667,
+              "p95": 35.767,
+              "p99": 35.86,
+              "min": 35.575,
+              "max": 35.992,
+              "mean": 35.676,
+              "std": 0.053,
+              "n": 270
+            },
+            "postprocess": {
+              "p50": 1.326,
+              "p95": 1.592,
+              "p99": 1.782,
+              "min": 0.667,
+              "max": 1.863,
+              "mean": 1.347,
+              "std": 0.141,
+              "n": 270
+            },
+            "total": {
+              "p50": 42.787,
+              "p95": 43.071,
+              "p99": 43.398,
+              "min": 42.151,
+              "max": 43.912,
+              "mean": 42.816,
+              "std": 0.178,
               "n": 270
             }
           },
           "temp_before_mean_c": 59.7,
-          "temp_after_mean_c": 60.8
-        },
-        {
-          "session": 2,
-          "wall_seconds": 11.61,
-          "n_images": 270,
-          "n_detections": 725,
-          "fps_wall": 23.26,
-          "stages": {
-            "preprocess": {
-              "p50": 5.832,
-              "p95": 5.897,
-              "p99": 6.071,
-              "min": 5.757,
-              "max": 6.17,
-              "mean": 5.839,
-              "std": 0.052,
-              "n": 270
-            },
-            "inference": {
-              "p50": 35.747,
-              "p95": 35.822,
-              "p99": 35.884,
-              "min": 35.643,
-              "max": 36.024,
-              "mean": 35.751,
-              "std": 0.047,
-              "n": 270
-            },
-            "postprocess": {
-              "p50": 1.343,
-              "p95": 1.569,
-              "p99": 1.764,
-              "min": 0.682,
-              "max": 1.823,
-              "mean": 1.361,
-              "std": 0.136,
-              "n": 270
-            },
-            "total": {
-              "p50": 42.937,
-              "p95": 43.19,
-              "p99": 43.432,
-              "min": 42.25,
-              "max": 43.969,
-              "mean": 42.951,
-              "std": 0.166,
-              "n": 270
-            }
-          },
-          "temp_before_mean_c": 59.4,
-          "temp_after_mean_c": 61.0
+          "temp_after_mean_c": 61.2
         },
         {
           "session": 3,
-          "wall_seconds": 11.61,
+          "wall_seconds": 11.57,
           "n_images": 270,
           "n_detections": 725,
-          "fps_wall": 23.25,
+          "fps_wall": 23.33,
           "stages": {
             "preprocess": {
-              "p50": 5.843,
-              "p95": 5.916,
-              "p99": 6.041,
-              "min": 5.772,
-              "max": 6.17,
-              "mean": 5.85,
-              "std": 0.049,
+              "p50": 5.8,
+              "p95": 5.851,
+              "p99": 6.001,
+              "min": 5.751,
+              "max": 6.123,
+              "mean": 5.807,
+              "std": 0.04,
               "n": 270
             },
             "inference": {
-              "p50": 35.749,
-              "p95": 35.827,
-              "p99": 35.924,
-              "min": 35.656,
-              "max": 36.144,
-              "mean": 35.753,
-              "std": 0.052,
+              "p50": 35.663,
+              "p95": 35.73,
+              "p99": 35.774,
+              "min": 35.573,
+              "max": 36.038,
+              "mean": 35.666,
+              "std": 0.046,
               "n": 270
             },
             "postprocess": {
-              "p50": 1.347,
-              "p95": 1.553,
-              "p99": 1.778,
-              "min": 0.698,
-              "max": 1.855,
-              "mean": 1.36,
-              "std": 0.136,
+              "p50": 1.327,
+              "p95": 1.537,
+              "p99": 1.693,
+              "min": 0.685,
+              "max": 1.793,
+              "mean": 1.343,
+              "std": 0.126,
               "n": 270
             },
             "total": {
-              "p50": 42.944,
-              "p95": 43.26,
-              "p99": 43.426,
-              "min": 42.279,
-              "max": 44.092,
-              "mean": 42.963,
-              "std": 0.17,
+              "p50": 42.802,
+              "p95": 43.04,
+              "p99": 43.174,
+              "min": 42.181,
+              "max": 43.954,
+              "mean": 42.815,
+              "std": 0.149,
               "n": 270
             }
           },
-          "temp_before_mean_c": 59.5,
-          "temp_after_mean_c": 61.1
+          "temp_before_mean_c": 59.6,
+          "temp_after_mean_c": 61.3
         }
       ],
       "median_stages": {
         "preprocess": {
-          "p50": 5.837,
-          "p95": 5.916,
-          "p99": 6.071,
-          "min": 5.762,
-          "max": 6.17,
-          "mean": 5.848,
-          "std": 0.052
+          "p50": 5.782,
+          "p95": 5.851,
+          "p99": 6.001,
+          "min": 5.718,
+          "max": 6.123,
+          "mean": 5.792,
+          "std": 0.04
         },
         "inference": {
-          "p50": 35.749,
-          "p95": 35.827,
-          "p99": 35.921,
-          "min": 35.643,
-          "max": 36.024,
-          "mean": 35.751,
-          "std": 0.052
+          "p50": 35.663,
+          "p95": 35.73,
+          "p99": 35.774,
+          "min": 35.573,
+          "max": 35.992,
+          "mean": 35.666,
+          "std": 0.046
         },
         "postprocess": {
-          "p50": 1.347,
-          "p95": 1.569,
-          "p99": 1.778,
-          "min": 0.696,
-          "max": 1.855,
-          "mean": 1.361,
-          "std": 0.136
+          "p50": 1.326,
+          "p95": 1.537,
+          "p99": 1.693,
+          "min": 0.678,
+          "max": 1.863,
+          "mean": 1.343,
+          "std": 0.133
         },
         "total": {
-          "p50": 42.944,
-          "p95": 43.26,
-          "p99": 43.432,
-          "min": 42.25,
-          "max": 43.969,
-          "mean": 42.958,
-          "std": 0.17
+          "p50": 42.787,
+          "p95": 43.04,
+          "p99": 43.19,
+          "min": 42.151,
+          "max": 43.912,
+          "mean": 42.815,
+          "std": 0.15
         }
       },
-      "latency_p50_ms": 42.944,
-      "latency_p95_ms": 43.26,
-      "fps": 23.3,
+      "latency_p50_ms": 42.787,
+      "latency_p95_ms": 43.04,
+      "fps": 23.4,
       "stage_sum_check": {
-        "sum_of_parts_p50": 42.933,
-        "total_p50": 42.944
+        "sum_of_parts_p50": 42.771,
+        "total_p50": 42.787
       },
-      "session_p50_spread_percent": 0.02,
+      "session_p50_spread_percent": 0.1,
       "resources": {
-        "process_rss_peak_mb": 2299.2,
-        "process_rss_mean_mb": 2299.2,
-        "system_used_peak_mb": 4356.5,
-        "system_used_baseline_mb": 4355.6,
-        "system_used_delta_mb": 0.9,
+        "process_rss_peak_mb": 2310.9,
+        "process_rss_mean_mb": 2310.9,
+        "system_used_peak_mb": 4374.1,
+        "system_used_baseline_mb": 4341.8,
+        "system_used_delta_mb": 32.3,
         "torch_gpu_allocated_mb": 44.8,
         "torch_gpu_peak_mb": 89.0,
-        "n_samples": 774,
+        "n_samples": 773,
         "ghi_chu": "Tren Jetson, CPU va GPU dung chung DRAM — 'gpu_peak' nam trong cung tong bo nho he thong, khong phai VRAM roi."
       },
       "idle_before_load": {
-        "system_used_mb": 4344.0,
-        "process_rss_mb": 2242.0
+        "system_used_mb": 4365.0,
+        "process_rss_mb": 2253.5
       }
     },
     "yolov8s|onnx": {
@@ -985,6 +994,8 @@
         "imgsz": 640,
         "conf": 0.25,
         "iou": 0.7,
+        "scaleup": true,
+        "multi_label": false,
         "framework": "onnxruntime 1.24.0",
         "providers_available": [
           "TensorrtExecutionProvider",
@@ -999,223 +1010,223 @@
         "running_on_gpu": true,
         "precision": "fp32"
       },
-      "load_seconds": 160.42,
+      "load_seconds": 130.53,
       "model_size_mb": 44.75,
       "sessions": [
         {
           "session": 1,
-          "wall_seconds": 7.69,
+          "wall_seconds": 7.67,
           "n_images": 270,
           "n_detections": 726,
-          "fps_wall": 35.12,
+          "fps_wall": 35.2,
           "stages": {
             "preprocess": {
-              "p50": 5.688,
-              "p95": 5.836,
-              "p99": 5.896,
-              "min": 5.644,
-              "max": 6.013,
-              "mean": 5.702,
-              "std": 0.057,
+              "p50": 5.67,
+              "p95": 5.735,
+              "p99": 5.795,
+              "min": 5.61,
+              "max": 5.861,
+              "mean": 5.676,
+              "std": 0.034,
               "n": 270
             },
             "inference": {
-              "p50": 21.583,
-              "p95": 21.647,
-              "p99": 21.715,
-              "min": 21.515,
-              "max": 21.832,
-              "mean": 21.589,
-              "std": 0.039,
+              "p50": 21.557,
+              "p95": 21.626,
+              "p99": 21.842,
+              "min": 21.469,
+              "max": 22.207,
+              "mean": 21.566,
+              "std": 0.069,
               "n": 270
             },
             "postprocess": {
-              "p50": 1.125,
-              "p95": 1.34,
-              "p99": 1.468,
-              "min": 0.519,
-              "max": 1.655,
-              "mean": 1.137,
-              "std": 0.124,
+              "p50": 1.11,
+              "p95": 1.279,
+              "p99": 1.444,
+              "min": 0.497,
+              "max": 1.502,
+              "mean": 1.127,
+              "std": 0.118,
               "n": 270
             },
             "total": {
-              "p50": 28.41,
-              "p95": 28.675,
-              "p99": 28.83,
-              "min": 27.777,
-              "max": 28.941,
-              "mean": 28.427,
-              "std": 0.139,
+              "p50": 28.351,
+              "p95": 28.6,
+              "p99": 28.796,
+              "min": 27.701,
+              "max": 29.522,
+              "mean": 28.369,
+              "std": 0.155,
               "n": 270
             }
           },
-          "temp_before_mean_c": 62.4,
-          "temp_after_mean_c": 63.2
+          "temp_before_mean_c": 63.0,
+          "temp_after_mean_c": 63.6
         },
         {
           "session": 2,
-          "wall_seconds": 7.68,
+          "wall_seconds": 7.67,
           "n_images": 270,
           "n_detections": 726,
-          "fps_wall": 35.14,
+          "fps_wall": 35.19,
           "stages": {
             "preprocess": {
-              "p50": 5.68,
-              "p95": 5.797,
-              "p99": 5.893,
-              "min": 5.632,
-              "max": 6.081,
-              "mean": 5.693,
-              "std": 0.051,
-              "n": 270
-            },
-            "inference": {
-              "p50": 21.582,
-              "p95": 21.645,
-              "p99": 21.72,
-              "min": 21.513,
-              "max": 21.748,
-              "mean": 21.586,
+              "p50": 5.672,
+              "p95": 5.75,
+              "p99": 5.819,
+              "min": 5.616,
+              "max": 5.871,
+              "mean": 5.681,
               "std": 0.037,
               "n": 270
             },
+            "inference": {
+              "p50": 21.561,
+              "p95": 21.634,
+              "p99": 21.694,
+              "min": 21.501,
+              "max": 21.813,
+              "mean": 21.567,
+              "std": 0.038,
+              "n": 270
+            },
             "postprocess": {
-              "p50": 1.115,
-              "p95": 1.311,
-              "p99": 1.459,
-              "min": 0.504,
-              "max": 1.597,
-              "mean": 1.133,
-              "std": 0.122,
+              "p50": 1.11,
+              "p95": 1.301,
+              "p99": 1.399,
+              "min": 0.499,
+              "max": 1.679,
+              "mean": 1.127,
+              "std": 0.121,
               "n": 270
             },
             "total": {
-              "p50": 28.396,
-              "p95": 28.611,
-              "p99": 28.789,
-              "min": 27.76,
-              "max": 28.913,
-              "mean": 28.412,
-              "std": 0.135,
+              "p50": 28.356,
+              "p95": 28.584,
+              "p99": 28.727,
+              "min": 27.72,
+              "max": 28.911,
+              "mean": 28.375,
+              "std": 0.132,
               "n": 270
             }
           },
-          "temp_before_mean_c": 60.7,
-          "temp_after_mean_c": 62.0
+          "temp_before_mean_c": 61.0,
+          "temp_after_mean_c": 62.3
         },
         {
           "session": 3,
-          "wall_seconds": 7.68,
+          "wall_seconds": 7.67,
           "n_images": 270,
           "n_detections": 726,
-          "fps_wall": 35.15,
+          "fps_wall": 35.18,
           "stages": {
             "preprocess": {
-              "p50": 5.684,
-              "p95": 5.735,
-              "p99": 5.829,
-              "min": 5.63,
-              "max": 5.897,
-              "mean": 5.689,
-              "std": 0.035,
+              "p50": 5.672,
+              "p95": 5.77,
+              "p99": 5.834,
+              "min": 5.629,
+              "max": 5.866,
+              "mean": 5.683,
+              "std": 0.04,
               "n": 270
             },
             "inference": {
-              "p50": 21.582,
-              "p95": 21.647,
-              "p99": 21.713,
-              "min": 21.515,
-              "max": 21.782,
-              "mean": 21.589,
-              "std": 0.037,
+              "p50": 21.562,
+              "p95": 21.636,
+              "p99": 21.746,
+              "min": 21.487,
+              "max": 21.809,
+              "mean": 21.57,
+              "std": 0.044,
               "n": 270
             },
             "postprocess": {
-              "p50": 1.111,
-              "p95": 1.299,
-              "p99": 1.415,
-              "min": 0.504,
-              "max": 1.512,
-              "mean": 1.13,
+              "p50": 1.114,
+              "p95": 1.297,
+              "p99": 1.408,
+              "min": 0.497,
+              "max": 1.525,
+              "mean": 1.128,
               "std": 0.117,
               "n": 270
             },
             "total": {
-              "p50": 28.402,
-              "p95": 28.602,
-              "p99": 28.714,
-              "min": 27.76,
-              "max": 28.813,
-              "mean": 28.408,
-              "std": 0.125,
+              "p50": 28.369,
+              "p95": 28.581,
+              "p99": 28.727,
+              "min": 27.746,
+              "max": 28.887,
+              "mean": 28.381,
+              "std": 0.131,
               "n": 270
             }
           },
           "temp_before_mean_c": 60.3,
-          "temp_after_mean_c": 61.5
+          "temp_after_mean_c": 61.6
         }
       ],
       "median_stages": {
         "preprocess": {
-          "p50": 5.684,
-          "p95": 5.797,
-          "p99": 5.893,
-          "min": 5.632,
-          "max": 6.013,
-          "mean": 5.693,
-          "std": 0.051
-        },
-        "inference": {
-          "p50": 21.582,
-          "p95": 21.647,
-          "p99": 21.715,
-          "min": 21.515,
-          "max": 21.782,
-          "mean": 21.589,
+          "p50": 5.672,
+          "p95": 5.75,
+          "p99": 5.819,
+          "min": 5.616,
+          "max": 5.866,
+          "mean": 5.681,
           "std": 0.037
         },
+        "inference": {
+          "p50": 21.561,
+          "p95": 21.634,
+          "p99": 21.746,
+          "min": 21.487,
+          "max": 21.813,
+          "mean": 21.567,
+          "std": 0.044
+        },
         "postprocess": {
-          "p50": 1.115,
-          "p95": 1.311,
-          "p99": 1.459,
-          "min": 0.504,
-          "max": 1.597,
-          "mean": 1.133,
-          "std": 0.122
+          "p50": 1.11,
+          "p95": 1.297,
+          "p99": 1.408,
+          "min": 0.497,
+          "max": 1.525,
+          "mean": 1.127,
+          "std": 0.118
         },
         "total": {
-          "p50": 28.402,
-          "p95": 28.611,
-          "p99": 28.789,
-          "min": 27.76,
-          "max": 28.913,
-          "mean": 28.412,
-          "std": 0.135
+          "p50": 28.356,
+          "p95": 28.584,
+          "p99": 28.727,
+          "min": 27.72,
+          "max": 28.911,
+          "mean": 28.375,
+          "std": 0.132
         }
       },
-      "latency_p50_ms": 28.402,
-      "latency_p95_ms": 28.611,
-      "fps": 35.2,
+      "latency_p50_ms": 28.356,
+      "latency_p95_ms": 28.584,
+      "fps": 35.3,
       "stage_sum_check": {
-        "sum_of_parts_p50": 28.381,
-        "total_p50": 28.402
+        "sum_of_parts_p50": 28.343,
+        "total_p50": 28.356
       },
-      "session_p50_spread_percent": 0.05,
+      "session_p50_spread_percent": 0.06,
       "resources": {
-        "process_rss_peak_mb": 3136.7,
-        "process_rss_mean_mb": 3130.3,
-        "system_used_peak_mb": 5248.7,
-        "system_used_baseline_mb": 5246.7,
-        "system_used_delta_mb": 2.0,
+        "process_rss_peak_mb": 3116.4,
+        "process_rss_mean_mb": 3116.4,
+        "system_used_peak_mb": 4190.9,
+        "system_used_baseline_mb": 4184.5,
+        "system_used_delta_mb": 6.4,
         "torch_gpu_allocated_mb": 0.0,
         "torch_gpu_peak_mb": 0.0,
-        "n_samples": 715,
+        "n_samples": 714,
         "ghi_chu": "Tren Jetson, CPU va GPU dung chung DRAM — 'gpu_peak' nam trong cung tong bo nho he thong, khong phai VRAM roi."
       },
       "idle_before_load": {
-        "system_used_mb": 4354.3,
-        "process_rss_mb": 2299.2
+        "system_used_mb": 4372.5,
+        "process_rss_mb": 2310.9
       }
     },
     "yolov8s|tensorrt": {
@@ -1229,8 +1240,11 @@
         "imgsz": 640,
         "conf": 0.25,
         "iou": 0.7,
+        "scaleup": true,
+        "multi_label": false,
         "framework": "tensorrt 10.3.0",
         "gpu": "Orin",
+        "cap_phat": "cuda-python (cudart), khong dung torch",
         "io": [
           {
             "name": "images",
@@ -1259,228 +1273,228 @@
           "float32"
         ]
       },
-      "load_seconds": 0.09,
+      "load_seconds": 0.07,
       "model_size_mb": 25.56,
       "sessions": [
         {
           "session": 1,
-          "wall_seconds": 5.07,
+          "wall_seconds": 4.98,
           "n_images": 270,
           "n_detections": 725,
-          "fps_wall": 53.24,
+          "fps_wall": 54.24,
           "stages": {
             "preprocess": {
-              "p50": 5.766,
-              "p95": 5.856,
-              "p99": 6.018,
-              "min": 5.703,
-              "max": 6.074,
-              "mean": 5.777,
-              "std": 0.056,
+              "p50": 5.83,
+              "p95": 6.013,
+              "p99": 6.257,
+              "min": 5.728,
+              "max": 6.299,
+              "mean": 5.849,
+              "std": 0.094,
               "n": 270
             },
             "inference": {
-              "p50": 11.671,
-              "p95": 11.738,
-              "p99": 11.84,
-              "min": 11.599,
-              "max": 11.895,
-              "mean": 11.678,
+              "p50": 11.317,
+              "p95": 11.376,
+              "p99": 11.497,
+              "min": 11.253,
+              "max": 11.559,
+              "mean": 11.325,
               "std": 0.043,
               "n": 270
             },
             "postprocess": {
-              "p50": 1.252,
-              "p95": 1.478,
+              "p50": 1.201,
+              "p95": 1.498,
               "p99": 1.723,
-              "min": 0.642,
-              "max": 1.88,
-              "mean": 1.28,
-              "std": 0.138,
+              "min": 0.581,
+              "max": 1.986,
+              "mean": 1.229,
+              "std": 0.146,
               "n": 270
             },
             "total": {
-              "p50": 18.705,
-              "p95": 19.054,
-              "p99": 19.238,
-              "min": 18.029,
-              "max": 19.721,
-              "mean": 18.735,
-              "std": 0.171,
+              "p50": 18.356,
+              "p95": 18.83,
+              "p99": 19.097,
+              "min": 17.782,
+              "max": 19.357,
+              "mean": 18.404,
+              "std": 0.197,
               "n": 270
             }
           },
-          "temp_before_mean_c": 61.2,
+          "temp_before_mean_c": 61.3,
           "temp_after_mean_c": 61.6
         },
         {
           "session": 2,
-          "wall_seconds": 5.07,
+          "wall_seconds": 4.98,
           "n_images": 270,
           "n_detections": 725,
-          "fps_wall": 53.22,
+          "fps_wall": 54.18,
           "stages": {
             "preprocess": {
-              "p50": 5.769,
-              "p95": 5.847,
-              "p99": 6.076,
-              "min": 5.682,
-              "max": 6.178,
-              "mean": 5.779,
-              "std": 0.065,
+              "p50": 5.834,
+              "p95": 6.063,
+              "p99": 6.277,
+              "min": 5.708,
+              "max": 6.435,
+              "mean": 5.858,
+              "std": 0.102,
               "n": 270
             },
             "inference": {
-              "p50": 11.671,
-              "p95": 11.761,
-              "p99": 11.852,
-              "min": 11.612,
-              "max": 12.04,
-              "mean": 11.682,
-              "std": 0.048,
+              "p50": 11.319,
+              "p95": 11.442,
+              "p99": 11.612,
+              "min": 11.265,
+              "max": 11.792,
+              "mean": 11.335,
+              "std": 0.067,
               "n": 270
             },
             "postprocess": {
-              "p50": 1.258,
-              "p95": 1.511,
-              "p99": 1.715,
-              "min": 0.628,
-              "max": 1.905,
-              "mean": 1.281,
-              "std": 0.135,
+              "p50": 1.204,
+              "p95": 1.539,
+              "p99": 1.736,
+              "min": 0.588,
+              "max": 1.788,
+              "mean": 1.23,
+              "std": 0.15,
               "n": 270
             },
             "total": {
-              "p50": 18.71,
-              "p95": 19.023,
-              "p99": 19.316,
-              "min": 18.096,
-              "max": 20.022,
-              "mean": 18.741,
-              "std": 0.176,
+              "p50": 18.376,
+              "p95": 18.85,
+              "p99": 19.266,
+              "min": 17.732,
+              "max": 19.867,
+              "mean": 18.422,
+              "std": 0.234,
               "n": 270
             }
           },
-          "temp_before_mean_c": 59.9,
+          "temp_before_mean_c": 60.1,
           "temp_after_mean_c": 60.8
         },
         {
           "session": 3,
-          "wall_seconds": 5.06,
+          "wall_seconds": 4.97,
           "n_images": 270,
           "n_detections": 725,
-          "fps_wall": 53.31,
+          "fps_wall": 54.36,
           "stages": {
             "preprocess": {
-              "p50": 5.751,
-              "p95": 5.803,
-              "p99": 5.987,
-              "min": 5.691,
-              "max": 6.252,
-              "mean": 5.757,
-              "std": 0.055,
+              "p50": 5.832,
+              "p95": 5.888,
+              "p99": 6.014,
+              "min": 5.733,
+              "max": 6.275,
+              "mean": 5.837,
+              "std": 0.057,
               "n": 270
             },
             "inference": {
-              "p50": 11.67,
-              "p95": 11.768,
-              "p99": 11.821,
-              "min": 11.608,
-              "max": 12.013,
-              "mean": 11.681,
-              "std": 0.048,
+              "p50": 11.303,
+              "p95": 11.356,
+              "p99": 11.458,
+              "min": 11.248,
+              "max": 11.788,
+              "mean": 11.311,
+              "std": 0.044,
               "n": 270
             },
             "postprocess": {
-              "p50": 1.259,
-              "p95": 1.443,
-              "p99": 1.808,
-              "min": 0.653,
-              "max": 2.113,
-              "mean": 1.274,
-              "std": 0.139,
+              "p50": 1.198,
+              "p95": 1.416,
+              "p99": 1.533,
+              "min": 0.572,
+              "max": 1.695,
+              "mean": 1.215,
+              "std": 0.122,
               "n": 270
             },
             "total": {
-              "p50": 18.693,
-              "p95": 18.906,
-              "p99": 19.404,
-              "min": 18.111,
-              "max": 19.969,
-              "mean": 18.711,
-              "std": 0.167,
+              "p50": 18.343,
+              "p95": 18.624,
+              "p99": 18.791,
+              "min": 17.699,
+              "max": 19.696,
+              "mean": 18.362,
+              "std": 0.158,
               "n": 270
             }
           },
           "temp_before_mean_c": 59.6,
-          "temp_after_mean_c": 60.4
+          "temp_after_mean_c": 60.6
         }
       ],
       "median_stages": {
         "preprocess": {
-          "p50": 5.766,
-          "p95": 5.847,
-          "p99": 6.018,
-          "min": 5.691,
-          "max": 6.178,
-          "mean": 5.777,
-          "std": 0.056
+          "p50": 5.832,
+          "p95": 6.013,
+          "p99": 6.257,
+          "min": 5.728,
+          "max": 6.299,
+          "mean": 5.849,
+          "std": 0.094
         },
         "inference": {
-          "p50": 11.671,
-          "p95": 11.761,
-          "p99": 11.84,
-          "min": 11.608,
-          "max": 12.013,
-          "mean": 11.681,
-          "std": 0.048
+          "p50": 11.317,
+          "p95": 11.376,
+          "p99": 11.497,
+          "min": 11.253,
+          "max": 11.788,
+          "mean": 11.325,
+          "std": 0.044
         },
         "postprocess": {
-          "p50": 1.258,
-          "p95": 1.478,
+          "p50": 1.201,
+          "p95": 1.498,
           "p99": 1.723,
-          "min": 0.642,
-          "max": 1.905,
-          "mean": 1.28,
-          "std": 0.138
+          "min": 0.581,
+          "max": 1.788,
+          "mean": 1.229,
+          "std": 0.146
         },
         "total": {
-          "p50": 18.705,
-          "p95": 19.023,
-          "p99": 19.316,
-          "min": 18.096,
-          "max": 19.969,
-          "mean": 18.735,
-          "std": 0.171
+          "p50": 18.356,
+          "p95": 18.83,
+          "p99": 19.097,
+          "min": 17.732,
+          "max": 19.696,
+          "mean": 18.404,
+          "std": 0.197
         }
       },
-      "latency_p50_ms": 18.705,
-      "latency_p95_ms": 19.023,
-      "fps": 53.5,
+      "latency_p50_ms": 18.356,
+      "latency_p95_ms": 18.83,
+      "fps": 54.5,
       "stage_sum_check": {
-        "sum_of_parts_p50": 18.695,
-        "total_p50": 18.705
+        "sum_of_parts_p50": 18.35,
+        "total_p50": 18.356
       },
-      "session_p50_spread_percent": 0.09,
+      "session_p50_spread_percent": 0.18,
       "resources": {
-        "process_rss_peak_mb": 2676.1,
-        "process_rss_mean_mb": 2676.1,
-        "system_used_peak_mb": 4825.4,
-        "system_used_baseline_mb": 4784.6,
-        "system_used_delta_mb": 40.8,
-        "torch_gpu_allocated_mb": 5.3,
-        "torch_gpu_peak_mb": 5.6,
-        "n_samples": 676,
+        "process_rss_peak_mb": 2658.7,
+        "process_rss_mean_mb": 2658.6,
+        "system_used_peak_mb": 4192.0,
+        "system_used_baseline_mb": 4177.1,
+        "system_used_delta_mb": 14.9,
+        "torch_gpu_allocated_mb": 0.0,
+        "torch_gpu_peak_mb": 0.0,
+        "n_samples": 674,
         "ghi_chu": "Tren Jetson, CPU va GPU dung chung DRAM — 'gpu_peak' nam trong cung tong bo nho he thong, khong phai VRAM roi."
       },
       "idle_before_load": {
-        "system_used_mb": 4747.4,
-        "process_rss_mb": 2635.7
+        "system_used_mb": 4177.2,
+        "process_rss_mb": 2615.4
       }
     }
   },
   "device": {
-    "collected_utc": "2026-09-09T10:35:20+00:00",
+    "collected_utc": "2026-09-09T13:18:13+00:00",
     "note": "truoc khi benchmark",
     "is_jetson": true,
     "hostname": "ubuntu",
@@ -1507,19 +1521,19 @@
       "gpu_mhz": 612.0
     },
     "temperatures_c": {
-      "cpu-thermal": 58.812,
-      "gpu-thermal": 59.937,
-      "soc0-thermal": 58.656,
-      "soc1-thermal": 59.75,
-      "soc2-thermal": 57.5,
-      "tj-thermal": 59.937
+      "cpu-thermal": 59.468,
+      "gpu-thermal": 60.406,
+      "soc0-thermal": 59.187,
+      "soc1-thermal": 60.156,
+      "soc2-thermal": 58.187,
+      "tj-thermal": 60.406
     },
-    "temperature_mean_c": 59.1,
+    "temperature_mean_c": 59.6,
     "memory": {
       "MemTotal": 7.79,
-      "MemAvailable": 5.89,
+      "MemAvailable": 5.37,
       "SwapTotal": 3.89,
-      "SwapFree": 3.69
+      "SwapFree": 3.29
     },
     "libraries": {
       "torch": "2.10.0",
@@ -1540,12 +1554,12 @@
       ]
     },
     "temperatures_after_settle_c": {
-      "cpu-thermal": 57.75,
-      "gpu-thermal": 59.531,
-      "soc0-thermal": 58.0,
-      "soc1-thermal": 58.968,
-      "soc2-thermal": 56.781,
-      "tj-thermal": 59.531
+      "cpu-thermal": 58.406,
+      "gpu-thermal": 59.875,
+      "soc0-thermal": 58.562,
+      "soc1-thermal": 59.5,
+      "soc2-thermal": 57.343,
+      "tj-thermal": 60.062
     }
   },
   "config": {
@@ -1580,9 +1594,9 @@
     "first": "crazing_104.jpg",
     "last": "scratches_99.jpg"
   },
-  "benchmarked_utc": "2026-09-09T10:40:25+00:00",
+  "benchmarked_utc": "2026-09-09T13:23:18+00:00",
   "device_after": {
-    "collected_utc": "2026-09-09T10:59:08+00:00",
+    "collected_utc": "2026-09-09T13:41:30+00:00",
     "note": "sau khi benchmark",
     "is_jetson": true,
     "hostname": "ubuntu",
@@ -1609,19 +1623,19 @@
       "gpu_mhz": 612.0
     },
     "temperatures_c": {
-      "cpu-thermal": 60.093,
-      "gpu-thermal": 61.5,
-      "soc0-thermal": 59.718,
-      "soc1-thermal": 60.406,
-      "soc2-thermal": 58.687,
-      "tj-thermal": 61.843
+      "cpu-thermal": 59.906,
+      "gpu-thermal": 61.968,
+      "soc0-thermal": 59.968,
+      "soc1-thermal": 60.625,
+      "soc2-thermal": 58.937,
+      "tj-thermal": 61.968
     },
-    "temperature_mean_c": 60.4,
+    "temperature_mean_c": 60.6,
     "memory": {
       "MemTotal": 7.79,
-      "MemAvailable": 2.93,
+      "MemAvailable": 3.51,
       "SwapTotal": 3.89,
-      "SwapFree": 3.69
+      "SwapFree": 3.29
     },
     "libraries": {
       "torch": "2.10.0",
@@ -1722,7 +1736,7 @@
       "conf": 0.001,
       "iou": 0.7,
       "imgsz": 640,
-      "wall_seconds": 10.46,
+      "wall_seconds": 10.58,
       "backend_info": {
         "runner": "pytorch",
         "weights": "models/yolov8n/best.pt",
@@ -1921,7 +1935,7 @@
       "conf": 0.001,
       "iou": 0.7,
       "imgsz": 640,
-      "wall_seconds": 5.15,
+      "wall_seconds": 5.04,
       "backend_info": {
         "runner": "tensorrt",
         "weights": "models/yolov8n/best.engine",
@@ -1933,6 +1947,7 @@
         "multi_label": false,
         "framework": "tensorrt 10.3.0",
         "gpu": "Orin",
+        "cap_phat": "cuda-python (cudart), khong dung torch",
         "io": [
           {
             "name": "images",
@@ -2041,7 +2056,7 @@
       "conf": 0.001,
       "iou": 0.7,
       "imgsz": 640,
-      "wall_seconds": 12.8,
+      "wall_seconds": 12.78,
       "backend_info": {
         "runner": "pytorch",
         "weights": "models/yolov8s/best.pt",
@@ -2136,7 +2151,7 @@
       "conf": 0.001,
       "iou": 0.7,
       "imgsz": 640,
-      "wall_seconds": 8.82,
+      "wall_seconds": 8.86,
       "backend_info": {
         "runner": "onnx",
         "weights": "models/yolov8s/best.onnx",
@@ -2240,7 +2255,7 @@
       "conf": 0.001,
       "iou": 0.7,
       "imgsz": 640,
-      "wall_seconds": 6.2,
+      "wall_seconds": 6.12,
       "backend_info": {
         "runner": "tensorrt",
         "weights": "models/yolov8s/best.engine",
@@ -2252,6 +2267,7 @@
         "multi_label": false,
         "framework": "tensorrt 10.3.0",
         "gpu": "Orin",
+        "cap_phat": "cuda-python (cudart), khong dung torch",
         "io": [
           {
             "name": "images",
