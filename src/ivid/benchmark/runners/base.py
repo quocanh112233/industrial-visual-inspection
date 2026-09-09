@@ -68,7 +68,8 @@ class BaseRunner(abc.ABC):
 
     def __init__(self, weights: Path, imgsz: int = 640, conf: float = 0.25,
                  iou: float = 0.7, device: str = "cuda", nc: int | None = None,
-                 scaleup: bool = True, multi_label: bool = False):
+                 scaleup: bool = True, multi_label: bool = False,
+                 resize_to: int | None = None):
         self.weights = Path(weights)
         self.imgsz = imgsz
         self.conf = conf
@@ -79,6 +80,9 @@ class BaseRunner(abc.ABC):
         # benchmark do lan ca khac biet duong ong vao khac biet runtime.
         self.scaleup = scaleup
         self.multi_label = multi_label
+        # Kich thuoc anh duoc thu ve BEN TRONG khung imgsz. None = phu kin khung.
+        # imgsz=672 + resize_to=640 tai lap che do rect cua ultralytics.
+        self.resize_to = resize_to
         # So lop: truyen tuong minh cho decode() thay vi de no doan truc tensor
         self.nc = nc if nc is not None else _num_classes()
         if not self.weights.exists():
@@ -104,6 +108,7 @@ class BaseRunner(abc.ABC):
             "conf": self.conf,
             "iou": self.iou,
             "scaleup": self.scaleup,
+            "resize_to": self.resize_to,
             "multi_label": self.multi_label,
         }
 
@@ -127,7 +132,8 @@ class BaseRunner(abc.ABC):
         t = Timing()
 
         t0 = time.perf_counter()
-        x, ratio, pad = preprocess(img_bgr, self.imgsz, scaleup=self.scaleup)
+        x, ratio, pad = preprocess(img_bgr, self.imgsz, scaleup=self.scaleup,
+                                   resize_to=self.resize_to)
         t.preprocess_ms = (time.perf_counter() - t0) * 1000
 
         t0 = time.perf_counter()

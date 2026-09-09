@@ -11,6 +11,7 @@ import sys
 from pathlib import Path
 
 import numpy as np
+import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
@@ -60,3 +61,39 @@ def test_preprocess_tra_ve_tensor_dung_dang_trong_ca_hai_che_do():
         assert x.shape == (1, 3, 640, 640)
         assert x.dtype == np.float32
         assert x.min() >= 0.0 and x.max() <= 1.0
+
+
+# --------------------------------- resize_to: tach kich thuoc anh khoi kich thuoc khung
+def test_resize_to_tao_vien_xam_quanh_anh_da_thu_nho():
+    """imgsz 672 + resize_to 640: anh 200x200 duoc phong len 640 roi dem 16 px
+    moi ben. Day la che do rect cua ultralytics, cho mAP cao hon han."""
+    lb, r, pad = letterbox(anh(200, 200), 672, resize_to=640)
+    assert lb.shape[:2] == (672, 672)
+    assert r == 640 / 200
+    assert pad == (16, 16)
+    assert lb[0, 0].tolist() == [114, 114, 114]        # goc la vien
+    assert lb[336, 336].tolist() == [128, 128, 128]    # giua la anh
+
+
+def test_khong_truyen_resize_to_thi_anh_phu_kin_khung():
+    a = letterbox(anh(200, 200), 640)
+    b = letterbox(anh(200, 200), 640, resize_to=640)
+    assert a[1] == b[1] and a[2] == b[2]
+
+
+def test_resize_to_lon_hon_khung_thi_bao_loi():
+    """Chan cau hinh vo nghia ngay tai cho, thay vi de anh bi cat am tham."""
+    with pytest.raises(ValueError, match="lon hon khung"):
+        letterbox(anh(200, 200), 640, resize_to=672)
+
+
+def test_scale_boxes_van_dung_khi_co_ca_resize_to_va_vien():
+    _, r, pad = letterbox(anh(200, 200), 672, resize_to=640)
+    det = np.array([[16.0 + 32, 16.0 + 64, 16.0 + 160, 16.0 + 192, 0.9, 0.0]], dtype=np.float32)
+    out = scale_boxes(det, r, pad, (200, 200))
+    assert out[0, :4].tolist() == [10.0, 20.0, 50.0, 60.0]
+
+
+def test_preprocess_tra_ve_khung_672_khi_yeu_cau():
+    x, _, _ = preprocess(anh(200, 200), 672, resize_to=640)
+    assert x.shape == (1, 3, 672, 672)

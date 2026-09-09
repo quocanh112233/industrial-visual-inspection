@@ -75,12 +75,14 @@ def test_set(data_yaml: Path, split: str, limit: int | None = None):
 
 
 def evaluate_backend(model: str, backend: str, images: list[Path], gts: list,
-                     nc: int, imgsz: int, conf: float, iou: float, root: Path) -> dict:
+                     nc: int, imgsz: int, conf: float, iou: float, root: Path,
+                     resize_to: int | None = None) -> dict:
     w = weights_for(root / "models" / model, backend)
     if not w.exists():
         return {"skipped": True, "reason": f"khong thay {w.name}"}
     try:
-        runner = build_runner(backend, w, imgsz=imgsz, conf=conf, iou=iou, nc=nc)
+        runner = build_runner(backend, w, imgsz=imgsz, conf=conf, iou=iou, nc=nc,
+                              resize_to=resize_to)
     except Exception as e:
         return {"skipped": True, "reason": f"{type(e).__name__}: {e}"}
 
@@ -95,7 +97,7 @@ def evaluate_backend(model: str, backend: str, images: list[Path], gts: list,
     m = compute_map(dets, gts, nc)
     m.update(skipped=False, model=model, backend=backend, class_names=NAMES,
              backend_label=BACKEND_LABEL.get(backend, backend),
-             conf=conf, iou=iou, imgsz=imgsz,
+             conf=conf, iou=iou, imgsz=imgsz, resize_to=resize_to,
              wall_seconds=round(wall, 2), backend_info=info)
     return m
 
@@ -134,6 +136,11 @@ def main() -> int:
                     help="thap de duong PR day du — mAP quet moi nguong, khong dung 1 nguong")
     ap.add_argument("--iou", type=float, default=0.7, help="nguong IoU cua NMS")
     ap.add_argument("--max-images", type=int, default=None)
+    ap.add_argument("--imgsz", type=int, default=None,
+                    help="ghi de imgsz trong config (kich thuoc dau vao model)")
+    ap.add_argument("--resize-to", type=int, default=None,
+                    help="thu anh ve kich thuoc nay roi dem xam ra imgsz. "
+                         "imgsz=672 --resize-to 640 tai lap che do rect cua ultralytics")
     ap.add_argument("--cross-check", action="store_true",
                     help="doi chieu ban .pt voi ultralytics.val() de xac nhan phep tinh mAP")
     ap.add_argument("--out", default="results/benchmark.json")
@@ -143,7 +150,7 @@ def main() -> int:
     cfg = yaml.safe_load((root / a.config).read_text(encoding="utf-8"))
     models = a.models or cfg["models"]
     backends = a.backends or cfg["backends"]
-    imgsz = int(cfg["imgsz"])
+    imgsz = int(a.imgsz or cfg["imgsz"])
     global NAMES
     NAMES = class_names(load_config(root / a.data_config))
     nc = len(NAMES)
@@ -175,7 +182,7 @@ def main() -> int:
             "ultralytics.val() doi pipeline danh gia tuy theo dinh dang model, nen no do "
             "ca su khac biet cua pipeline lan cua runtime. Xem docstring "
             "ivid/benchmark/accuracy.py va results/parity_conf001.json."),
-        "conf": a.conf, "iou_nms": a.iou, "imgsz": imgsz,
+        "conf": a.conf, "iou_nms": a.iou, "imgsz": imgsz, "resize_to": a.resize_to,
         "cong_thuc_AP": "noi suy 101 diem, khop voi ultralytics compute_ap(method='interp')",
     }
 
@@ -183,7 +190,8 @@ def main() -> int:
         for backend in backends:
             key = f"{model}|{backend}"
             print(f"\n[acc] === {model} / {BACKEND_LABEL.get(backend, backend)} ===")
-            r = evaluate_backend(model, backend, images, gts, nc, imgsz, a.conf, a.iou, root)
+            r = evaluate_backend(model, backend, images, gts, nc, imgsz, a.conf, a.iou,
+                                 root, a.resize_to)
             payload["accuracy"][key] = r
             if r.get("skipped"):
                 print(f"    BO QUA: {r['reason']}")
